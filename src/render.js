@@ -5,7 +5,7 @@ const mkdirp = require('mkdirp');
 
 const settings = require('./settings.js');
 
-var features = settings.features || ['rename', 'property', 'class', 'module'];
+var features = settings.features || ['rename', 'property', 'depends', 'class', 'module'];
 var featureModules = features.map((name) => require(`./features/${name}.js`));
 
 
@@ -32,9 +32,10 @@ Parts.prototype = {
   files(){
     return Object.keys(this.parts)
       .map((key) => {
-        return { name: key, src: this.parts[key] }
+        return { name: key, src: this.parts[key].join('\n') }
       })
       .filter((prt) => prt.name.endsWith('.i'));
+      
   }
   
 }

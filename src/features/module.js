@@ -27,8 +27,8 @@ module.exports.renderSwig = function(decl, parts) {
     src: `\
 // Module ${decl.name}
 // dependencies
-// {dependantModules}
-// {dependantHeaders}
+${parts.get('moduleDepends')}
+
 
 %module(package="OCC") ${decl.name}
 %include ../../user/common/ModuleHeader.i

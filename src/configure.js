@@ -1,5 +1,6 @@
 require('./features/rename.js');
-
+require('./features/depends.js');
+require('./features/property.js');
 const fs = require('fs');
 const mkdirp = require('mkdirp');
 const glob = require('glob');
