@@ -1,0 +1,141 @@
+[{
+    "name": "TKernel",
+    "modules": ["FSD", "MMgt", "OSD", "Plugin", "Quantity", "Resource",
+      "SortTools",
+      "Standard", "StdFail", "Storage", "TColStd",
+      "TCollection", "TShort", "Units", "UnitsAPI",
+      "IncludeLibrary", "Dico", "NCollection", "Message"
+    ]
+  }, {
+    "name": "TKMath",
+    "modules": ["math", "ElCLib", "ElSLib", "BSplCLib", "BSplSLib",
+      "PLib", "Precision", "GeomAbs", "Poly", "CSLib",
+      "Convert", "Bnd", "gp", "TColgp", "TopLoc"
+    ]
+  }, {
+    "name": "TKAdvTools",
+    "modules": ["Dynamic", "Materials", "Expr", "ExprIntrp",
+      "GraphDS", "GraphTools"
+    ]
+  }, {
+    "name": "TKG2d",
+    "modules": ["Geom2d", "LProp", "TColGeom2d", "Adaptor2d",
+      "Geom2dLProp", "Geom2dAdaptor", "GProp"
+    ]
+  }, {
+    "name": "TKG3d",
+    "modules": ["Geom", "TColGeom", "GeomAdaptor", "AdvApprox",
+      "GeomLProp", "Adaptor3d", "LProp3d", "TopAbs"
+    ]
+  }, {
+    "name": "TKGeomBase",
+    "modules": ["ProjLib", "GeomProjLib", "GCPnts", "CPnts",
+      "Approx", "AppParCurves", "FEmTool", "AppCont",
+      "Extrema", "IntAna", "IntAna2d", "GeomConvert",
+      "AdvApp2Var", "GeomLib", "Geom2dConvert", "Hermit",
+      "BndLib", "AppDef", "GeomTools", "GC", "GCE2d",
+      "gce"
+    ]
+  }, {
+    "name": "TKBRep",
+    "modules": ["TopoDS", "TopExp", "TopTools", "BRep", "BRepLProp",
+      "BRepAdapor", "BRepTools"
+    ]
+  }, {
+    "name": "TKGeomAlgo",
+    "modules": ["Hatch", "GeomInt", "IntStart", "IntWalk",
+      "IntImp", "IntCurveSurface", "IntSurf", "IntPatch",
+      "Geom2dInt", "IntImpParGen", "IntRes2d", "IntCurve",
+      "TopTrans", "Intf", "ApproxInt", "TopTrans", "Intf",
+      "ApproxInt", "GccAna", "GccEnt", "GccInt", "GccIter",
+      "GccGeo", "HatchGen", "Geom2dHatch", "Law", "TopTrans",
+      "Intf", "ApproxInt", "GccAna", "GccEnt", "GccInt",
+      "GccIter", "GccGeo", "HatchGen", "Geom2dHatch",
+      "Law", "AppBlend", "Plate", "GeomPlate",
+      "LocalAnalysis", "GeomAPI", "GeomFill", "Geom2dAPI",
+      "Geom2dGcc", "FairCurve", "NLPlate", "IntPolyh",
+      "TopClass"
+    ]
+  }, {
+    "name": "TKTopAlgo",
+    "modules": ["IntCurvesFace", "MAT", "MAT2d", "Bisector",
+      "BRepMAT2d", "BRepCheck", "BRepBndLib", "BRepExtrema",
+      "BRepClass", "BRepClass3d", "BRepLib", "BRepGProp",
+      "BRepIntCurveSurface", "BRepTopAdaptor",
+      "BRepBuilderAPI", "BRepApprox"
+    ]
+  }, {
+    "name": "TKPrim",
+    "modules": ["BRepPrim", "Primitives", "BRepSweep", "Sweep",
+      "BRepPrimAPI"
+    ]
+  }, {
+    "name": "TKBO",
+    "modules": ["IntTools", "BRepAlgoAPI", "BOPCol", "BOPInt", "BOPDS",
+      "BOPAlgo", "BOPTools"
+    ]
+  }, {
+    "name": "TKHLR",
+    "modules": ["HLRTopoBRep", "HLRBRep", "HLRAlgo", "HLRAppli",
+      "Intrv", "TopBas", "TopCnx", "Contap"
+    ]
+  },
+  { "name": "TKMesh", "modules": ["BRepMesh", "IntPoly"] }, {
+    "name": "TKShHealing",
+    "modules": ["ShapeBuild", "ShapeExtend", "ShapeConstruct",
+      "ShapeCustom", "ShapeAnalysis", "ShapeFix",
+      "ShapeUpgrade", "ShapeAlgo", "ShapeProcess",
+      "ShapeProcessAPI"
+    ]
+  },
+  { "name": "TKXMesh", "modules": ["XBRepMesh"] }, {
+    "name": "TKBool",
+    "modules": ["TopOpeBRep", "TopOpeBRepDS", "TopOpeBRepBuild",
+      "TopOpeBRepTool", "BRepAlgo", "BRepFill", "BRepProj"
+    ]
+  }, {
+    "name": "TKFillet",
+    "modules": ["ChFiDS", "ChFi2d", "ChFi3d", "ChFiKPart", "Blend",
+      "BRepBlend", "BlendFunc", "BRepFilletAPI",
+      "FilletSurf"
+    ]
+  },
+  { "name": "TKFeat", "modules": ["LocOpe", "BRepFeat"] },
+  { "name": "TKOffset", "modules": ["BRepOffsetAPI", "Draft", "BRepOffset", "BiTgte"] },
+
+  {
+    "name": "TKService",
+    "modules": ["Aspect", "SelectBasics", "Image",
+      "InterfaceGraphic", "TColQuantity"
+    ]
+  }, {
+    "name": "TKV3d",
+    "modules": ["V3d", "Graphic3d", "Visual3d", "Select3D",
+      "Prs3d", "StdPrs", "SelectMgr", "PrsMgr",
+      "AIS", "DsgPrs", "StdSelect"
+    ]
+  },
+  { "name": "TKMeshVS", "modules": ["MeshVS"] },
+
+  { "name": "TKSTL", "modules": ["StlMesh", "StlAPI", "StlTransfer", "RWStl"] },
+  { "name": "TKSTEP", "modules": ["STEPControl"] },
+  { "name": "TKIGES", "modules": ["IGESControl"] },
+  { "name": "TKXSBase", "modules": ["Interface", "IFSelect"] },
+
+  { "name": "TKCDF", "modules": [] },
+  { "name": "PTKernel", "modules": [] },
+  { "name": "TKLCAF", "modules": ["TDF", "TDataStd", "TFunction", "TDocStd", "AppStdL"] },
+  { "name": "FWOSPlugin", "modules": [] },
+  { "name": "TKPShape", "modules": [] },
+  { "name": "TKBinL", "modules": [] },
+  { "name": "TKXmlL", "modules": [] },
+  { "name": "TKPLCAF", "modules": [] },
+  { "name": "TKTObj", "modules": [] },
+  { "name": "TKShapeSchema", "modules": [] },
+  { "name": "TKStdLSchema", "modules": [] },
+  { "name": "TKXCAF", "modules": ["XCAFApp", "XCAFDoc", "XCAFPrs"] },
+  { "name": "TKXDESTEP", "modules": ["STEPCAFControl"] },
+  { "name": "TKXDEIGES", "modules": ["IGESCAFControl"] },
+
+  { "name": "SMESH", "modules": ["SMDSAbs", "SMDS", "SMESH", "SMESHDS", "StdMeshers", "NETGENPlugin"] }
+]

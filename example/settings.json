@@ -1,0 +1,7 @@
+{
+  "oce_include": "/usr/local/include/oce",
+  "oce_lib": "/home/henrik/OCE/lib",
+  "xml_generator": "gccxml",
+  "xml_generator_path": "/usr/bin/gccxml"
+
+}

@@ -1,0 +1,41 @@
+{
+  "extends": "airbnb",
+  "env": {
+    "node": true
+  },
+  "globals": {
+    "expect": true,
+    "describe": true,
+    "it": true,
+    "before": true,
+    "after": true,
+    "beforeEach": true,
+    "afterEach": true,
+    "Array.args": true,
+    "$$": true,
+  },
+  "rules": {
+    "no-var": 0,
+    "comma-dangle": [2, "never"],
+    "no-space-before-semi": 0,
+    "space-after-function-name": 0,
+    "semi-spacing": [2, { "before": false, "after": true }],
+    "no-param-reassign": 0,
+    "spaced-line-comment": 0,
+    "react/prop-types": 1,
+    "react/jsx-boolean-value": 0,
+    "indent": [2, 2, { "SwitchCase": 1 }],
+    "default-case": 1,
+    "prefer-arrow-callback": 0,
+    "prefer-template": 0,
+    "space-before-function-paren": 0,
+    "curly": 0,
+    #"no-extend-native": 0,
+    "func-names": 0,
+    "one-var": 0,
+    "one-var-declaration-per-line": 0,
+    "no-unused-vars": 1,
+    "vars-on-top": 0,
+    "prefer-rest-params": 0
+  }
+}

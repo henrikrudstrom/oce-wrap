@@ -1,0 +1,47 @@
+{
+  "name": "oce-wrap",
+  "version": "0.0.1",
+  "description": "Wrap generator for for Opencascade Solid modelling kernel",
+  "main": "gulpfile.js",
+  "directories": {
+    "doc": "doc",
+    "example": "examples",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/henrikrudstrom/opencascade.js.git"
+  },
+  "author": "Henrik Rudstrøm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/henrikrudstrom/opencascade.js/issues"
+  },
+  "homepage": "https://github.com/henrikrudstrom/opencascade.js",
+  "devDependencies": {
+    "arrify": "^1.0.1",
+    "async": "^2.0.0-rc.2",
+    "camel-case": "^1.2.2",
+    "eslint": "^2.5.1",
+    "eslint-config-airbnb": "^6.2.0",
+    "eslint-plugin-react": "^4.2.3",
+    "extend": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-exec": "^2.1.2",
+    "gulp-jasmine": "^2.3.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-run": "^1.6.12",
+    "gulp-shell": "^0.5.2",
+    "gulp-util": "^3.0.7",
+    "hash-files": "^1.1.0",
+    "jasmine": "^2.4.1",
+    "jasmine-node": "^1.14.5",
+    "jasmine-spec-reporter": "^2.4.0",
+    "json-query": "^1.8.0",
+    "promise": "^7.1.1",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.1.5",
+    "through": "^2.3.8",
+    "yargs": "^4.3.2"
+  }
+}
