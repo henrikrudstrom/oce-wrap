@@ -28,7 +28,7 @@ module.exports.renderSwig = function(cls, parts) {
     .filter((mem) => mem.cls === 'constructor')
     .map(renderFunction).join('');
     
-  const functions = cls.members
+  const functions = cls.declarations
     .filter((mem) => mem.cls !== 'constructor')
     .map(renderFunction).join('');
     
@@ -39,7 +39,7 @@ class ${cls.name}${base} {
     /* Constructors */
     ${constructors}
     /* Member functions */
-    ${parts(cls.name+'Properties')}
+    ${parts.get(cls.name+'Properties')}
     ${functions}
 };`;
   return [

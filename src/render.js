@@ -1,13 +1,16 @@
 const arrify = require('arrify');
 const fs = require('fs');
 const path = require('path');
+const mkdirp = require('mkdirp');
 
-// defines which features to render and in what order.
-var features = ['rename', 'property', 'class', 'module']
+const settings = require('./settings.js');
+
+var features = settings.features || ['rename', 'property', 'class', 'module'];
 var featureModules = features.map((name) => require(`./features/${name}.js`));
 
 
-function Parts(){
+function Parts(name){
+  this.name = name;
   this.parts = {};
 }
 
@@ -27,8 +30,11 @@ Parts.prototype = {
     return '// ' + partName + ' is not defined';
   },
   files(){
-    return this.parts
-      .filter((prt) => prt.name.endsWith('.i'))
+    return Object.keys(this.parts)
+      .map((key) => {
+        return { name: key, src: this.parts[key] }
+      })
+      .filter((prt) => prt.name.endsWith('.i'));
   }
   
 }
@@ -42,17 +48,32 @@ function renderFeature(parts, decl, feature){
 }
 
 function render(mod, features){
-  var parts = new Parts();
+  if(Array.isArray(mod)) 
+    return mod.map((m) => render(m, features))
+  if(typeof mod === 'string')
+    mod = JSON.parse(fs.readFileSync(mod));
+    
+  
+  var parts = new Parts(mod.name);
   (features || featureModules).forEach((feat) => {
     renderFeature(parts, mod, feat);
   });
+  console.log(parts.files)
   return parts;
 }
 
 function writeParts(dest, parts){
-  parts.files().forEach((part) => 
-    fs.writeFileSync(path.join(dest, part.name), part.src)
-  );
+  console.log('dest', dest)
+  if(Array.isArray(parts)){
+    return parts.forEach((p) => writeParts(dest, p));
+  }
+  
+  console.log("PARTS", parts)
+  parts.files().forEach((part) => {
+    var file = path.join(dest, parts.name, part.name)
+    mkdirp.sync(path.dirname(file));
+    fs.writeFileSync(file, part.src);
+  });
 }
 
 

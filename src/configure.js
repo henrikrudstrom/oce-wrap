@@ -10,7 +10,8 @@ var createTypeDict = require('./typedict.js')
 
 
 function configureModule(file){
-  var file = file.replace("src/configure/", "./");
+  //var file = file.replace("src/configure/", "./");
+  file = path.relative(__dirname, file);
   var configure = require(file);
   
   var mod = new conf.Conf();
@@ -45,6 +46,7 @@ function translateTypes(mods){
 }
 
 function configure(configurationFiles, outputPath){
+  console.log(configurationFiles)
   var mods = configurationFiles.map(configureModule)
   
   translateTypes(mods);
@@ -52,11 +54,10 @@ function configure(configurationFiles, outputPath){
   mods.forEach((mod) => {
     delete mod.stacks
     mod.declarations.forEach((decl) => delete decl.stacks)
-    var destFile = `${outputPath}/${mod.name}.js`;
-    mkdirp(path.dirname(destFile));
+    var destFile = `${outputPath}/${mod.name}.json`;
+    mkdirp.sync(path.dirname(destFile));
     fs.writeFileSync(destFile, JSON.stringify(mod, null, 2));  
   });
-  
 }
 
 module.exports = configure;

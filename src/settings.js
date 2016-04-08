@@ -22,13 +22,13 @@ var defaultOptions = {
     ]  
   },
   xmlGenerator:  "gccxml",
-  xmlGeneratorPath: "/usr/bin/gccxml"
+  xmlGeneratorPath: "/usr/bin/gccxml",
 };
+// defines which features to render and in what order.
 
 function oceData(parseToolkits){
   function readData(name, def) {
     var file = path.join(generatorPath, 'data', name);
-    console.log(file)
     if (!fs.existsSync(file)) return def;
     return JSON.parse(fs.readFileSync(file));
   }
