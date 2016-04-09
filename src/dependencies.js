@@ -62,6 +62,7 @@ function dependencyReader(mods) {
     return res;
 
   }
+
   return classDepends;
 }
 module.exports = dependencyReader;

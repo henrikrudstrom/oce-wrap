@@ -8,17 +8,20 @@ function match(exp, name) {
 }
 
 function find(data, expr, matcher) {
-  var type = expr;
-  var member = null;
-  if (expr.indexOf('::') !== -1) {
-    type = expr.split('::')[0];
-    member = expr.split('::')[1];
-  }
+  //console.log(expr)
+  var res = expr.match(
+    /((?:\w|\*)+)(?:::((?:\w|\*)+))*(?:\(((?:\w|\*)+)(?:, *((?:\w|\*)+))*\))*/
+  );
+
+  var type = res[1];
+  var member = res[2];
+  var args = res.slice(3);
+
   var types = data.declarations.filter(matcher(type));
-  if (member === null) return types;
+  if (member === undefined) return types;
   return types.map((t) => t.declarations)
     .reduce((a, b) => a.concat(b), [])
-    .filter(matcher(member));
+    .filter(matcher(member, args));
 }
 
 function getDecl(data, name, matcher) {

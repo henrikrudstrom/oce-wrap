@@ -61,31 +61,32 @@ describe('module object', function() {
     expect(mod.declarations[0].name).toBe('gp_Pnt');
   });
 
-  it('wrap defintions are mapped to the source', function(){
-    var mod = new conf.Conf();
-    mod.include('gp_Pnt');
-    mod.rename('gp_Pnt', 'Point');
-    var pnt = mod.get('gp_Pnt')
-    pnt.include('SetX');
-    mod.process();
-    // console.log(pnt)
-    // console.log("================================")
-    // console.log("SetX", pnt.get('SetX'))
+  it('wrap defintions are mapped to the source', function() {
+      var mod = new conf.Conf();
+      mod.include('gp_Pnt');
+      mod.rename('gp_Pnt', 'Point');
+      var pnt = mod.get('gp_Pnt')
+      pnt.include('SetX');
+      mod.process();
+      // console.log(pnt)
+      // console.log("================================")
+      // console.log("SetX", pnt.get('SetX'))
 
-    expect(pnt.source().name).toBe('gp_Pnt');
-
-    expect(pnt.get('SetX').source().name).toBe('SetX');
-  })
-  // it('deepcopies the object from the source', function() {
-  //   var mod = new conf.Conf();
-  //   mod.include('gp_Pnt');
-  //   mod.process('include');
-  //   var wrapped = mod.get('gp_Pnt');
-  //   var orig = headers.get('gp_Pnt');
-  //   expect(wrapped).not.toBe(orig);
-  //   expect(wrapped.declarations[0]).not.toBe(orig.declarations[0]);
-  //   expect(wrapped.declarations.length).toBe(orig.declarations.length);
-  // });
+      expect(pnt.source().name).toBe('gp_Pnt');
+      console.log("PNT", pnt)
+      console.log("FIND", pnt.find('SetX'));
+      expect(pnt.get('SetX').source().name).toBe('SetX');
+    })
+    // it('deepcopies the object from the source', function() {
+    //   var mod = new conf.Conf();
+    //   mod.include('gp_Pnt');
+    //   mod.process('include');
+    //   var wrapped = mod.get('gp_Pnt');
+    //   var orig = headers.get('gp_Pnt');
+    //   expect(wrapped).not.toBe(orig);
+    //   expect(wrapped.declarations[0]).not.toBe(orig.declarations[0]);
+    //   expect(wrapped.declarations.length).toBe(orig.declarations.length);
+    // });
 
   it('can rename declarations', function() {
     var mod = new conf.Conf();
@@ -97,7 +98,7 @@ describe('module object', function() {
     expect(mod.get('gp_Pnt').declarations[0].parent).toBe('Point');
 
   });
-  it('renames childs parents', function(){
+  it('renames childs parents', function() {
 
   })
 
@@ -161,7 +162,7 @@ describe('module object', function() {
   });
 
 
-  it('can query nested declarations', function(){
+  it('can query nested declarations', function() {
     var mod = new conf.Conf();
     mod.include('gp_*')
     mod.find('*')
@@ -173,7 +174,7 @@ describe('module object', function() {
     //console.log('can query nested declarations=====================')
   });
 
-  it('can apply to many declarations', function(){
+  it('can apply to many declarations', function() {
     var mod = new conf.Conf();
     var classes = mod.include('gp_*');
     mod.find('gp_*').exclude('*');
@@ -210,7 +211,7 @@ describe('module object', function() {
     expect(mod.get('Handle_Geom_Point').name).toBe('Handle_Point');
   });
 
-  it('can define properties', function(){
+  it('can define properties', function() {
     var mod = new conf.Conf();
     mod.include('gp_Vec')
     var vec = mod.get('gp_Vec')
@@ -227,22 +228,22 @@ describe('module object', function() {
 
 
 describe('MultiConf', function() {
-  it('behaves as a normal array', function(){
-    var a = [1,3,5];
-    conf.wrapDeclarations(a);
+  it('behaves as a normal array', function() {
+    var a = [1, 3, 5];
+    conf.createMultiConf(a);
     expect(a[0]).toBe(1);
     expect(a[1]).toBe(3);
-    var sum = a.reduce((a,b) => a + b);
+    var sum = a.reduce((a, b) => a + b);
     expect(sum).toBe(9);
     expect(typeof a.include).toBe('function')
     expect(typeof a.exclude).toBe('function')
   });
 });
 
-describe('modules queries', function(){
-    it('can query wrapped modules', function(){
+describe('modules queries', function() {
+  it('can query wrapped modules', function() {
     var mod1 = new conf.Conf();
-    mod1.name ='gp';
+    mod1.name = 'gp';
     mod1.include('gp_Pnt');
     mod1.rename('gp_Pnt', 'Point');
     mod1.process();

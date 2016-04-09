@@ -28,9 +28,9 @@ module.exports.reporter = reporter;
 
 gulp.task('test', function() {
   var specSources = ['spec/*Spec.js'];
-  var testArgs = yargs.argv._.splice(2);
-  if(testArgs.length > 0)
-    specSources = testArgs.map((arg) => `spec/${arg}Spec.js`);
+  var arg = yargs.argv.spec;
+  if (arg)
+    specSources = `spec/${arg}Spec.js`;
   gulp.src(specSources)
     .pipe(jasmine({
       verbose: true,

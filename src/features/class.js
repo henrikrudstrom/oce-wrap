@@ -18,8 +18,8 @@ function renderFunction(func) {
 }
 
 module.exports.renderSwig = function(cls, parts) {
-  if(cls.cls !== 'class') return;
-  
+  if (cls.cls !== 'class') return false;
+
   var base = '';
   if (cls.bases.length > 0) {
     base = ' : ' + cls.bases[0].access + ' ' + cls.bases[0].name;
@@ -27,11 +27,11 @@ module.exports.renderSwig = function(cls, parts) {
   const constructors = cls.declarations
     .filter((mem) => mem.cls === 'constructor')
     .map(renderFunction).join('');
-    
+
   const functions = cls.declarations
     .filter((mem) => mem.cls !== 'constructor')
     .map(renderFunction).join('');
-    
+
   const src = `\
 %nodefaultctor ${cls.name};
 class ${cls.name}${base} {
@@ -42,14 +42,11 @@ class ${cls.name}${base} {
     ${parts.get(cls.name+'Properties')}
     ${functions}
 };`;
-  return [
-{
-      name: 'classIncludes',
-      src: `%include classes/${cls.name}`
-    },
-    {
-      name: `classes/${cls.name}.i`,
-      src: src
-    }
-  ];
-}
+  return [{
+    name: 'classIncludes',
+    src: `%include classes/${cls.name}.i`
+  }, {
+    name: `classes/${cls.name}.i`,
+    src
+  }];
+};

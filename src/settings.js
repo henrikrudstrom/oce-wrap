@@ -6,7 +6,7 @@ const glob = require('glob');
 
 var generatorPath = path.join(__dirname, '..');
 
-var defaultOptions = {
+var defaultsettings = {
   paths: {
     build: 'build',
     dist: 'dist',
@@ -22,7 +22,8 @@ var defaultOptions = {
     ]
   },
   xmlGenerator: 'gccxml',
-  xmlGeneratorPath: '/usr/bin/gccxml'
+  xmlGeneratorPath: '/usr/bin/gccxml',
+  swig: 'swig'
 };
 
 function oceData(parseToolkits) {
@@ -56,26 +57,30 @@ function oceData(parseToolkits) {
 }
 
 
-function initialize(options) {
-  if (module.exports.paths !== undefined)
-    console.log('Warning: Settings already initialized');
-
+function initialize(settings) {
   var fileSettings = {};
   if (fs.existsSync('settings.json'))
     fileSettings = JSON.parse(fs.readFileSync('settings.json'));
 
-  options = extend(true, {}, defaultOptions, options || {});
-  extend(true, options, fileSettings);
+  settings = extend(true, {}, defaultsettings, settings || {});
+  extend(true, settings, fileSettings);
 
-  module.exports.paths = extend({}, options.paths, {
-    swig: path.join(options.paths.build, 'swig'),
-    cxx: path.join(options.paths.build, 'cxx'),
-    config: path.join(options.paths.build, 'config'),
-    headerCache: path.join(options.paths.generator, 'cache/headers'),
-    data: path.join(options.paths.generator, 'data')
+  settings.paths = extend({}, settings.paths, {
+    swig: path.join(settings.paths.build, 'swig'),
+    cxx: path.join(settings.paths.build, 'cxx'),
+    config: path.join(settings.paths.build, 'config'),
+    headerCache: path.join(settings.paths.generator, 'cache/headers'),
+    data: path.join(settings.paths.generator, 'data')
   });
-  
-  module.exports.oce = extend(options.oce, oceData(options.oce.parseToolkits));
+
+  settings.oce = extend(settings.oce, oceData(settings.oce.parseToolkits));
+
+  settings.build = {
+    modules: glob.sync(`${settings.paths.definition}/modules/*.js`)
+      .map((file) => path.basename(file).replace('.js', ''))
+  };
+
+  module.exports = settings;
 }
 
 module.exports.initialize = initialize;
