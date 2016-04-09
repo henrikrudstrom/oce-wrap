@@ -2,24 +2,6 @@ const extend = require('extend');
 const headers = require('./headers.js');
 const common = require('./common.js');
 
-function matcher(exp, matchValue) {
-  if (matchValue === undefined)
-    matchValue = true;
-  return function(obj) {
-    var key = obj.key // || obj.name;
-      //console.log(exp, 'key', ""+obj.key)
-    return common.match(exp, key) ? matchValue : !matchValue;
-  };
-}
-
-function cleanTypeName(ret) {
-  ret = ret.replace(/&|\*/, '');
-  ret = ret.replace('const', '');
-  ret = ret.trim();
-  return ret;
-}
-
-
 function MultiConf() {}
 MultiConf.prototype = [];
 
@@ -41,7 +23,7 @@ MultiConf.prototype.exclude = function(expr) {
 function Conf(decl, parent) {
   require('./features/rename.js');
   if (decl) {
-    extend(true, this, decl)
+    extend(true, this, decl);
     if (parent)
       this.parent = parent;
   } else {
@@ -53,7 +35,7 @@ function Conf(decl, parent) {
   this.stacks = {
     include: [],
     transform: []
-  }
+  };
 }
 
 function processInclude(decl, parent) {
@@ -64,6 +46,8 @@ function processInclude(decl, parent) {
   } else {
     newDecl = extend(true, {}, decl);
     newDecl.key = decl.name;
+    if (newDecl.cls === 'memfun' || newDecl.cls === 'constructor')
+      newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
   }
   return newDecl;
 }
@@ -88,12 +72,13 @@ function mapSources(declaration) {
 
 Conf.prototype = {
   find(expr) {
-    var res = createMultiConf(common.find(this, expr, matcher)); // TODO. search by key not name
+    console.log("Find expr", expr)
+    var res = createMultiConf(common.find(this, expr, common.matcher)); // TODO. search by key not name
     return res;
   },
 
   get(name) {
-    return common.get(this, name, matcher);
+    return common.get(this, name, common.matcher);
   },
 
   include(expr) {
@@ -112,7 +97,8 @@ Conf.prototype = {
     return this;
   },
   exclude(expr) {
-    this.declarations = this.declarations.filter(matcher(expr, false));
+    console.log('expr', expr)
+    this.declarations = this.declarations.filter(common.matcher(expr, undefined, false));
   },
   transform(expr, fn) {
     this.stacks.transform.push(() => {

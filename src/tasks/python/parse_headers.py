@@ -98,11 +98,13 @@ def w_arg(arg):
     return d
 
 def w_member_function(cd, parent):
+    args = list(iter(cd.arguments, w_arg))
     d = Dict(
         name=clean_name(cd.name),
+        key=cd.name + "(" + ", ".join([a['type'] for a in args]) + ")",
         parent=parent.name,
         cls="memfun",
-        arguments=iter(cd.arguments, w_arg),
+        arguments=args,
         returnType=str(cd.return_type) if cd.return_type else ""
 
         )
@@ -126,10 +128,11 @@ def w_enum(e):
     return Dict(
         name=clean_name(e.name),
         cls="enum",
+        key=clean_name(e.name),
         values=e.values)
 
 def w_typedef(td):
-    return Dict(name=clean_name(td.name), type=str(td.type), cls="typedef")
+    return Dict(name=clean_name(td.name), type=str(td.type), key=clean_name(td.name), cls="typedef")
 
 
 
@@ -162,6 +165,7 @@ def w_class(cls):
         artificial=cls.is_artificial,
         location=cls.location.as_tuple(),
         cls="class",
+        key=cls.name,
         #operators=iter(cls.operators(), w_operator),
         # enums=iter(cls.enums(), w_enum),
         # #typedefs=iter(cls.typedefs(), w_typedef),

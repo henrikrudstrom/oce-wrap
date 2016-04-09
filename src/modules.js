@@ -7,7 +7,10 @@ function matcher(exp, matchValue) {
   if (matchValue === undefined)
     matchValue = true;
   return function(obj) {
-    return common.match(exp, obj.name) ? matchValue : !matchValue;
+    var key = obj.name; // || obj.name;
+    if (exp.indexOf('(') !== -1)
+      key = key.split('(')[0];
+    return common.match(exp, key) ? matchValue : !matchValue;
   };
 }
 

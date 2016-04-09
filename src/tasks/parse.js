@@ -50,7 +50,9 @@ settings.oce.modules.forEach(function(moduleName) {
       settings.paths.data,
       cacheFile(moduleName)
     ].join(' ');
+
     var cmd = `python ${parseScript} ${args}`;
+    console.log(cmd)
     return run(cmd).exec(done);
   });
 });

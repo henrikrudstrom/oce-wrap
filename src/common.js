@@ -3,28 +3,37 @@ var replaceAll = function(target, search, replacement) {
 };
 
 function match(exp, name) {
-  exp = new RegExp('^' + replaceAll(exp, '*', '.*') + '$');
+  exp = exp.replace('(', '\\(');
+  exp = exp.replace(')', '\\)');
+  exp = replaceAll(exp, '*', '.*');
+  exp = new RegExp('^' + exp + '$');
   return exp.test(name);
 }
 
-function find(data, expr, matcher) {
-  //console.log(expr)
-  var res = expr.match(
-    /((?:\w|\*)+)(?:::((?:\w|\*)+))*(?:\(((?:\w|\*)+)(?:, *((?:\w|\*)+))*\))*/
-  );
+function keyMatcher(exp, args, matchValue) {
+  if (matchValue === undefined)
+    matchValue = true;
 
-  var type = res[1];
-  var member = res[2];
-  var args = null;
-  if (expr.indexOf('(') !== -1)
-    args = res.slice(3).filter((a) => a !== undefined);
+  return function(obj) {
+    var key = obj.key;
+    if (exp.indexOf('(') === -1)
+      key = key.split('(')[0];
 
-    
-  var types = data.declarations.filter(matcher(type));
+    return match(exp, key) ? matchValue : !matchValue;
+  };
+}
+function find(data, expr) {
+  var type = expr;
+  var member = undefined;
+  if (expr.indexOf('::')) {
+    type = expr.split('::')[0];
+    member = expr.split('::')[1];
+  }
+  var types = data.declarations.filter(keyMatcher(type));
   if (member === undefined) return types;
   return types.map((t) => t.declarations)
     .reduce((a, b) => a.concat(b), [])
-    .filter(matcher(member, args));
+    .filter(keyMatcher(member));
 }
 
 function getDecl(data, name, matcher) {
@@ -34,9 +43,9 @@ function getDecl(data, name, matcher) {
   throw new Error('headers.get expected one result, got multiple');
 }
 
-
 module.exports = {
   match,
   find,
-  get: getDecl
+  get: getDecl,
+  matcher: keyMatcher
 };

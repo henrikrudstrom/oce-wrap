@@ -9,27 +9,6 @@ function cleanTypeName(ret) {
   return ret;
 }
 
-function matcher(exp, args, matchValue) {
-  if (matchValue === undefined)
-    matchValue = true;
-  return function(obj) {
-    var res = common.match(exp, obj.name);
-    if (args === null || args === undefined || obj.cls === 'memfun' || !res)
-      return res ? matchValue : !matchValue;
-    for (var i = 0; i < args.length; i++) {
-      console.log("Aregs", args, "obj", obj)
-      if (obj.arguments[i] === undefined){
-        res = false;
-        break;
-      }
-      var ares = common.match(args[i], obj.arguments[i].type);
-      if (!ares)
-        res = ares;
-    }
-    return res ? matchValue : !matchValue;
-  };
-}
-
 function processType(type) {
   // TODO: should be implemented in header_parser.py
   type.declarations = [];
@@ -69,7 +48,7 @@ function getModule(mod) {
 
 function find(expr) {
   var mod = expr.replace('Handle_', '').split('_')[0];
-  return common.find(getModule(mod), expr, matcher);
+  return common.find(getModule(mod), expr, common.matcher);
 }
 
 function get(name) {

@@ -3,14 +3,14 @@ const conf = require('../conf.js');
 const headers = require('../headers.js');
 conf.Conf.prototype.property = function(getter, setter, name) {
   this.transform(getter, (getMethod) => {
-    if(getMethod.cls === 'constructor') return;
-    
-    if(typeof setter === 'string'){
+    if (getMethod.cls === 'constructor') return;
+
+    if (typeof setter === 'string') {
       var setterStr = setter;
       setter = () => setterStr;
     }
     var setMethod = this.get(setter(getter));
-    
+
     var property = {
       name: name || getMethod.name.replace(/^Get/, ""),
       key: getMethod.key,
@@ -22,22 +22,24 @@ conf.Conf.prototype.property = function(getter, setter, name) {
       setter: setMethod ? setMethod.name : undefined,
       setterKey: setMethod ? setMethod.key : undefined
     };
-    
+    console.log("SETSET")
+    console.log(getMethod.key)
+    console.log(setMethod.key)
     this.exclude(getMethod.key);
     this.exclude(setMethod.key);
     this.declarations.push(property);
-    
+
     return property;
   });
   return this;
 };
 module.exports.renderSwig = function(decl) {
-  if(decl.cls !== 'property') return;
+  if (decl.cls !== 'property') return;
   var srcGetter = decl.source('getterKey')
   var args = [srcGetter.parent, srcGetter.returnType, decl.name, decl.getterKey]
-  if(decl.setterKey)
+  if (decl.setterKey)
     args.push(decl.setterKey)
-  
+
   return {
     name: decl.parent + 'Properties',
     src: `%attribute(${args.join(', ')});`
