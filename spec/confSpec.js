@@ -1,4 +1,3 @@
-require('../src/settings.js').initialize;
 var headers = require('../src/headers.js');
 
 require('../src/features/rename.js');
@@ -15,7 +14,7 @@ describe('querie objects', function() {
     expect(headers.get('gp_Pnt').name).toBe('gp_Pnt');
     expect(headers.get('Geom_Point').name).toBe('Geom_Point');
     expect(headers.get('Handle_Geom_Point').name).toBe('Handle_Geom_Point');
-    
+
     expect(headers.find('gp_Pnt::SetCoord').length).toBe(2);
     expect(headers.find('gp_Pnt::Set*').length).toBe(6);
     expect(headers.get('gp_Pnt::BaryCenter').name).toBe('BaryCenter');
@@ -23,7 +22,7 @@ describe('querie objects', function() {
     expect(headers.find('gp_Vec*WithNull*').length).toBe(1);
     expect(headers.find('gp_*::*Distance').length).toBe(22);
   });
-  
+
 
 });
 
@@ -53,7 +52,7 @@ describe('module object', function() {
     expect(mod.get('gp_Pnt').name).toBe('gp_Pnt');
     expect(mod.find('*').length).toBe(1);
   });
-  
+
   it('can include declared types', function() {
     var mod = new conf.Conf();
     mod.include('gp_Pnt');
@@ -61,7 +60,7 @@ describe('module object', function() {
     mod.process();
     expect(mod.declarations[0].name).toBe('gp_Pnt');
   });
-  
+
   it('wrap defintions are mapped to the source', function(){
     var mod = new conf.Conf();
     mod.include('gp_Pnt');
@@ -72,9 +71,9 @@ describe('module object', function() {
     // console.log(pnt)
     // console.log("================================")
     // console.log("SetX", pnt.get('SetX'))
-    
+
     expect(pnt.source().name).toBe('gp_Pnt');
-    
+
     expect(pnt.get('SetX').source().name).toBe('SetX');
   })
   // it('deepcopies the object from the source', function() {
@@ -96,14 +95,14 @@ describe('module object', function() {
     mod.process();
     expect(mod.get('gp_Pnt').name).toBe('Point');
     expect(mod.get('gp_Pnt').declarations[0].parent).toBe('Point');
-    
+
   });
   it('renames childs parents', function(){
-    
+
   })
-  
-  
-  
+
+
+
   it('can rename before include', function() {
     var mod = new conf.Conf();
     mod.rename('gp_Vec', 'Vector');
@@ -121,7 +120,7 @@ describe('module object', function() {
     expect(mod.get('gp_Vec').name).toBe('Vector');
     expect(mod.get('gp_Vec2d').name).toBe('Vector2d');
   });
-  
+
   it('can pass a function', function() {
     var mod = new conf.Conf();
     mod.include('gp_Vec*');
@@ -130,7 +129,7 @@ describe('module object', function() {
     expect(mod.get('gp_Vec').name).toBe('gp_Vec_suffix');
     expect(mod.get('gp_Vec2d').name).toBe('gp_Vec2d_suffix');
   });
-  
+
   it('functions can be composed', function() {
     conf.Conf.prototype.testInclude = function(expr, name) {
       this.include(expr);
@@ -146,7 +145,7 @@ describe('module object', function() {
     var mod = new conf.Conf();
     mod.include('gp_Vec');
     var vec = mod.get('gp_Vec');
-    
+
     vec.exclude('*');
     mod.process();
     expect(mod.get('gp_Vec').declarations.length).toBe(0);
@@ -160,8 +159,8 @@ describe('module object', function() {
     mod.process();
     expect(mod.get('gp_Vec').get('SetX').name).toBe('setX');
   });
-  
-  
+
+
   it('can query nested declarations', function(){
     var mod = new conf.Conf();
     mod.include('gp_*')
@@ -183,7 +182,7 @@ describe('module object', function() {
     expect(mod.get('gp_Pnt').declarations.length).toBe(0);
     expect(mod.get('gp_Vec').declarations.length).toBe(12);
     expect(mod.get('gp_Vec2d').declarations.length).toBe(9);
-    
+
   });
 
 
@@ -193,7 +192,7 @@ describe('module object', function() {
     var vec = mod.get('gp_Vec');
     vec.include('*');
     vec.camelCase('*');
-  
+
     mod.process();
     expect(vec.find('SetY')[0].name).toBe('setY');
     expect(vec.find('Mirror')[0].name).toBe('mirror');
@@ -204,13 +203,13 @@ describe('module object', function() {
     mod.include('Geom_Point');
     mod.include('Handle_Geom_Point');
     mod.removePrefix('*');
-  
+
     mod.process();
     expect(mod.get('gp_Vec').name).toBe('Vec');
     expect(mod.get('Geom_Point').name).toBe('Point');
     expect(mod.get('Handle_Geom_Point').name).toBe('Handle_Point');
   });
-  
+
   it('can define properties', function(){
     var mod = new conf.Conf();
     mod.include('gp_Vec')
@@ -251,12 +250,11 @@ describe('modules queries', function(){
     mod2.name = 'Geom';
     mod2.include('Geom_Point');
     mod1.process();
-    
+
     var mods = moduleReader([mod1, mod2])
-    
+
     expect(mods.get('gp.Point').name).toBe('Point');
     expect(mods.get('Geom.Geom_Point').name).toBe('Geom_Point');
-    
+
   });
 });
-

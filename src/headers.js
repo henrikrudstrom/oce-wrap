@@ -1,5 +1,5 @@
 const settings = require('./settings.js');
-settings.initialize();
+//settings.initialize();
 const common = require('./common.js');
 const fs = require('fs');
 

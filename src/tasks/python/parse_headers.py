@@ -13,8 +13,7 @@ from collections import OrderedDict
 import json
 
 
-with open("data/cannot-parse.json", "r") as f:
-    ignore_list = json.loads(f.read())
+
 def ignore(header):
     header = os.path.splitext(header)[0]
     header = re.sub("<\w+>", "", header)
@@ -203,9 +202,13 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         oce_include = sys.argv[2]
     if len(sys.argv) > 3:
-        output_path = sys.argv[3]
+        data_path = sys.argv[3]
+    if len(sys.argv) > 4:
+        output_path = sys.argv[4]
     else:
         exit(1)
+    with open(data_path + "/cannot-parse.json", "r") as f:
+        ignore_list = json.loads(f.read())
     module = Module(module_name, "")
     data = w_module(module.ns, module_name)
 

@@ -11,8 +11,8 @@ xml_generator=None
 if os.path.exists(settings_path):
     with open(settings_path, 'r') as f:
         settings = json.loads(f.read())
-        xml_generator = settings.get('xml_generator')
-        xml_generator_path = settings.get('xml_generator_path')
+        xml_generator = settings.get('xmlGenerator')
+        xml_generator_path = settings.get('xmlGeneratorPath')
 
 
 def parse_files(path, files):

@@ -1,4 +1,4 @@
-require('../src/settings.js').initialize;
+//require('../src/settings.js').initialize;
 var headers = require('../src/headers.js');
 
 require('../src/features/rename.js');
