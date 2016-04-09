@@ -15,8 +15,11 @@ function find(data, expr, matcher) {
 
   var type = res[1];
   var member = res[2];
-  var args = res.slice(3);
+  var args = null;
+  if (expr.indexOf('(') !== -1)
+    args = res.slice(3).filter((a) => a !== undefined);
 
+    
   var types = data.declarations.filter(matcher(type));
   if (member === undefined) return types;
   return types.map((t) => t.declarations)

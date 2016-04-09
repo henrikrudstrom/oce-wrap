@@ -1,5 +1,4 @@
 const settings = require('./settings.js');
-//settings.initialize();
 const common = require('./common.js');
 const fs = require('fs');
 
@@ -10,11 +9,24 @@ function cleanTypeName(ret) {
   return ret;
 }
 
-function matcher(exp, matchValue) {
+function matcher(exp, args, matchValue) {
   if (matchValue === undefined)
     matchValue = true;
   return function(obj) {
-    return common.match(exp, obj.name) ? matchValue : !matchValue;
+    var res = common.match(exp, obj.name);
+    if (args === null || args === undefined || obj.cls === 'memfun' || !res)
+      return res ? matchValue : !matchValue;
+    for (var i = 0; i < args.length; i++) {
+      console.log("Aregs", args, "obj", obj)
+      if (obj.arguments[i] === undefined){
+        res = false;
+        break;
+      }
+      var ares = common.match(args[i], obj.arguments[i].type);
+      if (!ares)
+        res = ares;
+    }
+    return res ? matchValue : !matchValue;
   };
 }
 
@@ -47,7 +59,7 @@ function loadModule(mod) {
   return data;
 }
 
-var modules = {}
+var modules = {};
 
 function getModule(mod) {
   if (modules[mod] === undefined)
@@ -57,7 +69,7 @@ function getModule(mod) {
 
 function find(expr) {
   var mod = expr.replace('Handle_', '').split('_')[0];
-  return common.find(getModule(mod), expr, matcher)
+  return common.find(getModule(mod), expr, matcher);
 }
 
 function get(name) {

@@ -21,9 +21,12 @@ describe('querie objects', function() {
     expect(headers.find('gp_Vec*').length).toBe(3);
     expect(headers.find('gp_Vec*WithNull*').length).toBe(1);
     expect(headers.find('gp_*::*Distance').length).toBe(22);
+    expect(headers.find('gp_Vec::gp_Vec').length).toBe(6);
+    expect(headers.find('gp_Vec::gp_Vec(gp_Vec)').length).toBe(1);
+    expect(headers.find('gp_Vec::gp_Vec(*, *)').length).toBe(2);
+    expect(headers.find('gp_Vec::gp_Vec(Standard_Real)').length).toBe(1);
+    expect(headers.find('gp_Vec::gp_Vec(*)').length).toBe(5);
   });
-
-
 });
 
 describe('module object', function() {
