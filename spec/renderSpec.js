@@ -13,7 +13,7 @@ describe('Swig Renderer', function() {
   it('can render a module', function() {
     var mod = new conf.Conf();
     mod.name = 'gp';
-    var res = render(mod);
+    var res = render('renderSwig', mod);
 
     var src = res.get('module.i');
 
@@ -59,4 +59,33 @@ describe('Swig Renderer', function() {
   //   var res = ['%attribute(gp_Vec, Standard_Real, x, X, SetX);']
   //   expect(parts.property).toEqual(res);
   // });
+});
+const testsFeature = require('../src/features/tests.js');
+const configure = require('../src/configure.js');
+const glob = require('glob');
+const modules = require('../src/modules');
+const execSync = require('child_process').execSync;
+const settings = require('../src/settings.js');
+
+describe('render tests', function() {
+  var createValue = testsFeature.createValue;
+  beforeEach(function() {
+    execSync(`rm -rf ${settings.paths.config}`);
+    const definedModules = glob.sync(`${settings.paths.definition}/modules/*.js`);
+    configure(definedModules, settings.paths.config);
+  });
+  it('can create values', function() {
+    expect(createValue('int')).toBe('1');
+    expect(createValue('double')).toBe('0.5');
+    expect(createValue('bool')).toBe('true');
+    expect(createValue('other.Vec')).toBe('create.other.Vec()');
+  });
+  it('can render tests', function(){
+    const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
+    var res = render('renderTest', configuredModules);
+    render.write(settings.paths.dist + '/test', res);
+    //var res = testsFeature.renderClassSuite(modules().get('other.Vec'))
+    console.log(res);
+
+  })
 });

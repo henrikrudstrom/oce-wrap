@@ -1,5 +1,11 @@
 const settings = require('./src/settings.js');
-settings.initialize();
+settings.initialize({
+  paths: {
+    build: 'spec/test-proj/build',
+    dist: 'spec/test-proj/dist',
+    definition: 'spec/test-proj/def'
+  }
+});
 const gulp = require('gulp');
 const jasmine = require('gulp-jasmine');
 const gutil = require('gulp-util');

@@ -54,8 +54,19 @@ gulp.task('swig-cxx', function(done) {
 
 gulp.task('render-swig', function(done) {
   const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
-  render.write(settings.paths.swig, render(configuredModules));
+  render.write(settings.paths.swig, render('renderSwig', configuredModules));
   return done();
+});
+
+gulp.task('tests-clean', (done) =>
+  run(`rm -rf ${settings.paths.dist}/tests`, { silent: true }).exec(done)
+);
+
+gulp.task('render-tests', function(done) {
+  const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
+  render.write(settings.paths.dist + '/tests', render('renderTest', configuredModules));
+  run(`cp -rf ${settings.paths.definition}/create.js ${settings.paths.dist}/tests/create.js`).exec(done);
+  // return done();
 });
 
 gulp.task('swig', function(done) {

@@ -4,10 +4,15 @@ const fs = require('fs');
 const glob = require('glob');
 
 function moduleQuery(mods) {
-  if (mods === undefined) {
-    glob.sync(`${settings.paths.build}/modules/*.json`).forEach((file) => {
-      JSON.parse(fs.readFileSync(file));
-    });
+  if (typeof mods === 'string') {
+    mods = glob.sync(`${mods}/*.json`).map(file =>
+      JSON.parse(fs.readFileSync(file))
+    );
+  } else if (mods === undefined) {
+    console.log(`${settings.paths.config}/*.json`)
+    mods = glob.sync(`${settings.paths.config}/*.json`).map(file =>
+      JSON.parse(fs.readFileSync(file))
+    );
   }
 
   var modules = {};
@@ -16,14 +21,22 @@ function moduleQuery(mods) {
   });
 
   function find(expr) {
+    console.log("E", expr);
     var mod;
     if (expr.indexOf('.') !== -1) {
       mod = expr.split('.')[0];
       expr = expr.split('.')[1];
     } else {
-      throw new Error('wild card modules not supported (yet)');
+      return [];
+      //throw new Error('wild card modules not supported (yet)');
     }
+    console.log('expr', expr, 'mod', mod)
+
     return common.find(modules[mod], expr, true);
+  }
+
+  function getModule(name) {
+    return modules[name];
   }
 
   function get(name) {
@@ -35,7 +48,8 @@ function moduleQuery(mods) {
 
   return {
     find,
-    get: get
+    get: get,
+    getModule
   };
 }
 module.exports = moduleQuery;

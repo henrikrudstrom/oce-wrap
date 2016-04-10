@@ -66,21 +66,15 @@ describe('module object', function() {
   });
 
   it('wrap defintions are mapped to the source', function() {
-      var mod = new conf.Conf();
-      mod.include('gp_Pnt');
-      mod.rename('gp_Pnt', 'Point');
-      var pnt = mod.get('gp_Pnt')
-      pnt.include('SetX');
-      mod.process();
-      
-      
-      
-
-      expect(pnt.source().name).toBe('gp_Pnt');
-
-
-      expect(pnt.get('SetX').source().name).toBe('SetX');
-    })
+    var mod = new conf.Conf();
+    mod.include('gp_Pnt');
+    mod.rename('gp_Pnt', 'Point');
+    var pnt = mod.get('gp_Pnt');
+    pnt.include('SetX');
+    mod.process();
+    expect(pnt.source().name).toBe('gp_Pnt');
+    expect(pnt.get('SetX').source().name).toBe('SetX');
+  });
     // it('deepcopies the object from the source', function() {
     //   var mod = new conf.Conf();
     //   mod.include('gp_Pnt');
@@ -100,7 +94,6 @@ describe('module object', function() {
     mod.process();
     expect(mod.get('gp_Pnt').name).toBe('Point');
     expect(mod.get('gp_Pnt').declarations[0].parent).toBe('Point');
-
   });
   it('renames childs parents', function() {
 
@@ -157,9 +150,9 @@ describe('module object', function() {
     expect(mod.get('gp_Vec')).toBe(vec);
     vec.include('SetX');
     expect(mod.get('gp_Vec').declarations.length).toBe(1);
-    
+
     expect(mod.get('gp_Vec').get('SetX').name).toBe('SetX');
-    
+
     vec.rename('SetX', 'setX');
     mod.process();
     expect(mod.get('gp_Vec').get('SetX').name).toBe('setX');
@@ -234,6 +227,8 @@ describe('module object', function() {
     expect(vec.get('SetX')).toBe(null);
 
   });
+
+  
 });
 
 
