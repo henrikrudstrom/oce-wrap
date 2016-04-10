@@ -20,26 +20,6 @@ function cacheFile(moduleName) {
   return `${settings.paths.headerCache}/${moduleName}.json`;
 }
 
-// Read dependencies from cached pygccxml output
-// gulp.task('init-dependencies', function(done) {
-//   const depFile = 'config/depends.json';
-//   if (fs.existsSync(depFile)) {
-//     gutil.log('dependencies ok')
-//     return done();
-//   }
-//
-//   return run(`rm -rf ${depFile}`).exec((error) => {
-//     if (error) return done(error);
-//     var deps = {};
-//     var reader = depend.reader();
-//     glob.sync(`${paths.headerCache}/*.json`).forEach((file) => {
-//       const mod = path.basename(file).replace('.json', '');
-//       deps[mod] = reader.requiredModules(mod, false);
-//     });
-//     fs.writeFile(depFile, JSON.stringify(deps, null, 2), done);
-//   });
-// });
-
 // Parse header for module
 settings.oce.modules.forEach(function(moduleName) {
   gulp.task(common.moduleTask('parse-headers', moduleName), function(done) {

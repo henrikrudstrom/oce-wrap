@@ -15,15 +15,15 @@ function renderFunction(func) {
   var stat = func.static ? 'static ' : '';
   var cons = func.const ? 'const ' : '';
   return `
-    %feature("compactdefaultargs") ${func.name};
-    ${stat}${cons}${source.returnType + ' '}${func.name}(${args});`;
+    %feature("compactdefaultargs") ${source.name};
+    ${stat}${cons}${source.returnType + ' '}${source.name}(${args});`;
 }
 
 module.exports.renderSwig = function(cls, parts) {
   if (cls.cls !== 'class') return false;
-
+  var srcCls = cls.source();
   var base = '';
-  if (cls.bases.length > 0) {
+  if (srcCls.bases.length > 0) {
     base = ' : ' + cls.bases[0].access + ' ' + cls.bases[0].name;
   }
   const constructors = cls.declarations
@@ -35,8 +35,8 @@ module.exports.renderSwig = function(cls, parts) {
     .map(renderFunction).join('');
 
   const src = `\
-%nodefaultctor ${cls.name};
-class ${cls.name}${base} {
+%nodefaultctor ${srcCls.name};
+class ${srcCls.name}${base} {
 	public:
     /* Constructors */
     ${constructors}
@@ -46,9 +46,9 @@ class ${cls.name}${base} {
 };`;
   return [{
     name: 'classIncludes',
-    src: `%include classes/${cls.name}.i`
+    src: `%include classes/${srcCls.name}.i`
   }, {
-    name: `classes/${cls.name}.i`,
+    name: `classes/${srcCls.name}.i`,
     src
   }];
 };

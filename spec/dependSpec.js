@@ -14,7 +14,7 @@ describe('classDepends', function() {
 
   it('can process source dependencies', function() {
     var reader = depend(headers);
-    var deps = reader(headers.get('gp_Pnt'));
+    var deps = reader.classDepends(headers.get('gp_Pnt'));
     var res = [
       'gp_XYZ', 'Standard_Real', 'Standard_Integer',
       'Standard_Boolean', 'gp_Ax1', 'gp_Ax2', 'gp_Trsf', 'gp_Vec'
@@ -28,16 +28,19 @@ describe('classDepends', function() {
     var mod1 = new conf.Conf();
     mod1.name = 'gp';
     mod1.include('gp_*');
+    mod1.include('Standard_Real');
+    mod1.include('Standard_Integer');
+    mod1.include('Standard_Boolean');
     mod1.find('gp_*').include('*');
     mod1.removePrefix('*');
     mod1.process();
-    configure.translateTypes([mod1]);
+    configure.processModules([mod1]);
 
 
     var modules = moduleReader([mod1]);
     var pnt = modules.get('gp.Pnt');
     var reader = depend(modules);
-    var deps = reader(pnt);
+    var deps = reader.classDepends(pnt);
     var res = [
       'gp.XYZ', 'double', 'int',
       'bool', 'gp.Ax1', 'gp.Ax2', 'gp.Trsf', 'gp.Vec'
@@ -49,7 +52,7 @@ describe('classDepends', function() {
   it('can process recursive dependencies', function() {
     var reader = depend(headers);
     var point = headers.get('Geom_Point');
-    var deps = reader(point, true);
+    var deps = reader.classDepends(point, true);
     var res = [
       'Standard_Real', 'gp_Pnt', 'Handle_Geom_Point', 'Handle_Standard_Type',
       'gp_XYZ', 'Standard_Integer', 'Standard_Boolean', 'gp_Ax1', 'gp_Ax2', 'gp_Trsf',

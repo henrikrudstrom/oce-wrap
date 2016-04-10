@@ -46,6 +46,10 @@ Exception handling
         strcat(message, error_message);
         // raise the python exception
         //TODO: PyErr_SetString(PyExc_RuntimeError, message);
-	    return NULL;
+      args.GetIsolate()->ThrowException(
+        v8::String::NewFromUtf8(args.GetIsolate(), "Bad parameters")
+      );
+      return;
+	    //return v8::ThrowException(v8::String::New(message));
     }
 }

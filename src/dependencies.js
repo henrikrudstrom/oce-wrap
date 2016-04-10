@@ -1,13 +1,17 @@
+const settings = require('./settings.js');
+const modules = require('./modules.js')();
+
+
 function unique(t, index, array) {
   return array.indexOf(t) === index;
 }
-
 
 function modName(name) {
   var matchRes = name.match(/(?:Handle_)*(\w+?)_\w+/);
   if (!matchRes) return name;
   return matchRes[1];
 }
+
 
 function dependencyReader(mods) {
   var cache = {};
@@ -60,6 +64,32 @@ function dependencyReader(mods) {
     return res;
   }
 
-  return classDepends;
+  function moduleDepends(mod) {
+    return mod.declarations
+      .map((d) => classDepends(d, false))
+      .reduce((a, b) => a.concat(b), [])
+      .filter((d, index, array) => array.indexOf(d) === index);
+  }
+
+  function toolkitDepends(mod) {
+    var modDeps = moduleDepends(mod)
+      .map(cls => modules.get(cls))
+      .filter(cls => cls !== null)
+      .map(cls => modName(cls.key))
+      .concat('Standard') // TODO: temp fix
+      .filter((cls, index, array) => array.indexOf(cls) === index);
+
+    return settings.oce.toolkits
+      .filter(tk => tk.modules.some(
+        m1 => modDeps.some((m2) => m1 === m2)
+      )).map(tk => tk.name);
+  }
+
+  return {
+    classDepends,
+    moduleDepends,
+    toolkitDepends
+  };
 }
 module.exports = dependencyReader;
+module.exports.modName = modName;

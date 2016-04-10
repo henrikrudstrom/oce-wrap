@@ -1,32 +1,29 @@
-var example = require('../lib/example.js');
-var other = require('../lib/other.js');
+var gp = require('../../lib/gp.node');
 
-module.exports.other = {
+module.exports.gp = {
   XYZ() {
-    return new other.XYZ(5, 5, 5);
+    return new gp.XYZ(5, 5, 5);
   },
   Vec() {
-    return new other.Pnt(10, 20, 40);
+    return new gp.Vec(10, 20, 40);
   },
   Pnt() {
-    return new other.Pnt(40, 20, 10);
-  }
-};
-module.exports.example = {
+    return new gp.Pnt(40, 20, 10);
+  },
   Dir() {
-    return new example.Dir(1, 2, 3);
+    return new gp.Dir(1, 2, 3);
   },
   Ax2() {
-    return new example.Ax2(
-      new other.Pnt(1, 1, 1), new example.Dir(0, 0, 1), new example.Dir(1, 0, 0)
+    return new gp.Ax2(
+      new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1), new gp.Dir(1, 0, 0)
     );
   },
   Ax3() {
-    return new example.Ax3(
-      new other.Pnt(1, 1, 1), new example.Dir(0, 0, 1), new example.Dir(1, 0, 0)
+    return new gp.Ax3(
+      new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1), new gp.Dir(1, 0, 0)
     );
   },
   Trsf() {
-    return new example.Trsf();
+    return new gp.Trsf();
   }
 };

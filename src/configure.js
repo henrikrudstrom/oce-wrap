@@ -11,17 +11,17 @@ var createTypeDict = require('./typedict.js')
 
 
 function configureModule(file) {
-  //var file = file.replace("src/configure/", "./");
   file = path.relative(__dirname, file);
-  var configure = require(file);
+  var config = require(file);
 
   var mod = new conf.Conf();
-  configure(mod);
-  mod.process();
+  config(mod);
+
   if (!mod.name)
     throw new Error('Configuration Error: module name must be specified.');
   return mod;
 }
+
 
 function translateTypes(mods) {
   var typedict = createTypeDict(mods);
@@ -46,9 +46,20 @@ function translateTypes(mods) {
   });
 }
 
+function processModules(mods) {
+  mods.forEach(mod => {
+    mod.rename('Standard_Real', 'double');
+    mod.rename('Standard_Integer', 'int');
+    mod.rename('Standard_Boolean', 'bool');
+    mod.rename('Standard_CString', 'string');
+    mod.process();
+  });
+  translateTypes(mods);
+}
+
 function configure(configurationFiles, outputPath) {
   var mods = configurationFiles.map(configureModule);
-  translateTypes(mods);
+  processModules(mods);
 
   mods.forEach((mod) => {
     delete mod.stacks;
@@ -61,3 +72,4 @@ function configure(configurationFiles, outputPath) {
 
 module.exports = configure;
 module.exports.translateTypes = translateTypes;
+module.exports.processModules = processModules;

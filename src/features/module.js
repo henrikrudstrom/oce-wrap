@@ -1,14 +1,14 @@
 function renderTypedef(td) {
-  return `typedef ${td.type} ${td.name};`;
+  return `typedef ${td.source().type} ${td.source().name};`;
 }
 
 module.exports.name = 'module'
 
 function renderEnum(en) {
-  var values = en.values.map(function(v) {
+  var values = en.source().values.map(function(v) {
     return `  ${v[0]} = ${v[1]}`;
   }).join(',\n');
-  return `enum ${en.name} {\n${values}\n};`;
+  return `enum ${en.source().name} {\n${values}\n};`;
 }
 
 module.exports.renderSwig = function(decl, parts) {
@@ -37,8 +37,8 @@ ${parts.get('moduleDepends')}
 
 ${parts.get('featureIncludes')}
 
-${typedefs}
-${enums}
+${typedefs.join('\n')}
+${enums.join('\n')}
 ${parts.get('classIncludes')}
 `
   };

@@ -1,5 +1,6 @@
 const settings = require('./settings.js');
 const common = require('./common.js');
+const conf = require('./conf.js');
 const fs = require('fs');
 const glob = require('glob');
 
@@ -9,7 +10,6 @@ function moduleQuery(mods) {
       JSON.parse(fs.readFileSync(file))
     );
   } else if (mods === undefined) {
-    console.log(`${settings.paths.config}/*.json`)
     mods = glob.sync(`${settings.paths.config}/*.json`).map(file =>
       JSON.parse(fs.readFileSync(file))
     );
@@ -17,21 +17,19 @@ function moduleQuery(mods) {
 
   var modules = {};
   mods.forEach((mod) => {
+    conf.mapSources(mod);
     modules[mod.name] = mod;
   });
 
   function find(expr) {
-    console.log("E", expr);
     var mod;
     if (expr.indexOf('.') !== -1) {
       mod = expr.split('.')[0];
       expr = expr.split('.')[1];
     } else {
-      return [];
+      return ['string', 'bool', 'int', 'double'].filter(type => common.match(expr, type));
       //throw new Error('wild card modules not supported (yet)');
     }
-    console.log('expr', expr, 'mod', mod)
-
     return common.find(modules[mod], expr, true);
   }
 

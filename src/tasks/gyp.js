@@ -1,6 +1,7 @@
 'use-strict';
 const fs = require('fs');
 const mkdirp = require('mkdirp');
+const async = require('async');
 
 const gulp = require('gulp');
 const runSequence = require('run-sequence');
@@ -8,31 +9,28 @@ const run = require('gulp-run');
 const gutil = require('gulp-util');
 
 const settings = require('../settings.js');
-const depend = require('../depend.js');
+const modules = require('../modules.js')();
+const depend = require('../dependencies.js');
 const paths = settings.paths;
 const common = require('./lib/common.js');
 
-function getToolkit(moduleName) {
-  return Object.keys(settings.toolkits).filter((tk) =>
-    settings.toolkits[tk].indexOf(moduleName) >= 0
-  )[0];
-}
+var reader = depend();
 
-function toolkitDeps(moduleName) {
-  return depend.toolkitDepends(moduleName)
+function toolkitDeps(mod) {
+  return reader.toolkitDepends(mod)
     .map((s) => `      "-l${s}"`).join(',\n');
 }
 module.exports.tool = toolkitDeps;
 
-function writeConfig(moduleName, buildPath) {
+function writeConfig(mod, buildPath) {
   var src = `{
   "targets": [{
-    "target_name":"${moduleName}",
-    "sources": ["../../src/${moduleName}_wrap.cxx"],
-    "include_dirs": ["${settings.oce_include}"],
+    "target_name":"${mod.name}",
+    "sources": ["../../cxx/${mod.name}_wrap.cxx"],
+    "include_dirs": ["${settings.oce.include}"],
     "libraries": [
-      "-L${settings.oce_lib}",
-${toolkitDeps(moduleName)}
+      "-L${settings.oce.lib}",
+${toolkitDeps(mod)}
     ],
     "cflags": [
       "-DCSFDB", "-DHAVE_CONFIG_H", "-DOCC_CONVERT_SIGNALS",
@@ -48,54 +46,54 @@ ${toolkitDeps(moduleName)}
   fs.writeFileSync(`${buildPath}/binding.gyp`, src);
 }
 
+function configureModule(modName, done) {
+  const buildPath = `${paths.gyp}/${modName}`;
+  console.log(modName);
+  var mod = modules.getModule(modName);
+  console.log(mod.name)
+  writeConfig(mod, buildPath);
+  run('node-gyp configure', {
+    cwd: buildPath,
+    verbosity: 0
+  }).exec(done);
+}
 
+gulp.task('gyp-clean', function(done) {
+  if (!fs.existsSync(paths.gyp)) return done();
+  return run(`rm -rf ${paths.gyp}`).exec(done);
+});
 
+gulp.task('gyp-configure', function(done) {
+  return async.parallel(
+    settings.build.modules.map(mod => cb => {
+      configureModule(mod, cb);
+    }),
+    done
+  );
+});
+var exec = require('child_process').exec;
+gulp.task('gyp-build', function(done) {
+  return async.parallel(
+    settings.build.modules.map(mod => cb => {
+      const buildPath = `${paths.gyp}/${mod}`;
+      exec('node-gyp build', { cwd: buildPath }, cb);
+      // run('node-gyp build', {
+      //   cwd: buildPath,
+      //   verbosity: 1
+      // }).exec(cb);
+    }),
+    done
+  );
+});
 
-settings.modules.forEach(function(moduleName) {
-  const buildPath = `${paths.gyp}/${moduleName}`;
-  const configPath = `${paths.configDest}/${moduleName}.json`;
-  var depends = settings.depends[moduleName];
-
-
-  function mTask(name, mName) {
-    if (mName === undefined)
-      mName = moduleName;
-    return common.moduleTask(name, mName);
-  }
-
-
-  gulp.task(mTask('gyp-clean'), function(done) {
-    if (!fs.existsSync(buildPath)) return done();
-    run(`rm -rf ${buildPath}`).exec(done);
-    return undefined;
-  });
-
-  gulp.task(mTask('gyp-configure'), function(done) {
-    writeConfig(moduleName, buildPath);
-    run('node-gyp configure', {
-      cwd: buildPath,
-      verbosity: 0
-    }).exec(done);
-  });
-
-  gulp.task(mTask('gyp-build'), [mTask('gyp-configure')], function(done) {
-    run('node-gyp build', {
-      cwd: buildPath,
-      verbosity: 1
-    }).exec(done);
-  });
-
-  gulp.task(mTask('gyp-dist'), function(done) {
-    mkdirp.sync(`${paths.dist}/lib/`);
-    var cmd = `cp ${buildPath}/build/Release/${moduleName}.node ${paths.dist}/lib/`;
-    run(cmd).exec(done);
-  });
-
-  gulp.task(mTask('gyp'), function(done) {
-    runSequence(mTask('gyp-build'), mTask('gyp-dist'), done);
-  });
-
-  gulp.task(mTask('gyp-deps'), function(done) {
-    common.limitExecution('gyp', depends, done);
-  });
+gulp.task('gyp-dist', function(done) {
+  return async.parallel(
+    settings.build.modules.map(mod => cb => {
+      const buildPath = `${paths.gyp}/${mod}`;
+      mkdirp.sync(`${paths.dist}/lib/`);
+      var cmd = `cp ${buildPath}/build/Release/${mod}.node ${paths.dist}/lib/`;
+      run(cmd).exec(cb);
+    }),
+    done
+  );
 });

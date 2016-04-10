@@ -9,12 +9,12 @@ module.exports = function typedict(mods) {
       dict[decl.key] = `${mod.name}.${decl.name}`;
     });
   });
-  extend(dict, {
-    Standard_Real: 'double',
-    Standard_Boolean: 'bool',
-    Standard_CString: 'string',
-    Standard_Integer: 'int'
-  });
+  // extend(dict, {
+  //   Standard_Real: 'double',
+  //   Standard_Boolean: 'bool',
+  //   Standard_CString: 'string',
+  //   Standard_Integer: 'int'
+  // });
   return (name) => {
     if (dict.hasOwnProperty(name)) return dict[name];
     return name;
