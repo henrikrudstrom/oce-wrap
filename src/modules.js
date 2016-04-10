@@ -3,22 +3,11 @@ const common = require('./common.js');
 const fs = require('fs');
 const glob = require('glob');
 
-function matcher(exp, matchValue) {
-  if (matchValue === undefined)
-    matchValue = true;
-  return function(obj) {
-    var key = obj.name; // || obj.name;
-    if (exp.indexOf('(') !== -1)
-      key = key.split('(')[0];
-    return common.match(exp, key) ? matchValue : !matchValue;
-  };
-}
-
 function moduleQuery(mods) {
   if (mods === undefined) {
     glob.sync(`${settings.paths.build}/modules/*.json`).forEach((file) => {
       JSON.parse(fs.readFileSync(file));
-    })
+    });
   }
 
   var modules = {};
@@ -34,7 +23,7 @@ function moduleQuery(mods) {
     } else {
       throw new Error('wild card modules not supported (yet)');
     }
-    return common.find(modules[mod], expr, matcher);
+    return common.find(modules[mod], expr, true);
   }
 
   function get(name) {
@@ -44,10 +33,6 @@ function moduleQuery(mods) {
     throw new Error('headers.get expected one result, got multiple');
   }
 
-  // hopefully only for debugging
-  function clearCache() {
-    modules = {};
-  }
   return {
     find,
     get: get

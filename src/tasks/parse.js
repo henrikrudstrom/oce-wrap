@@ -52,7 +52,7 @@ settings.oce.modules.forEach(function(moduleName) {
     ].join(' ');
 
     var cmd = `python ${parseScript} ${args}`;
-    console.log(cmd)
+
     return run(cmd).exec(done);
   });
 });

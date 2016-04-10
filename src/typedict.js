@@ -1,4 +1,7 @@
-module.exports = function typedict(mods){
+const settings = require('./settings.js');
+module.exports = function typedict(mods) {
+  if (mods === undefined)
+    mods = settings.build.modules;
   var dict = {
     Standard_Real: 'double',
     Standard_Boolean: 'bool',
@@ -11,7 +14,7 @@ module.exports = function typedict(mods){
     });
   });
   return (name) => {
-    if(dict.hasOwnProperty(name)) return dict[name];
+    if (dict.hasOwnProperty(name)) return dict[name];
     return name;
   }
 }

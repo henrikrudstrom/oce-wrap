@@ -10,30 +10,40 @@ function match(exp, name) {
   return exp.test(name);
 }
 
-function keyMatcher(exp, args, matchValue) {
+function keyMatcher(exp, matchValue, wrapped) {
+  if (typeof wrapped !== 'boolean' && typeof wrapped !== 'undefined')
+    throw new Error();
   if (matchValue === undefined)
     matchValue = true;
 
   return function(obj) {
     var key = obj.key;
+    if (wrapped) {
+      key = obj.name;
+    }
     if (exp.indexOf('(') === -1)
       key = key.split('(')[0];
-
     return match(exp, key) ? matchValue : !matchValue;
   };
 }
-function find(data, expr) {
+
+function find(data, expr, wrapped) {
   var type = expr;
   var member = undefined;
-  if (expr.indexOf('::')) {
-    type = expr.split('::')[0];
-    member = expr.split('::')[1];
+  var splitter = '::';
+  if (wrapped)
+    splitter = '.';
+  if (expr.indexOf(splitter)) {
+    type = expr.split(splitter)[0];
+    member = expr.split(splitter)[1];
   }
-  var types = data.declarations.filter(keyMatcher(type));
+
+  var types = data.declarations.filter(keyMatcher(type, true, wrapped));
+
   if (member === undefined) return types;
   return types.map((t) => t.declarations)
     .reduce((a, b) => a.concat(b), [])
-    .filter(keyMatcher(member));
+    .filter(keyMatcher(member, true, wrapped));
 }
 
 function getDecl(data, name, matcher) {

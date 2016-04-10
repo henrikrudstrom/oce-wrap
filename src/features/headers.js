@@ -1,15 +1,16 @@
-var classDepends = require('../dependencies.js');
+var reader = require('../dependencies.js');
 module.exports.renderSwig = function(decl) {
-  if (decl.cls !== 'module' || decl.moduleDepends === undefined) return false;
+  var classDeps = reader();
+  if (decl.cls !== 'module') return false;
   var depends = decl.declarations
-    .map((d) => classDepends(d, false))
+    .map((d) => classDeps(d.source(), false))
     .reduce((a, b) => a.concat(b), [])
     .filter((d, index, array) => array.indexOf(d) === index)
-    .map((d) => `#include <${d}>`)
+    .map((d) => `#include <${d}.hxx>`)
     .join('\n');
 
   return {
-    name: 'headers',
+    name: 'headers.i',
     src: `
 %{
 ${depends}

@@ -60,7 +60,7 @@ function mapSources(declaration) {
       if (declaration.cls === 'module')
         return headers.get(this[keyProp]);
       var query = declaration.key + '::' + decl[keyProp];
-      console.log('Query', query)
+
       return headers.get(query);
     };
 
@@ -72,18 +72,17 @@ function mapSources(declaration) {
 
 Conf.prototype = {
   find(expr) {
-    console.log("Find expr", expr)
-    var res = createMultiConf(common.find(this, expr, common.matcher)); // TODO. search by key not name
+    var res = createMultiConf(common.find(this, expr)); // TODO. search by key not name
     return res;
   },
 
   get(name) {
-    return common.get(this, name, common.matcher);
+    return common.get(this, name);
   },
 
   include(expr) {
     if (Array.isArray(expr)) expr.map(this.include.bind(this));
-    if (this.cls && (this.cls === 'class' || this.cls === 'enum'))
+    if (this.cls && (this.cls === 'class' || this.cls === 'enum' || this.cls === 'typedef'))
       expr = `${this.key}::${expr}`;
 
     // query parsed headers for declaration
@@ -97,8 +96,7 @@ Conf.prototype = {
     return this;
   },
   exclude(expr) {
-    console.log('expr', expr)
-    this.declarations = this.declarations.filter(common.matcher(expr, undefined, false));
+    this.declarations = this.declarations.filter(common.matcher(expr, false));
   },
   transform(expr, fn) {
     this.stacks.transform.push(() => {
@@ -110,7 +108,7 @@ Conf.prototype = {
     if (stackName === undefined) {
       this.process('include');
       this.process('transform');
-      this.init(); //TODO: should get a better home
+      this.init(); // TODO: should get a better home
       return;
     }
     if (this.declarations) {

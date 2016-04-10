@@ -36,7 +36,7 @@ describe('module object', function() {
     mod.process();
     expect(mod.declarations[0].name).toBe('gp_Pnt');
     expect(mod.declarations.length).toBe(1);
-    console.log("EXCLUDE")
+
     mod.exclude('gp_Vec');
     mod.process();
     expect(mod.declarations.length).toBe(1);
@@ -72,13 +72,13 @@ describe('module object', function() {
       var pnt = mod.get('gp_Pnt')
       pnt.include('SetX');
       mod.process();
-      // console.log(pnt)
-      // console.log("================================")
-      // console.log("SetX", pnt.get('SetX'))
+      
+      
+      
 
       expect(pnt.source().name).toBe('gp_Pnt');
-      console.log("PNT", pnt)
-      console.log("FIND", pnt.find('SetX'));
+
+
       expect(pnt.get('SetX').source().name).toBe('SetX');
     })
     // it('deepcopies the object from the source', function() {
@@ -157,9 +157,9 @@ describe('module object', function() {
     expect(mod.get('gp_Vec')).toBe(vec);
     vec.include('SetX');
     expect(mod.get('gp_Vec').declarations.length).toBe(1);
-    //console.log('filter and rename members=====================')
+    
     expect(mod.get('gp_Vec').get('SetX').name).toBe('SetX');
-    //console.log('filter and rename members=====================')
+    
     vec.rename('SetX', 'setX');
     mod.process();
     expect(mod.get('gp_Vec').get('SetX').name).toBe('setX');
@@ -173,10 +173,10 @@ describe('module object', function() {
       .include('*');
     mod.camelCase('*::*');
     mod.process();
-    console.log('can query nested declarations=====================')
+
     mod.find('gp_Vec::SetX');
     expect(mod.find('gp_Vec::SetX')[0].name).toBe('setX');
-    console.log('can query nested declarations=====================')
+
     expect(mod.find('gp_Vec::gp_Vec(*, *, *)').length).toBe(1);
     expect(mod.find('gp_Vec::gp_Vec(Standard_Real, Standard_Real, Standard_Real)').length).toBe(1);
 
@@ -227,7 +227,7 @@ describe('module object', function() {
       .camelCase('*')
       .property('X', 'SetX');
     mod.process();
-    console.log(vec)
+
     expect(vec.get('X').cls).toBe('property');
     expect(vec.get('X').name).toBe('x');
     expect(vec.get('X').type).toBe('Standard_Real');

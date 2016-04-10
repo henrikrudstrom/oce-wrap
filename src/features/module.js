@@ -3,6 +3,7 @@ function renderTypedef(td) {
 }
 
 module.exports.name = 'module'
+
 function renderEnum(en) {
   var values = en.values.map(function(v) {
     return `  ${v[0]} = ${v[1]}`;
@@ -11,17 +12,17 @@ function renderEnum(en) {
 }
 
 module.exports.renderSwig = function(decl, parts) {
-  if(decl.cls !== 'module') 
-    return;
-    
+  if (decl.cls !== 'module')
+    return false;
+
   var typedefs = decl.declarations
     .filter((d) => d.cls === 'typedef')
     .map(renderTypedef);
-  
+
   var enums = decl.declarations
     .filter((d) => d.cls === 'enum')
     .map(renderEnum);
-    
+
   return {
     name: 'module.i',
     src: `\
@@ -31,8 +32,8 @@ ${parts.get('moduleDepends')}
 
 
 %module(package="OCC") ${decl.name}
-%include ../../user/common/ModuleHeader.i
-%include headers.i
+%include ../common/ModuleHeader.i
+%include "headers.i"
 
 ${parts.get('featureIncludes')}
 

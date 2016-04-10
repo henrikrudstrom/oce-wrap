@@ -53,25 +53,21 @@ function render(mod, feats) {
     conf.mapSources(mod);
   }
 
-
-
   var parts = new Parts(mod.name);
   (feats || featureModules).forEach((feat) => {
     renderFeature(parts, mod, feat);
   });
-  console.log(parts.files)
+
   return parts;
 }
 
 function writeParts(dest, parts) {
-  console.log('dest', dest)
   if (Array.isArray(parts)) {
     return parts.forEach((p) => writeParts(dest, p));
   }
 
-  console.log("PARTS", parts)
   parts.files().forEach((part) => {
-    var file = path.join(dest, parts.name, part.name)
+    var file = path.join(dest, parts.name, part.name);
     mkdirp.sync(path.dirname(file));
     fs.writeFileSync(file, part.src);
   });

@@ -1,4 +1,4 @@
-module.exports.name = 'class'
+module.exports.name = 'class';
 
 function renderArg(arg) {
   var res = arg.decl + ' ' + arg.name;
@@ -8,13 +8,15 @@ function renderArg(arg) {
   return res;
 }
 
+
 function renderFunction(func) {
-  var args = func.arguments.map(renderArg).join(', ');
+  var source = func.source();
+  var args = source.arguments.map(renderArg).join(', ');
   var stat = func.static ? 'static ' : '';
   var cons = func.const ? 'const ' : '';
   return `
     %feature("compactdefaultargs") ${func.name};
-    ${stat}${cons}${func.returnType + ' '}${func.name}(${args});`;
+    ${stat}${cons}${source.returnType + ' '}${func.name}(${args});`;
 }
 
 module.exports.renderSwig = function(cls, parts) {
@@ -39,7 +41,7 @@ class ${cls.name}${base} {
     /* Constructors */
     ${constructors}
     /* Member functions */
-    ${parts.get(cls.name+'Properties')}
+    ${parts.get(cls.name + 'Properties')}
     ${functions}
 };`;
   return [{

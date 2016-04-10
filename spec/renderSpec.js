@@ -10,14 +10,14 @@ describe('Swig Renderer', function() {
     require(`../src/features/${name}.js`)
   );
 
-  it('can render a module', function(){
+  it('can render a module', function() {
     var mod = new conf.Conf();
     mod.name = 'gp';
     var res = render(mod);
 
     var src = res.get('module.i');
-    console.log(src);
-    expect(src.indexOf('%include renames.i')).not.toBe(-1)
+
+    expect(src.indexOf('%include "renames.i"')).not.toBe(-1);
   });
 
   // it('can render renames', function() {

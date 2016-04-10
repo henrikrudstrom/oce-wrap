@@ -1,7 +1,5 @@
-//const settings = require('./settings.js');
-
 function unique(t, index, array) {
-  return array.indexOf(t) === index
+  return array.indexOf(t) === index;
 }
 
 
@@ -12,8 +10,8 @@ function modName(name) {
 }
 
 function dependencyReader(mods) {
-  var visited = {};
   var cache = {};
+
   // return the type names that class member depends on
   function memberDepends(mem) {
     return [mem.returnType]
@@ -28,7 +26,7 @@ function dependencyReader(mods) {
       firstCall = true;
       visited = {};
     }
-    //console.log("dep" , cls.name)
+
     if (cache.hasOwnProperty(cls.name)) {
       return cache[cls.name];
     }
@@ -60,7 +58,6 @@ function dependencyReader(mods) {
     }
     cache[cls.name] = res;
     return res;
-
   }
 
   return classDepends;

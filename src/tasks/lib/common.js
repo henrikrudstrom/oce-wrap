@@ -20,10 +20,10 @@ module.exports.writeJSON = function(dest, data, done) {
   mkdirp.sync(path.dirname(dest));
   var src = JSON.stringify(data, null, 2);
   if (typeof done !== 'function'){
-    //console.log("Sync", dest)
+    
     return fs.writeFileSync(dest, src);
   }
-  //console.log("ASync", dest)
+  
   return fs.writeFile(dest, src, done);
 }
 
