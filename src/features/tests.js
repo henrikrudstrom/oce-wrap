@@ -71,69 +71,68 @@ function createValue(typeName) {
 }
 module.exports.createValue = createValue;
 
-// function initArg(arg) {
-//   var decl = modules.find(arg).
-//
-//
-// }
-
-function renderCalldef(cls, calldef) {
-  var signature = `${calldef.name}(${calldef.arguments.map(arg => arg.type)})`;
+function renderTest(cls, member, testSrc) {
+  var signature = `${member.name}`;
+  if(member.arguments)
+    signature += `(${member.arguments.map(arg => arg.type).join(', ')})`;
+  
   var key = `${cls.parent}.${cls.name}#${signature}`;
-
   if (overridenTests.hasOwnProperty(key))
     return overridenTests[key];
 
-  var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
+  // disable tests for members with missing arguments/return type
+  // TODO: find better way to indentify that checking for '_'
   var disable = ''
-  if (args.indexOf('_') !== -1 || calldef.returnType.indexOf('_') !== -1)
+  if (signature.concat(member.returnType || member.type).indexOf('_') !== -1) 
     disable = 'x';
-
-  var returnType = calldef.returnType.indexOf('.') !== -1 ?
-    calldef.returnType.split('.')[1] : calldef.returnType;
-
-  var testSrc = `\n
-    expect(typeof res).toBe('object');
-    expect(obj.constructor.name).toBe('${returnType}');`;
-  if (returnType === 'void') {
-    testSrc = '';
-  }
-  if (returnType === 'int' || returnType === 'double')
-    testSrc = 'expect(typeof res).toBe(\'number\');';
-  if (returnType === 'bool')
-    testSrc = 'expect(typeof res).toBe(\'boolean\');';
-
+  
   var src = `\n
   ${disable}it('${signature}', function(){
-    var obj = create.${cls.parent}.${cls.name}();
-    var res = obj.${calldef.name}(${args});
 ${testSrc}
   });`;
   return src;
 }
 
-function renderConstructor(cls, calldef) {
-  var signature = `${calldef.name}(${calldef.arguments.map(arg => arg.type)})`;
-  var key = `${cls.parent}.${cls.name}#${signature}`;
-  if (overridenTests.hasOwnProperty(key)){
-    return overridenTests[key];
-  }
-
-
+function renderMemberFunction(cls, calldef) {
+  var returnType = calldef.returnType.indexOf('.') !== -1 ?
+    calldef.returnType.split('.')[1] : calldef.returnType;
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
-  var disable = ''
-  if (args.indexOf('_') !== -1)
-    disable = 'x';
-
-  var src = `\n
-  ${disable}it('${signature}', function(){
-    var res = new ${cls.parent}.${calldef.name}(${args});
+  var testSrc = `\
+    var obj = create.${cls.parent}.${cls.name}();
+    var res = obj.${calldef.name}(${args});`
+  if (returnType === 'int' || returnType === 'double')
+    testSrc += '\n    expect(typeof res).toBe(\'number\');';
+  else if (returnType === 'bool')
+    testSrc += '\n    expect(typeof res).toBe(\'boolean\');';
+  else if (returnType !== 'void')
+    testSrc += `
     expect(typeof res).toBe('object');
-    expect(res.constructor.name).toBe('${cls.name}');
-  });`;
-  return src;
+    expect(res.constructor.name.replace('_exports_', '')).toBe('${returnType}');`;
+  return renderTest(cls, calldef, testSrc);
 }
 
+
+function renderConstructor(cls, calldef) {
+  var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
+
+  var src = `\
+    var res = new ${cls.parent}.${calldef.name}(${args});
+    expect(typeof res).toBe('object');
+    expect(res.constructor.name.replace('_exports_', '')).toBe('${cls.name}');`;
+  return renderTest(cls, calldef, src);
+}
+
+
+function renderProperty(cls, prop) {
+  console.log("prop", prop)
+  var value = createValue(prop.type);
+  var src = `\
+    var obj = create.${cls.parent}.${cls.name}();
+    var val = ${value};
+    obj.${prop.name} = val;
+    expect(obj.${prop.name}).toBe(val);`;
+  return renderTest(cls, prop, src);
+}
 
 
 function renderClassSuite(cls, imports) {
@@ -147,13 +146,18 @@ function renderClassSuite(cls, imports) {
   // var functionTests = [];
   var functionTests = cls.declarations
     .filter(decl => decl.cls === 'memfun')
-    .map(decl => renderCalldef(cls, decl));
+    .map(decl => renderMemberFunction(cls, decl));
+    
+  var propertyTests = cls.declarations
+    .filter(decl => decl.cls === 'property')
+    .map(decl => renderProperty(cls, decl));
   var clsSrc = `\n
 ${imports}
 var create = require('../create.js')
 describe('${cls.parent}.${cls.name}', function(){
 ${constructorTests.join('\n')}
 ${functionTests.join('\n')}
+${propertyTests.join('\n')}
 });
 `;
   return clsSrc;

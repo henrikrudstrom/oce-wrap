@@ -18,10 +18,11 @@ function keyMatcher(exp, matchValue, wrapped) {
 
   return function(obj) {
     var key = obj.key;
-    if (wrapped) {
+    if (wrapped !== undefined) {
       key = obj.name;
     }
-    if (exp.indexOf('(') === -1)
+    //console.log("N", obj.name, "K", obj.key, wrapped, key)
+    if (exp.indexOf('(') === -1 && key.indexOf('(') !== -1)
       key = key.split('(')[0];
     return match(exp, key) ? matchValue : !matchValue;
   };

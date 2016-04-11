@@ -34,12 +34,16 @@ conf.Conf.prototype.property = function(getter, setter, name) {
 module.exports.renderSwig = function(decl) {
   if (decl.cls !== 'property') return false;
   var srcGetter = decl.source('getterKey');
-  var args = [srcGetter.parent, srcGetter.returnType, decl.name, headers.get(decl.getterKey).name];
-  if (decl.setterKey)
-    args.push(headers.get(decl.setterKey));
-
+  
+  var ar = []
+  
+  var args = [srcGetter.parent, srcGetter.returnType, decl.name, srcGetter.name];
+  if (decl.setterKey){
+    var srcSetter = decl.source('setterKey');
+    args.push(srcSetter.name);
+  }
   return {
-    name: decl.parent + 'Properties',
+    name: 'properties.i',
     src: `%attribute(${args.join(', ')});`
   };
 };

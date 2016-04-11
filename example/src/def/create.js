@@ -13,6 +13,11 @@ module.exports.gp = {
   Dir() {
     return new gp.Dir(1, 2, 3);
   },
+  Ax1() {
+    return new gp.Ax1(
+      new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1)
+    );
+  },
   Ax2() {
     return new gp.Ax2(
       new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1), new gp.Dir(1, 0, 0)

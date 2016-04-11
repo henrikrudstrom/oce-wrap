@@ -34,6 +34,7 @@ ${parts.get('moduleDepends')}
 %module(package="OCC") ${decl.name}
 %include ../common/ModuleHeader.i
 %include "headers.i"
+//%include "properties.i"
 
 ${parts.get('featureIncludes')}
 

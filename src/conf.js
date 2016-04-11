@@ -62,6 +62,8 @@ function processInclude(decl, parent) {
   return newDecl;
 }
 
+// adds .source() function to declarations, maps wrapped definition
+// to the original from the headers.
 function mapSources(declaration) {
   declaration.declarations.forEach((d) => {
     var decl = d;

@@ -2,6 +2,7 @@ module.exports.name = 'class';
 
 function renderArg(arg) {
   var res = arg.decl + ' ' + arg.name;
+  //res = res.replace('&', '') //TODO: pythonocc removes byrefs on gp module...
   if (arg.default) {
     res += '=' + arg.default;
   }
@@ -28,11 +29,11 @@ module.exports.renderSwig = function(cls, parts) {
   }
   const constructors = cls.declarations
     .filter((mem) => mem.cls === 'constructor')
-    .map(renderFunction).join('');
+    .map(renderFunction).join('\n');
 
   const functions = cls.declarations
     .filter((mem) => mem.cls !== 'constructor')
-    .map(renderFunction).join('');
+    .map(renderFunction).join('\n');
 
   const src = `\
 %nodefaultctor ${srcCls.name};

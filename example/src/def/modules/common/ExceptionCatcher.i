@@ -26,6 +26,8 @@ Exception handling
 #include <Standard_Failure.hxx>
 #include <Standard_ErrorHandler.hxx>
 %}
+// use val
+
 
 %exception
 {
@@ -33,6 +35,7 @@ Exception handling
     {
         OCC_CATCH_SIGNALS
         $action
+        //$function
     }
     catch(Standard_Failure)
     {
@@ -42,12 +45,12 @@ Exception handling
 	    // concatenate the two strings
         char *message = (char *)malloc(strlen(error_name) + strlen(error_message) + 1);
 	    strcpy(message, error_name);
-	    strcat(message,"\n");
+	    strcat(message,": ");
         strcat(message, error_message);
         // raise the python exception
         //TODO: PyErr_SetString(PyExc_RuntimeError, message);
       args.GetIsolate()->ThrowException(
-        v8::String::NewFromUtf8(args.GetIsolate(), "Bad parameters")
+        v8::String::NewFromUtf8(args.GetIsolate(), message)
       );
       return;
 	    //return v8::ThrowException(v8::String::New(message));

@@ -42,8 +42,8 @@ describe('classDepends', function() {
     var reader = depend(modules);
     var deps = reader.classDepends(pnt);
     var res = [
-      'gp.XYZ', 'double', 'int',
-      'bool', 'gp.Ax1', 'gp.Ax2', 'gp.Trsf', 'gp.Vec'
+      'gp.XYZ', 'gp.double', 'gp.int',
+      'gp.bool', 'gp.Ax1', 'gp.Ax2', 'gp.Trsf', 'gp.Vec'
     ];
     res.sort();
     deps.sort();

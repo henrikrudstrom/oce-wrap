@@ -19,7 +19,7 @@ function dependencyReader(mods) {
   // return the type names that class member depends on
   function memberDepends(mem) {
     return [mem.returnType]
-      .concat(mem.arguments.map((a) => a.type))
+      .concat(mem.arguments ? mem.arguments.map((a) => a.type) : [])
       .filter((t, index, array) => array.indexOf(t) === index);
   }
 
