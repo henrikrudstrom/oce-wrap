@@ -68,17 +68,22 @@ function dependencyReader(mods) {
     return mod.declarations
       .map((d) => classDepends(d, false))
       .reduce((a, b) => a.concat(b), [])
+      .concat(mod.declarations.map(d => d.name))
       .filter((d, index, array) => array.indexOf(d) === index);
   }
 
   function toolkitDepends(mod) {
+    var classes = moduleDepends(mod)
+          .map(cls => modules.get(cls))
+      .filter(cls => cls !== null)
+      .map(cls => cls.key)
     var modDeps = moduleDepends(mod)
       .map(cls => modules.get(cls))
       .filter(cls => cls !== null)
       .map(cls => modName(cls.key))
       .concat('Standard') // TODO: temp fix
       .filter((cls, index, array) => array.indexOf(cls) === index);
-
+    console.log(modDeps, "cls", classes)
     return settings.oce.toolkits
       .filter(tk => tk.modules.some(
         m1 => modDeps.some((m2) => m1 === m2)
