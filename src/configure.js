@@ -37,10 +37,11 @@ function translateTypes(mods) {
       .forEach(
         (mem) => {
           mem.returnType = typedict(mem.returnType);
-          mem.arguments.forEach((arg) => {
-            delete arg.decl;
-            arg.type = typedict(arg.type);
-          });
+          if (mem.arguments)
+            mem.arguments.forEach((arg) => {
+              delete arg.decl;
+              arg.type = typedict(arg.type);
+            });
         }
       );
   });

@@ -34,9 +34,9 @@ conf.Conf.prototype.property = function(getter, setter, name) {
 module.exports.renderSwig = function(decl) {
   if (decl.cls !== 'property') return false;
   var srcGetter = decl.source('getterKey');
-  var args = [srcGetter.parent, srcGetter.returnType, decl.name, decl.getterKey];
+  var args = [srcGetter.parent, srcGetter.returnType, decl.name, headers.get(decl.getterKey).name];
   if (decl.setterKey)
-    args.push(decl.setterKey);
+    args.push(headers.get(decl.setterKey));
 
   return {
     name: decl.parent + 'Properties',

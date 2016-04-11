@@ -25,5 +25,15 @@ module.exports.gp = {
   },
   Trsf() {
     return new gp.Trsf();
+  },
+  Sphere() {
+    return new gp.Sphere(new gp.Ax3(
+      new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1), new gp.Dir(1, 0, 0)
+    ), 5);
+  },
+  Cylinder() {
+    return new gp.Cylinder(new gp.Ax3(
+      new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1), new gp.Dir(1, 0, 0)
+    ), 5);
   }
 };

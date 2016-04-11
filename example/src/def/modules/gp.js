@@ -20,7 +20,10 @@ module.exports = function(mod) {
   mod.find('*')
     .exclude('*Coord')
     .exclude('XYZ')
-    .exclude('XY');
+    .exclude('XY')
+    .property('X', 'SetX')
+    .property('Y', 'SetY')
+    .property('Z', 'SetZ')
   mod.camelCase('*::*');
   mod.removePrefix('*');
 };

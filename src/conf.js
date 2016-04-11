@@ -10,16 +10,26 @@ function createMultiConf(decls) {
   return decls;
 }
 
-MultiConf.prototype.include = function(expr) {
+MultiConf.prototype.include = function include(expr) {
   this.map((decl) => decl.include(expr));
   return this;
 };
-MultiConf.prototype.exclude = function(expr) {
+MultiConf.prototype.exclude = function exclude(expr) {
   this.map((decl) => decl.exclude(expr));
   return this;
 };
-
-
+MultiConf.prototype.rename = function rename(expr, newName) {
+  this.map((decl) => decl.rename(expr, newName));
+  return this;
+};
+MultiConf.prototype.camelCase = function camelCase(expr) {
+  this.map((decl) => decl.camelCase(expr));
+  return this;
+};
+MultiConf.prototype.property = function property(getter, setter) {
+  this.map((decl) => decl.property(getter, setter));
+  return this;
+};
 function Conf(decl, parent) {
   require('./features/rename.js');
   if (decl) {

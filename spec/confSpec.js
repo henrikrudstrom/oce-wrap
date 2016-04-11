@@ -225,10 +225,34 @@ describe('module object', function() {
     expect(vec.get('X').name).toBe('x');
     expect(vec.get('X').type).toBe('Standard_Real');
     expect(vec.get('SetX')).toBe(null);
-
+  });
+  it('can define multiple properties', function() {
+    var mod = new conf.Conf();
+    mod.include('gp_Vec');
+    mod.include('gp_Pnt');
+    mod.include('gp_Dir');
+    mod.find('*')
+      .include('*X')
+    mod.find('*').camelCase('*')
+    mod.find('*').property('X', 'SetX');
+    mod.process();
+    var vec = mod.get('gp_Vec');
+    var pnt = mod.get('gp_Pnt');
+    var dir = mod.get('gp_Dir');
+    expect(vec.get('X').cls).toBe('property');
+    expect(vec.get('X').name).toBe('x');
+    expect(vec.get('X').type).toBe('Standard_Real');
+    expect(vec.get('SetX')).toBe(null);
+    expect(pnt.get('X').cls).toBe('property');
+    expect(pnt.get('X').name).toBe('x');
+    expect(pnt.get('X').type).toBe('Standard_Real');
+    expect(pnt.get('SetX')).toBe(null);
+    expect(dir.get('X').cls).toBe('property');
+    expect(dir.get('X').name).toBe('x');
+    expect(dir.get('X').type).toBe('Standard_Real');
+    expect(dir.get('SetX')).toBe(null);
   });
 
-  
 });
 
 
