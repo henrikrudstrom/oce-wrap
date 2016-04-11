@@ -16,24 +16,26 @@
 ##You should have received a copy of the GNU Lesser General Public License
 ##along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
 */
-%module Visualization;
+%module Tesselator;
 
 %{
-#include <Visualization.h>
 #include <Tesselator.h>
 #include <Standard.hxx>
 %}
 
-%include ../SWIG_files/common/ExceptionCatcher.i
-%include "python/std_string.i"
+%include ../common/ModuleHeader.i
+//%include "python/std_string.i"
 %include "typemaps.i"
 
+
 %typemap(out) float [ANY] {
+  Isolate* isolate = args.GetIsolate();
+  $result = Array::New(isolate);
+
   int i;
-  $result = PyList_New($1_dim0);
   for (i = 0; i < $1_dim0; i++) {
-    PyObject *o = PyFloat_FromFloat((float) $1[i]);
-    PyList_SetItem($result,i,o);
+    Number::New(isolate, $1[i]);
+    $result->->Set(i, result);
   }
 }
 
@@ -43,25 +45,28 @@ enum theTextureMappingRule {
 	atNormalAutoScale
 	};
 
-%apply int& OUTPUT {int& v1, int& v2, int& v3}
-%apply float& OUTPUT {float& x, float& y, float& z}
+/*%apply int& OUTPUT {int& v1, int& v2, int& v3}
+%apply float& OUTPUT {float& x, float& y, float& z}*/
 
 class Tesselator {
  public:
-    Tesselator(TopoDS_Shape aShape,
+    /*Tesselator(TopoDS_Shape aShape,
+               float aDeviation,
                theTextureMappingRule aTxtMapType,
                float anAutoScaleSizeOnU,
                float anAutoScaleSizeOnV,
-               float aDeviation,
                float aUOrigin,
                float aVOrigin,
                float aURepeat,
                float aVRepeat,
                float aScaleU,
                float aScaleV,
-               float aRotationAngle);
-    Tesselator(TopoDS_Shape aShape);
-    void GetVertex(int ivert, float& x, float& y, float& z);
+               float aRotationAngle);*/
+    Tesselator(TopoDS_Shape aShape,
+               float aDeviation);
+    std::string exportJSON();
+    //Tesselator(TopoDS_Shape aShape);
+    /*void GetVertex(int ivert, float& x, float& y, float& z);
     void GetNormal(int inorm, float& x, float& y, float& z);
     void GetTriangleIndex(int triangleIdx, int& v1, int& v2, int& v3);
     void GetEdgeVertex(int iEdge, int ivert, float& x, float& y, float& z);
@@ -74,23 +79,5 @@ class Tesselator {
     std::string ExportShapeToX3DIndexedFaceSet();
 	void ExportShapeToThreejs(char *filename);
 	void ExportShapeToX3D(char *filename, int diffR=1, int diffG=0, int diffB=0);
-	void SetDeviation(float aDeviation);
-};
-
-class Display3d {
- public:
-	%feature("autodoc", "1");
-	Display3d();
-	%feature("autodoc", "1");
-	~Display3d();
-	%feature("autodoc", "1");
-	void Init(const long handle);
-	%feature("autodoc", "1");
-	Handle_V3d_View& GetView();
-	%feature("autodoc", "1");
-	Handle_V3d_Viewer& GetViewer();
-	%feature("autodoc", "1");
-	Handle_AIS_InteractiveContext GetContext();
-	%feature("autodoc", "1");
-	void Test();
+	void SetDeviation(float aDeviation);*/
 };

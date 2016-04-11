@@ -35,7 +35,22 @@ module.exports.reporter = reporter;
 gulp.task('test-generated', function() {
   var specPath = `${settings.paths.dist}/spec/generated`;
   var specSources = [`${specPath}/**/*Spec.js`];
-  console.log(specSources);
+
+  var arg = yargs.argv.spec;
+  if (arg)
+    specSources = [`${specPath}/${arg}Spec.js`];
+  gulp.src(specSources)
+    .pipe(jasmine({
+      verbose: false,
+      includeStackTrace: yargs.argv.verbose,
+      reporter
+    }));
+});
+
+gulp.task('test-copied', function() {
+  var specPath = `${settings.paths.dist}/spec/`;
+  var specSources = [`${specPath}/*Spec.js`];
+
   var arg = yargs.argv.spec;
   if (arg)
     specSources = [`${specPath}/${arg}Spec.js`];

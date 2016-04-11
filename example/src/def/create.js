@@ -1,5 +1,5 @@
 var gp = require('../../lib/gp.node');
-
+var brepTest = require('../../lib/brepTest.node');
 module.exports.gp = {
   XYZ() {
     return new gp.XYZ(5, 5, 5);
@@ -41,4 +41,22 @@ module.exports.gp = {
       new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1), new gp.Dir(1, 0, 0)
     ), 5);
   }
+};
+module.exports.brepTest = {
+  MakeFace() {
+    return new brepTest.MakeFace();
+  },
+  Shape() {
+    var sphere = module.exports.gp.Sphere()
+    var mk = new brepTest.MakeFace(sphere);
+
+    return mk.face();
+  },
+  Face() {
+    var sphere = module.exports.gp.Sphere()
+    var mk = new brepTest.MakeFace(sphere);
+
+    return mk.face();
+  }
+
 };

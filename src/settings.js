@@ -68,6 +68,7 @@ function initialize(settings) {
   settings.paths = extend({}, settings.paths, {
     swig: path.join(settings.paths.build, 'swig'),
     cxx: path.join(settings.paths.build, 'cxx'),
+    inc: path.join(settings.paths.build, 'inc'),
     gyp: path.join(settings.paths.build, 'gyp'),
     config: path.join(settings.paths.build, 'config'),
     headerCache: path.join(settings.paths.generator, 'cache/headers'),

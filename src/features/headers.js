@@ -1,4 +1,3 @@
-const modules = require('../modules.js')();
 module.exports.renderSwig = function(decl) {
   var reader = require('../dependencies.js')();
   if (decl.cls !== 'module') return false;

@@ -75,7 +75,7 @@ function renderTest(cls, member, testSrc) {
   var signature = `${member.name}`;
   if(member.arguments)
     signature += `(${member.arguments.map(arg => arg.type).join(', ')})`;
-  
+
   var key = `${cls.parent}.${cls.name}#${signature}`;
   if (overridenTests.hasOwnProperty(key))
     return overridenTests[key];
@@ -83,9 +83,9 @@ function renderTest(cls, member, testSrc) {
   // disable tests for members with missing arguments/return type
   // TODO: find better way to indentify that checking for '_'
   var disable = ''
-  if (signature.concat(member.returnType || member.type).indexOf('_') !== -1) 
+  if (signature.concat(member.returnType || member.type).indexOf('_') !== -1)
     disable = 'x';
-  
+
   var src = `\n
   ${disable}it('${signature}', function(){
 ${testSrc}
@@ -124,7 +124,6 @@ function renderConstructor(cls, calldef) {
 
 
 function renderProperty(cls, prop) {
-  console.log("prop", prop)
   var value = createValue(prop.type);
   var src = `\
     var obj = create.${cls.parent}.${cls.name}();
@@ -147,7 +146,7 @@ function renderClassSuite(cls, imports) {
   var functionTests = cls.declarations
     .filter(decl => decl.cls === 'memfun')
     .map(decl => renderMemberFunction(cls, decl));
-    
+
   var propertyTests = cls.declarations
     .filter(decl => decl.cls === 'property')
     .map(decl => renderProperty(cls, decl));
@@ -175,6 +174,7 @@ module.exports.renderTest = function(decl, parts) {
     .join('\n');
   return decl.declarations
     .filter(d => d.cls === 'class')
+    .filter(cls => !cls.abstract)
     .map(cls =>
       ({ name: `${cls.name}Spec.js`, src: renderClassSuite(cls, imports) })
     );

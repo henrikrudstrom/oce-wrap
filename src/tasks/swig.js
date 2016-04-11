@@ -21,6 +21,7 @@ function runSwig(moduleName, done) {
   const includes = include.join(' ');
   mkdirp.sync(path.dirname(output));
   const cmd = `${settings.swig} ${flags} ${otherFlags} ${includes} -o ${output} ${input}`;
+  console.log(cmd)
   exec(cmd, done);
 }
 
@@ -28,16 +29,32 @@ gulp.task('swig-clean', (done) =>
   run(`rm -rf ${settings.paths.swig}`, { silent: true }).exec(done)
 );
 
+// function copy(files, dest, done) {
+//   glob(files, function(error, files) {
+//     if (error) return done();
+//     files.forEach(file => {
+//       mkdirp(path.basename(file));
+//
+//     })
+//   })
+//
+// }
+
 // Copy hand written swig .i files from module folder
 gulp.task('swig-copy', function(done) {
   var modules = settings.build.modules.concat('common');
   async.parallel(modules.map((mod) => (cb) => {
     var src = path.join(settings.paths.definition, 'modules', mod);
-    var dest = path.join(settings.paths.swig, mod);
+    var swig = path.join(settings.paths.swig, mod);
+    var cxx = path.join(settings.paths.cxx);
+    var inc = path.join(settings.paths.inc);
+
     if (!fs.existsSync(src)) return cb();
-    mkdirp.sync(dest);
+    mkdirp.sync(swig);
+    mkdirp.sync(cxx);
+    mkdirp.sync(inc);
     return run(
-      `cp ${src}/*.i ${dest}/`, { silent: false }
+      `cp -f ${src}/*.i ${swig}/\ncp -f ${src}/*.c* ${cxx}/\ncp -f ${src}/*.h* ${inc}/`, { silent: false }
     ).exec(cb);
   }), done);
 });
@@ -49,8 +66,20 @@ gulp.task('swig-cxx', function(done) {
   );
 });
 
+gulp.task('copy-sources', function(done) {
+  exec('')
+})
+
 gulp.task('render-swig', function(done) {
-  const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
+  // const predefinedSwigs = glob.sync(`${settings.paths.definition}/modules/*/module.i`)
+  //   .map(file => file.match(/modules\/(\w+)\/module.i/)[1]);
+  // const configuredModules = glob.sync(`${settings.paths.config}/*.json`)
+  //   .filter(file => path.basename(file).replace('.json', '')
+
+  const configuredModules = settings.build.modules
+    .filter(mod => !fs.existsSync(`${settings.paths.definition}/modules/${mod}/module.i`))
+    .map(mod => path.join(settings.paths.config, mod + '.json'));
+
   render.write(settings.paths.swig, render('renderSwig', configuredModules));
   return done();
 });

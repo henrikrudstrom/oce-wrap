@@ -78,26 +78,29 @@ class Tesselator
       Standard_Boolean TriangleIsValid(const gp_Pnt& P1, const gp_Pnt& P2, const gp_Pnt& P3) const;
       void PrepareBoxTextureCoordinates(const TopoDS_Shape& aShape);
       void GetBoxTextureCoordinate(const gp_Pnt& p, const gp_Dir& N1, gp_Vec2d& theCoord_p);
-      void ComputeDefaultDeviation();
+      void ComputeDefaultDeviation(Standard_Real dev);
       void ComputeEdges();
 
   public:
+      // Tesselator(TopoDS_Shape aShape,
+      //          theTextureMappingRule aTxtMapType,
+      //          Standard_Real anAutoScaleSizeOnU,
+      //          Standard_Real anAutoScaleSizeOnV,
+      //          Standard_Real aDeviation,
+      //          Standard_Real aUOrigin,
+      //          Standard_Real aVOrigin,
+      //          Standard_Real aURepeat,
+      //          Standard_Real aVRepeat,
+      //          Standard_Real aScaleU,
+      //          Standard_Real aScaleV,
+      //          Standard_Real aRotationAngle);
       Tesselator(TopoDS_Shape aShape,
-               theTextureMappingRule aTxtMapType,
-               Standard_Real anAutoScaleSizeOnU,
-               Standard_Real anAutoScaleSizeOnV,
-               Standard_Real aDeviation,
-               Standard_Real aUOrigin,
-               Standard_Real aVOrigin,
-               Standard_Real aURepeat,
-               Standard_Real aVRepeat,
-               Standard_Real aScaleU,
-               Standard_Real aScaleV,
-               Standard_Real aRotationAngle);
-      Tesselator(TopoDS_Shape aShape);
+                 float aDeviation);
+      //Tesselator(TopoDS_Shape aShape);
       ~Tesselator();
       void Tesselate();
       void TesselateWithUVCoords();
+      std::string exportJSON();
       void JoinPrimitives();
       void JoinPrimitivesWithUVCoords();
       void SetDeviation(Standard_Real aDeviation);

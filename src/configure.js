@@ -33,12 +33,12 @@ function translateTypes(mods) {
     mod.declarations.map(
         (decl) => (decl.declarations ? decl.declarations : [])
       )
-      .reduce((a, b) => a.concat(b))
+      .reduce((a, b) => a.concat(b), [])
       .forEach(
         (mem) => {
-          if(mem.returnType)
+          if (mem.returnType)
             mem.returnType = typedict(mem.returnType);
-          if(mem.type)
+          if (mem.type)
             mem.type = typedict(mem.type);
           if (mem.arguments)
             mem.arguments.forEach((arg) => {
