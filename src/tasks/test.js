@@ -1,4 +1,3 @@
-'use-strict';
 const path = require('path');
 const fs = require('fs');
 const glob = require('glob');
@@ -17,12 +16,12 @@ const yargs = require('yargs');
 
 // show line number of spec that failed
 var Reporter = require('jasmine-terminal-reporter');
-var reporter = new Reporter({ isVerbose: true });
+var reporter = new Reporter({ isVerbose: false });
 var oldSpecDone = reporter.specDone;
 reporter.specDone = function(result) {
   oldSpecDone(result);
   for (var i = 0; i < result.failedExpectations.length; i++) {
-    if(result.failedExpectations[i].stack === undefined) return;
+    if (result.failedExpectations[i].stack === undefined) return;
     gutil.log('\n' + result.failedExpectations[i].stack
       .split('\n')
       .filter((l) => !l.includes('node_modules'))
@@ -30,17 +29,19 @@ reporter.specDone = function(result) {
     );
   }
 };
+
 module.exports.reporter = reporter;
 
 gulp.task('test-generated', function() {
-  var specPath = `${settings.paths.dist}/spec/generated/`;
+  var specPath = `${settings.paths.dist}/spec/generated`;
   var specSources = [`${specPath}/**/*Spec.js`];
+  console.log(specSources);
   var arg = yargs.argv.spec;
   if (arg)
     specSources = [`${specPath}/${arg}Spec.js`];
   gulp.src(specSources)
     .pipe(jasmine({
-      verbose: true,
+      verbose: false,
       includeStackTrace: yargs.argv.verbose,
       reporter
     }));

@@ -1,5 +1,6 @@
 var modules = require('../modules.js')();
-
+const glob = require('glob');
+const fs = require('fs');
 module.exports.renderTest = function(cls, parts) {
 
 };
@@ -21,6 +22,26 @@ function findConstructor(type) {
     return constructors[0];
   return withArgs[0];
 }
+
+function parseTests() {
+  var specs = {};
+  glob.sync('src/spec/**/*Spec.js').forEach(file => {
+    var itexp = / *x?it\('(\w+\(.*\))',((?:.|\n)*?\}\));/g;
+    var descExp = /describe\('(?:\w|\.|_)*',((?:.|\n)*?)(?=describe)/g;
+    var src = fs.readFileSync(file).toString();
+
+    src.match(descExp).forEach(desc => {
+      var suite = desc.match(/describe\('(.+)'/)[1];
+      desc.match(itexp).forEach(it => {
+        var name = it.match(/it\('(\w+\(.*\))'/)[1];
+        specs[`${suite}#${name}`] = it;
+      });
+    });
+  });
+  return specs;
+}
+var overridenTests = parseTests();
+
 
 var nextInt = 0;
 var nextDouble = 0.0;
@@ -57,6 +78,12 @@ module.exports.createValue = createValue;
 // }
 
 function renderCalldef(cls, calldef) {
+  var signature = `${calldef.name}(${calldef.arguments.map(arg => arg.type)})`;
+  var key = `${cls.parent}.${cls.name}#${signature}`;
+
+  if (overridenTests.hasOwnProperty(key))
+    return overridenTests[key];
+
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
   var disable = ''
   if (args.indexOf('_') !== -1 || calldef.returnType.indexOf('_') !== -1)
@@ -77,7 +104,7 @@ function renderCalldef(cls, calldef) {
     testSrc = 'expect(typeof res).toBe(\'boolean\');';
 
   var src = `\n
-  ${disable}it('${calldef.name}(${calldef.arguments.map(arg => arg.type)})', function(){
+  ${disable}it('${signature}', function(){
     var obj = create.${cls.parent}.${cls.name}();
     var res = obj.${calldef.name}(${args});
 ${testSrc}
@@ -86,13 +113,20 @@ ${testSrc}
 }
 
 function renderConstructor(cls, calldef) {
+  var signature = `${calldef.name}(${calldef.arguments.map(arg => arg.type)})`;
+  var key = `${cls.parent}.${cls.name}#${signature}`;
+  if (overridenTests.hasOwnProperty(key)){
+    return overridenTests[key];
+  }
+
+
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
   var disable = ''
   if (args.indexOf('_') !== -1)
     disable = 'x';
 
   var src = `\n
-  ${disable}it('${calldef.name}(${calldef.arguments.map(arg => arg.type)})', function(){
+  ${disable}it('${signature}', function(){
     var res = new ${cls.parent}.${calldef.name}(${args});
     expect(typeof res).toBe('object');
     expect(res.constructor.name).toBe('${cls.name}');
@@ -100,7 +134,10 @@ function renderConstructor(cls, calldef) {
   return src;
 }
 
+
+
 function renderClassSuite(cls, imports) {
+
   var calldefs = cls.declarations
     .filter(decl => decl.cls === 'memfun' || decl.cls === 'constructor');
 
@@ -122,6 +159,10 @@ ${functionTests.join('\n')}
   return clsSrc;
 }
 module.exports.renderClassSuite = renderClassSuite;
+
+
+
+
 
 module.exports.renderTest = function(decl, parts) {
   if (decl.cls !== 'module') return false;

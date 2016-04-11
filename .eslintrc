@@ -13,6 +13,7 @@
     "afterEach": true,
     "Array.args": true,
     "$$": true,
+    "create": true,
   },
   "rules": {
     "no-var": 0,

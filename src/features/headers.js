@@ -4,6 +4,7 @@ module.exports.renderSwig = function(decl) {
   if (decl.cls !== 'module') return false;
   var depends = decl.declarations
     .map((d) => reader.classDepends(d.source(), false))
+    .concat(decl.declarations.map(d => d.source().name))
     .reduce((a, b) => a.concat(b), [])
     .filter((d, index, array) => array.indexOf(d) === index)
     .map((d) => `#include <${d}.hxx>`)

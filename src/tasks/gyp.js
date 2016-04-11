@@ -76,8 +76,8 @@ gulp.task('gyp-build', function(done) {
   return async.parallel(
     settings.build.modules.map(mod => cb => {
       const buildPath = `${paths.gyp}/${mod}`;
-      exec('node-gyp build', { cwd: buildPath }, cb);
-      // run('node-gyp build', {
+      exec('node-gyp build', { cwd: buildPath, maxBuffer: 500 * 1024 }, cb);
+      // run('node-gyp build', {{maxBuffer : 500 * 1024}
       //   cwd: buildPath,
       //   verbosity: 1
       // }).exec(cb);
