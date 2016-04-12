@@ -1,3 +1,11 @@
+describe('gp.Pnt', function() {
+  xit('Pnt(gp.Pnt)', function() {
+    var res = new gp.Pnt(create.gp.Pnt());
+    expect(typeof res).toBe('object');
+    expect(res.constructor.name.replace('_exports_', '')).toBe('Pnt');
+  });
+})
+
 describe('gp.Trsf', function() {
 
   xit('getRotation(gp.XYZ, gp.double)', function() {
@@ -6,7 +14,7 @@ describe('gp.Trsf', function() {
     expect(typeof res).toBe('boolean');
   });
 
-  xit('transforms(gp.double, gp.double, gp.double)', function(){
+  xit('transforms(gp.double, gp.double, gp.double)', function() {
     var obj = create.gp.Trsf();
     var res = obj.transforms(0.5, 0.5, 0.5);
   });
@@ -90,10 +98,11 @@ describe('brepTest.MakeFace', function() {
     var obj = create.brepTest.MakeFace();
     var res = obj.init(create.brepTest.Face());
   });
-  xit('MakeFace(brepTest.Face)', function(){
+  xit('MakeFace(brepTest.Face)', function() {
     var res = new brepTest.MakeFace(create.brepTest.Face());
     expect(typeof res).toBe('object');
     expect(res.constructor.name.replace('_exports_', '')).toBe('MakeFace');
   });
 })
+
 describe();

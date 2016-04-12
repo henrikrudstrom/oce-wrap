@@ -52,12 +52,14 @@ function listModules(){
 }
 
 function find(expr) {
-  
+
   var mod = expr.replace('Handle_', '').split('_')[0];
   if (mod === 'Geom') {
     var modu = getModule(mod);
   }
-  return common.find(getModule(mod), expr);
+  return common
+    .find(getModule(mod), expr)
+    .filter(res => !res.copyConstructor); //TODO: wrong home
 }
 
 function get(name) {
@@ -68,12 +70,11 @@ function get(name) {
 }
 
 module.exports = {
-  find, 
-  get: get, 
+  find,
+  get: get,
   getModule,
   listModules
 }
 
 // module.exports.find = find;
 // module.exports.get = get;
-

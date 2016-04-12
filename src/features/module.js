@@ -15,6 +15,8 @@ function renderEnum(en) {
   return `enum ${en.source().name} {\n${values}\n};`;
 }
 
+
+
 module.exports.renderSwig = function(decl, parts) {
   if (decl.cls !== 'module')
     return false;
@@ -26,13 +28,13 @@ module.exports.renderSwig = function(decl, parts) {
   var enums = decl.declarations
     .filter((d) => d.cls === 'enum')
     .map(renderEnum);
-  
-  var extraFile = path.join(settings.paths.definition, 'modules', decl.name, 'extra.i');
-  var extra = fs.existsSync(path.join(settings.paths.definition, 'modules', decl.name, 'extra.i'));
-  
-  var extraInclude = extra ? '%include "extra.i"' : '';
-  console.log("FF", extraFile )
-  console.log("INCLUDE EXTRA", decl.name, extra, extraInclude)
+
+  function includeIfExists(name) {
+    var file = path.join(settings.paths.definition, 'modules', decl.name, name);
+    return fs.existsSync(file) ? `%include "${name}"` : `// ${name} not present`;
+  }
+  var typemaps = decl.typemaps ? '%include "typemaps.i"' : '// no typemaps';
+
   return {
     name: 'module.i',
     src: `\
@@ -47,8 +49,8 @@ ${parts.get('moduleDepends')}
 //%include "properties.i"
 
 ${parts.get('featureIncludes')}
-${extraInclude}
-
+${includeIfExists('extra.i')}
+${typemaps}
 ${typedefs.join('\n')}
 ${enums.join('\n')}
 ${parts.get('classIncludes')}

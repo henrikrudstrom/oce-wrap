@@ -4,7 +4,7 @@ require('../src/features/rename.js');
 require('../src/features/property.js');
 const conf = require('../src/conf.js');
 var moduleReader = require('../src/modules.js');
-
+var configure = require('../src/configure.js');
 
 const render = require('../src/render.js');
 
@@ -75,16 +75,16 @@ describe('module object', function() {
     expect(pnt.source().name).toBe('gp_Pnt');
     expect(pnt.get('SetX').source().name).toBe('SetX');
   });
-    // it('deepcopies the object from the source', function() {
-    //   var mod = new conf.Conf();
-    //   mod.include('gp_Pnt');
-    //   mod.process('include');
-    //   var wrapped = mod.get('gp_Pnt');
-    //   var orig = headers.get('gp_Pnt');
-    //   expect(wrapped).not.toBe(orig);
-    //   expect(wrapped.declarations[0]).not.toBe(orig.declarations[0]);
-    //   expect(wrapped.declarations.length).toBe(orig.declarations.length);
-    // });
+  // it('deepcopies the object from the source', function() {
+  //   var mod = new conf.Conf();
+  //   mod.include('gp_Pnt');
+  //   mod.process('include');
+  //   var wrapped = mod.get('gp_Pnt');
+  //   var orig = headers.get('gp_Pnt');
+  //   expect(wrapped).not.toBe(orig);
+  //   expect(wrapped.declarations[0]).not.toBe(orig.declarations[0]);
+  //   expect(wrapped.declarations.length).toBe(orig.declarations.length);
+  // });
 
   it('can rename declarations', function() {
     var mod = new conf.Conf();
@@ -252,7 +252,22 @@ describe('module object', function() {
     expect(dir.get('X').type).toBe('Standard_Real');
     expect(dir.get('SetX')).toBe(null);
   });
+  fit('can define typemaps', function() {
+    var mod = new conf.Conf();
+    mod.name = 'gp'
+    mod.include('gp_Vec');
+    mod.include('gp_Pnt');
+    var pnt = mod.get('gp_Pnt');
+    pnt.include('SetXYZ');
+    pnt.include('XYZ');
+    mod.removePrefix('*');
+    mod.typemap('gp_XYZ', 'gp_Vec', 'XYZ()');
+    mod.process();
+    configure.processModules(mod);
+    expect(pnt.get('XYZ').returnType).toBe('gp.Vec');
+    expect(pnt.get('SetXYZ').arguments[0].type).toBe('gp.Vec');
 
+  });
 });
 
 

@@ -41,7 +41,7 @@ gulp.task('test-generated', function() {
     specSources = [`${specPath}/${arg}Spec.js`];
   gulp.src(specSources)
     .pipe(jasmine({
-      verbose: false,
+      verbose: yargs.argv.verbose,
       includeStackTrace: yargs.argv.verbose,
       reporter
     }));

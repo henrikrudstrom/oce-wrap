@@ -9,7 +9,7 @@ conf.Conf.prototype.property = function(getter, setter, name) {
       var setterStr = setter;
       setter = () => setterStr;
     }
-    var setMethod = this.get(setter(getter));
+    var setMethod = this.get(setter());
 
     var property = {
       name: name || getMethod.name.replace(/^Get/, ''),
@@ -22,9 +22,8 @@ conf.Conf.prototype.property = function(getter, setter, name) {
       setter: setMethod ? setMethod.name : undefined,
       setterKey: setMethod ? setMethod.key : undefined
     };
-    console.log(getter, setter, name)
     this.exclude(getMethod.key);
-    this.exclude(setMethod.key);
+    if (setMethod) this.exclude(setMethod.key);
     this.declarations.push(property);
 
     return property;

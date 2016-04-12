@@ -1,6 +1,8 @@
 const camelCase = require('camel-case');
 module.exports = function(mod) {
   mod.name = 'gp';
+  mod.typemap('gp_XYZ', 'gp_Vec', 'XYZ()');
+
   mod.include('Standard_Real');
   mod.include('Standard_Integer');
   mod.include('Standard_Boolean');
@@ -26,12 +28,12 @@ module.exports = function(mod) {
     .property('X', 'SetX')
     .property('Y', 'SetY')
     .property('Z', 'SetZ')
-    
 
-  
+
+
   mod.camelCase('*::*');
   mod.removePrefix('*');
-  
+
   const trsfs = ['Mirror', 'Rotate', 'Scale', 'Transform', 'Translate', 'Cross', 'CrossCross'];
   trsfs.forEach((trsf) => {
     var self = trsf.replace(/e$/, '') + 'ed';
@@ -40,6 +42,5 @@ module.exports = function(mod) {
       .rename(self, camelCase(trsf));
   });
 
-  
+
 };
-  
