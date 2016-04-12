@@ -1,3 +1,7 @@
+var fs = require('fs');
+var path = require('path');
+var settings = require('../settings.js');
+
 function renderTypedef(td) {
   return `typedef ${td.source().type} ${td.source().name};`;
 }
@@ -22,7 +26,13 @@ module.exports.renderSwig = function(decl, parts) {
   var enums = decl.declarations
     .filter((d) => d.cls === 'enum')
     .map(renderEnum);
-
+  
+  var extraFile = path.join(settings.paths.definition, 'modules', decl.name, 'extra.i');
+  var extra = fs.existsSync(path.join(settings.paths.definition, 'modules', decl.name, 'extra.i'));
+  
+  var extraInclude = extra ? '%include "extra.i"' : '';
+  console.log("FF", extraFile )
+  console.log("INCLUDE EXTRA", decl.name, extra, extraInclude)
   return {
     name: 'module.i',
     src: `\
@@ -37,6 +47,7 @@ ${parts.get('moduleDepends')}
 //%include "properties.i"
 
 ${parts.get('featureIncludes')}
+${extraInclude}
 
 ${typedefs.join('\n')}
 ${enums.join('\n')}

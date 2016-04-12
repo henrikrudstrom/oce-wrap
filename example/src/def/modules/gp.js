@@ -7,7 +7,7 @@ module.exports = function(mod) {
   mod.include('Standard_CString');
   mod.include('gp_Pnt');
   mod.include('gp_Vec');
-  mod.include('gp_XYZ');
+  //mod.include('gp_XYZ');
   mod.include('gp_Dir');
   mod.include('gp_Ax1');
   mod.include('gp_Ax2');
@@ -21,8 +21,8 @@ module.exports = function(mod) {
   mod.find('*').exclude('_*');
   mod.find('*')
     .exclude('*Coord')
-    .exclude('XYZ')
-    .exclude('XY')
+    // .exclude('XYZ')
+    // .exclude('XY')
     .property('X', 'SetX')
     .property('Y', 'SetY')
     .property('Z', 'SetZ')

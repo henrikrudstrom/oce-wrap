@@ -1,7 +1,7 @@
 const settings = require('./settings.js');
 const common = require('./common.js');
 const fs = require('fs');
-
+var glob = require('glob')
 function cleanTypeName(ret) {
   ret = ret.replace(/&|\*/, '');
   ret = ret.replace('const', '');
@@ -46,6 +46,11 @@ function getModule(mod) {
   return modules[mod];
 }
 
+function listModules(){
+  return glob.sync(`${settings.paths.headerCache}/*.json`)
+    .map(file => file.match(/\/(\w+).json/)[1])
+}
+
 function find(expr) {
   
   var mod = expr.replace('Handle_', '').split('_')[0];
@@ -62,5 +67,13 @@ function get(name) {
   throw new Error('headers.get expected one result, got multiple');
 }
 
-module.exports.find = find;
-module.exports.get = get;
+module.exports = {
+  find, 
+  get: get, 
+  getModule,
+  listModules
+}
+
+// module.exports.find = find;
+// module.exports.get = get;
+

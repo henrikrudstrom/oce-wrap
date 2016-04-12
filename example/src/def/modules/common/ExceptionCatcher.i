@@ -28,31 +28,29 @@ Exception handling
 %}
 // use val
 
-
+%inline %{
+    char* GetErrorMessage(){
+        Handle(Standard_Failure) error = Standard_Failure::Caught ();
+        char *error_name = (char*) error->DynamicType()->Name();
+        char *error_message = (char*) error->GetMessageString();
+        // concatenate the two strings
+        char *message = (char *)malloc(strlen(error_name) + strlen(error_message) + 1);
+        strcpy(message, error_name);
+        strcat(message,": ");
+        strcat(message, error_message);
+        return message;
+    }
+%}
 %exception
 {
     try
     {
         OCC_CATCH_SIGNALS
         $action
-        //$function
     }
     catch(Standard_Failure)
     {
-	    Handle(Standard_Failure) error = Standard_Failure::Caught ();
-	    char *error_name = (char*) error->DynamicType()->Name();
-	    char *error_message = (char*) error->GetMessageString();
-	    // concatenate the two strings
-        char *message = (char *)malloc(strlen(error_name) + strlen(error_message) + 1);
-	    strcpy(message, error_name);
-	    strcat(message,": ");
-        strcat(message, error_message);
-        // raise the python exception
-        //TODO: PyErr_SetString(PyExc_RuntimeError, message);
-      args.GetIsolate()->ThrowException(
-        v8::String::NewFromUtf8(args.GetIsolate(), message)
-      );
-      return;
-	    //return v8::ThrowException(v8::String::New(message));
+        args.GetIsolate()->ThrowException(v8::String::NewFromUtf8(args.GetIsolate(), GetErrorMessage()));
+        return;
     }
 }

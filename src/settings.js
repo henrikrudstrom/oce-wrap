@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const extend = require('extend');
 const glob = require('glob');
-
+const arrify = require('arrify');
 var generatorPath = path.join(__dirname, '..');
 
 var defaultsettings = {
@@ -81,6 +81,8 @@ function initialize(settings) {
     modules: glob.sync(`${settings.paths.definition}/modules/*.js`)
       .map((file) => path.basename(file).replace('.js', ''))
   };
+  if(yargs.argv.module)
+    settings.build.modules = arrify(yargs.argv.module)
 
   module.exports = settings;
 }
