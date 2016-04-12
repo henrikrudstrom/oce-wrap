@@ -22,7 +22,7 @@ conf.Conf.prototype.property = function(getter, setter, name) {
       setter: setMethod ? setMethod.name : undefined,
       setterKey: setMethod ? setMethod.key : undefined
     };
-
+    console.log(getter, setter, name)
     this.exclude(getMethod.key);
     this.exclude(setMethod.key);
     this.declarations.push(property);
@@ -34,11 +34,9 @@ conf.Conf.prototype.property = function(getter, setter, name) {
 module.exports.renderSwig = function(decl) {
   if (decl.cls !== 'property') return false;
   var srcGetter = decl.source('getterKey');
-  
-  var ar = []
-  
+
   var args = [srcGetter.parent, srcGetter.returnType, decl.name, srcGetter.name];
-  if (decl.setterKey){
+  if (decl.setterKey) {
     var srcSetter = decl.source('setterKey');
     args.push(srcSetter.name);
   }
