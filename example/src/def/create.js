@@ -1,5 +1,6 @@
 var gp = require('../../lib/gp.node');
 var brepTest = require('../../lib/brepTest.node');
+var Geom = require('../../lib/Geom.node');
 module.exports.gp = {
   XYZ() {
     return new gp.XYZ(5, 5, 5);
@@ -60,3 +61,11 @@ module.exports.brepTest = {
   }
 
 };
+module.exports.Geom = {
+  SphericalSurface () {
+    return new Geom.SphericalSurface(module.exports.gp.Ax3(), 10);
+  },
+  CylindricalSurface () {
+    return new Geom.CylindricalSurface(module.exports.gp.Ax3(), 10);
+  }
+}
