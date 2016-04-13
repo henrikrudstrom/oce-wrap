@@ -21,11 +21,11 @@ describe('querie objects', function() {
     expect(headers.find('gp_Vec*').length).toBe(3);
     expect(headers.find('gp_Vec*WithNull*').length).toBe(1);
     expect(headers.find('gp_*::*Distance').length).toBe(22);
-    expect(headers.find('gp_Vec::gp_Vec').length).toBe(6);
-    expect(headers.find('gp_Vec::gp_Vec(gp_Vec)').length).toBe(1);
+    expect(headers.find('gp_Vec::gp_Vec').length).toBe(5);
+    expect(headers.find('gp_Vec::gp_Vec(gp_Vec)').length).toBe(0); // removed copy constructors
     expect(headers.find('gp_Vec::gp_Vec(*, *)').length).toBe(2);
     expect(headers.find('gp_Vec::gp_Vec(Standard_Real, Standard_Real, Standard_Real)').length).toBe(1);
-    expect(headers.find('gp_Vec::gp_Vec(*)').length).toBe(6);
+    expect(headers.find('gp_Vec::gp_Vec(*)').length).toBe(5);
   });
 });
 
@@ -252,7 +252,7 @@ describe('module object', function() {
     expect(dir.get('X').type).toBe('Standard_Real');
     expect(dir.get('SetX')).toBe(null);
   });
-  fit('can define typemaps', function() {
+  it('can define typemaps', function() {
     var mod = new conf.Conf();
     mod.name = 'gp'
     mod.include('gp_Vec');
@@ -268,6 +268,25 @@ describe('module object', function() {
     expect(pnt.get('SetXYZ').arguments[0].type).toBe('gp.Vec');
 
   });
+  it('can handle argouts', function() {
+    var mod = new conf.Conf();
+    mod.name = 'Geom';
+    mod.camelCase('*::*');
+    mod.removePrefix('*');
+
+    mod.include('Geom_Geometry');
+    mod.include('Geom_Surface');
+    mod.include('Geom_ElementarySurface');
+    mod.include('Geom_SphericalSurface');
+    mod.find('*').include('*')
+    mod.find('*').argout('Bounds');
+    mod.process();
+    var method = mod.get('Geom_SphericalSurface').get('Bounds');
+    expect(method.argouts.length).toBe(4)
+    expect(method.arguments.length).toBe(0)
+    expect(method.returnType).toBe('Array')
+    
+  })
 });
 
 

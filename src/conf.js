@@ -18,18 +18,8 @@ MultiConf.prototype.exclude = function exclude(expr) {
   this.map((decl) => decl.exclude(expr));
   return this;
 };
-MultiConf.prototype.rename = function rename(expr, newName) {
-  this.map((decl) => decl.rename(expr, newName));
-  return this;
-};
-MultiConf.prototype.camelCase = function camelCase(expr) {
-  this.map((decl) => decl.camelCase(expr));
-  return this;
-};
-MultiConf.prototype.property = function property(getter, setter) {
-  this.map((decl) => decl.property(getter, setter));
-  return this;
-};
+
+
 function Conf(decl, parent) {
   require('./features/rename.js');
   if (decl) {
@@ -137,7 +127,7 @@ Conf.prototype = {
 };
 
 module.exports = {
-  Conf,
+  Conf, MultiConf,
   createMultiConf,
   mapSources
 };

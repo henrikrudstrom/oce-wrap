@@ -67,5 +67,8 @@ module.exports.Geom = {
   },
   CylindricalSurface () {
     return new Geom.CylindricalSurface(module.exports.gp.Ax3(), 10);
+  }, 
+  Axis1Placement() {
+    return new Geom.Axis1Placement(module.exports.gp.Ax1());
   }
 }

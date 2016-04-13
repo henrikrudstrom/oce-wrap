@@ -1,4 +1,4 @@
-module.exports.name = 'property'
+module.exports.name = 'asStatic'
 const conf = require('../conf.js');
 const headers = require('../headers.js');
 conf.Conf.prototype.property = function(decl, clsName, method, newName) {

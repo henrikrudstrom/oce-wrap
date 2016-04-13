@@ -38,6 +38,17 @@ function removePrefix(expr) {
 conf.Conf.prototype.rename = rename;
 conf.Conf.prototype.camelCase = renameCamelCase;
 conf.Conf.prototype.removePrefix = removePrefix;
+conf.MultiConf.prototype.rename = function rename(expr, newName) {
+  this.map((decl) => decl.rename(expr, newName));
+  return this;
+};
+conf.MultiConf.prototype.camelCase = function camelCase(expr) {
+  this.map((decl) => decl.camelCase(expr));
+  return this;
+};
+
+
+
 module.exports.renderSwig = function(decl) {
   if (decl.cls === 'module') {
     return {

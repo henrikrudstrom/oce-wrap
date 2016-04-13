@@ -13,4 +13,9 @@ module.exports = function(mod) {
   mod.include('Handle_Geom_Axis1Placement');
   mod.include('Geom_Axis1Placement');
   mod.find('*').include('*')
+  mod.find('*')
+    .argout('Bounds')
+    .argout('TransformParameters')
+    .argout('Coefficients');
+  
 };

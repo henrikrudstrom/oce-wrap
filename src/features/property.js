@@ -30,6 +30,13 @@ conf.Conf.prototype.property = function(getter, setter, name) {
   });
   return this;
 };
+
+conf.MultiConf.prototype.property = function property(getter, setter) {
+  this.map((decl) => decl.property(getter, setter));
+  return this;
+};
+
+
 module.exports.renderSwig = function(decl) {
   if (decl.cls !== 'property') return false;
   var srcGetter = decl.source('getterKey');
