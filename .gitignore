@@ -61,3 +61,4 @@ tmp/
 src/swig/gen/
 cache/
 ref/
+settings.json
