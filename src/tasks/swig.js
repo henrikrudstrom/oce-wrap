@@ -9,6 +9,7 @@ const gulp = require('gulp');
 const run = require('gulp-run');
 const render = require('../render.js');
 const settings = require('../settings.js');
+const headers = require('../headers.js');
 const exec = require('child_process').exec;
 
 const flags = '-javascript -node -c++ -DSWIG_TYPE_TABLE=occ.js';
@@ -65,6 +66,27 @@ gulp.task('swig-cxx', function(done) {
     done
   );
 });
+var replace = require('gulp-replace');
+gulp.task('swig-hack-handles', function(){
+    
+    gulp.src([`${settings.paths.cxx}/*_wrap.cxx`])
+    .pipe(replace(/(\w+_\w+ \*result;)/g, str => {
+      var clsName = 'Handle_' + str.match(/\w+_\w+/)[0];
+      if(headers.get(clsName))
+        return 'Handle_' + str.replace('*', '');
+      return str;
+      
+    }))
+    .pipe(gulp.dest(settings.paths.cxx));
+})
+
+function replacePointerWithHandle(file){
+  
+  
+  
+}
+ 
+
 
 gulp.task('copy-sources', function(done) {
   exec('')

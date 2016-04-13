@@ -10,7 +10,7 @@ module.exports = function(mod) {
   mod.include('Geom_ElementarySurface');
   mod.include('Geom_SphericalSurface');
   mod.include('Geom_CylindricalSurface');
-  mod.include('Handle_Geom_Axis1Placement');
+  mod.include('Geom_AxisPlacement');
   mod.include('Geom_Axis1Placement');
   mod.find('*').include('*')
   mod.find('*')
