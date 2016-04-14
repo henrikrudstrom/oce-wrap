@@ -11,7 +11,7 @@ module.exports = function typedict(mods) {
       dict[decl.key] = `${mod.name}.${decl.name}`;
     });
   });
-  console.log(dict)
+
   mods.filter(mod => mod.typemaps)
     .forEach(mod => mod.typemaps.forEach(tm => {
       dict[tm.from] = dict[tm.to];

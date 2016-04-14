@@ -66,15 +66,20 @@ gulp.task('swig-cxx', function(done) {
     done
   );
 });
+
+
+
 var replace = require('gulp-replace');
 gulp.task('swig-hack-handles', function(){
-    
+    var expr = /result = \(\w+_\w+ \*\)new \w+_\w+\(\(.*/g
     gulp.src([`${settings.paths.cxx}/*_wrap.cxx`])
-    .pipe(replace(/(\w+_\w+ \*result;)/g, str => {
-      var clsName = 'Handle_' + str.match(/\w+_\w+/)[0];
-      if(headers.get(clsName))
-        return 'Handle_' + str.replace('*', '');
-      return str;
+    .pipe(replace(expr, str => {
+      var clsName = str.match(/\w+_\w+/)[0];
+      if(!headers.get('Handle_' + clsName))
+        return str
+      var statement = `
+    self->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&result, SWIGTYPE_p_Handle_${clsName}, SWIG_POINTER_OWN |  0 ));`
+      return str + statement;
       
     }))
     .pipe(gulp.dest(settings.paths.cxx));

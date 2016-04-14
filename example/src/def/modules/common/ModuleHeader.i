@@ -9,3 +9,4 @@
 %include ExceptionCatcher.i
 /*%include ../common/FunctionTransformers.i*/
 %include Operators.i
+%include javascriptfragments.swg

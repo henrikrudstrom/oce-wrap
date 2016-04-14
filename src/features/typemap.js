@@ -2,7 +2,7 @@ var conf = require('../conf.js');
 conf.Conf.prototype.typemap = function(from, to, getter) {
   if (!this.typemaps)
     this.typemaps = [];
-  this.typemaps.push({ from, to, getter });
+  this.typemaps.push({ from, to, getter, render: getter !== undefined });
 };
 
 function typemap(fromType, toType, getter) {
@@ -28,6 +28,7 @@ function typemap(fromType, toType, getter) {
 module.exports.renderSwig = function(decl) {
   if (!decl.typemaps) return false;
   var src = decl.typemaps
+    .filter(tm => tm.render)
     .map(tm => typemap(tm.from, tm.to, tm.getter)).join('\n');
   return { name: 'typemaps.i', src };
 };

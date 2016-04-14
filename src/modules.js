@@ -27,7 +27,7 @@ function moduleQuery(mods) {
       mod = expr.split('.')[0];
       expr = expr.split('.')[1];
     } else {
-      return ['string', 'bool', 'int', 'double'].filter(type => common.match(expr, type));
+      return ['string', 'bool', 'int', 'double', 'void', 'Array'].filter(type => common.match(expr, type));
       //throw new Error('wild card modules not supported (yet)');
     }
     return common.find(modules[mod], expr, true);

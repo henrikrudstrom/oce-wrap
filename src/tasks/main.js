@@ -16,7 +16,7 @@ gulp.task('init', function() {
 });
 
 gulp.task('render', function(done) {
-  runSequence(['swig-clean', 'configure'], 'render-swig', 'copy', 'swig-cxx', 'swig-hack-handles', done);
+  runSequence(['swig-clean', 'configure'], 'render-swig', 'copy', 'swig-cxx', /*'swig-hack-handles',*/ done);
 });
 
 gulp.task('build', ['render'], function(done) {
@@ -28,7 +28,7 @@ gulp.task('dist', ['build'], function(done) {
 });
 
 gulp.task('test', function(done) {
-  runSequence('render-tests', 'test-generated', done);
+  runSequence('test-clean', 'render-tests', 'test-generated', done);
 });
 
 gulp.task('all', function(done) {

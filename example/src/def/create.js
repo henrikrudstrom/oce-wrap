@@ -1,7 +1,7 @@
 var gp = require('../../lib/gp.node');
 var brepTest = require('../../lib/brepTest.node');
 var Geom = require('../../lib/Geom.node');
-module.exports.gp = {
+creategp = {
   XYZ() {
     return new gp.XYZ(5, 5, 5);
   },
@@ -43,32 +43,51 @@ module.exports.gp = {
     ), 5);
   }
 };
-module.exports.brepTest = {
+createbrepTest = {
   MakeFace() {
     return new brepTest.MakeFace();
   },
   Shape() {
-    var sphere = module.exports.gp.Sphere()
+    var sphere = creategp.Sphere()
     var mk = new brepTest.MakeFace(sphere);
 
     return mk.face();
   },
   Face() {
-    var sphere = module.exports.gp.Sphere()
+    var sphere = creategp.Sphere()
     var mk = new brepTest.MakeFace(sphere);
 
     return mk.face();
   }
 
 };
-module.exports.Geom = {
+createGeom = {
   SphericalSurface () {
-    return new Geom.SphericalSurface(module.exports.gp.Ax3(), 10);
+    return new Geom.SphericalSurface(creategp.Ax3(), 10);
   },
   CylindricalSurface () {
-    return new Geom.CylindricalSurface(module.exports.gp.Ax3(), 10);
+    return new Geom.CylindricalSurface(creategp.Ax3(), 10);
+  }, 
+    CylindricalSurface () {
+    return new Geom.CylindricalSurface(creategp.Ax3(), 10);
   }, 
   Axis1Placement() {
-    return new Geom.Axis1Placement(module.exports.gp.Ax1());
-  }
+    return new Geom.Axis1Placement(creategp.Ax1());
+  },
+  AxisPlacement() {
+    return createGeom.Axis1Placement();
+  },
+  Geometry() {
+    return createGeom.CylindricalSurface();
+  }, 
+  Surface() {
+    return createGeom.CylindricalSurface();
+  }, 
+  ElementarySurface() {
+    return createGeom.CylindricalSurface();
+  }, 
+  
+}
+module.exports = {
+  gp: creategp, Geom: createGeom, brepTest: createbrepTest
 }

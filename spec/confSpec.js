@@ -286,6 +286,29 @@ describe('module object', function() {
     expect(method.arguments.length).toBe(0)
     expect(method.returnType).toBe('Array')
     
+  });
+  it('can hide handles', function(){
+    var mod = new conf.Conf();
+    mod.name = 'Geom';
+    mod.camelCase('*::*');
+    mod.removePrefix('*');
+
+    mod.include('Geom_Axis1Placement');
+    
+    mod.include('Geom_AxisPlacement');
+    mod.find('*').include('*');
+    mod.noHandle('Geom_*');
+    mod.process();
+    configure.processModules(mod);
+    //adds the handle class
+    expect(mod.declarations.length).toBe(4)
+    var obj = mod.get('Geom_AxisPlacement');
+    var handle = mod.get('Handle_Geom_AxisPlacement');
+    expect(typeof handle).toBe('object');
+    expect(handle.declarations.length).toBe(0);
+    expect(obj.get('Angle').arguments[0].type).toBe('Geom.AxisPlacement')
+    
+    
   })
 });
 

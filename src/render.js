@@ -7,7 +7,7 @@ const settings = require('./settings.js');
 const conf = require('./conf.js');
 
 var features = settings.features || [
-  'rename', 'property', 'depends', 'headers', 'class', 'typemap', 'argout', 'module',  'tests'
+  'rename', 'property', 'depends', 'headers', 'class', 'typemap', 'argout', 'noHandle', 'module',  'tests'
 ];
 var featureModules = features.map((name) => require(`./features/${name}.js`));
 

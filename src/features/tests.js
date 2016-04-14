@@ -80,11 +80,17 @@ function renderTest(cls, member, testSrc) {
   if (overridenTests.hasOwnProperty(key))
     return overridenTests[key];
 
-  // disable tests for members with missing arguments/return type
-  // TODO: find better way to indentify that checking for '_'
+  // disable tests for members with unwrapped arguments/return type
   var disable = ''
-  if (signature.concat(member.returnType || member.type).indexOf('_') !== -1)
+  var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
+  if(member.cls !== 'constructor')
+    unwrapped.push(member.returnType || member.type)
+  
+  //signature.concat(member.returnType || member.type).indexOf('_') !== -1
+  if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
     disable = 'x';
+  
+  console.log(unwrapped, disable)
 
   var src = `\n
   ${disable}it('${signature}', function(){
@@ -99,7 +105,11 @@ function renderMemberFunction(cls, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
   var testSrc = `\
     var obj = create.${cls.parent}.${cls.name}();
-    var res = obj.${calldef.name}(${args});`
+    var obj_h = obj._handle;
+    var res = obj.${calldef.name}(${args});
+    if(res)
+       var res_h = res._handle;`
+    
   if (returnType === 'int' || returnType === 'double')
     testSrc += '\n    expect(typeof res).toBe(\'number\');';
   else if (returnType === 'bool')
@@ -117,6 +127,7 @@ function renderConstructor(cls, calldef) {
 
   var src = `\
     var res = new ${cls.parent}.${calldef.name}(${args});
+    var res_h = res._handle;
     expect(typeof res).toBe('object');
     expect(res.constructor.name.replace('_exports_', '')).toBe('${cls.name}');`;
   return renderTest(cls, calldef, src);
@@ -174,7 +185,8 @@ module.exports.renderTest = function(decl, parts) {
     .join('\n');
   return decl.declarations
     .filter(d => d.cls === 'class')
-    .filter(cls => !cls.abstract)
+    .filter(cls => !cls.name.startsWith('Handle_'))
+    //.filter(cls => !cls.abstract)
     .map(cls =>
       ({ name: `${cls.name}Spec.js`, src: renderClassSuite(cls, imports) })
     );

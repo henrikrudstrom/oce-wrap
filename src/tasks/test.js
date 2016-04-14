@@ -16,7 +16,7 @@ const yargs = require('yargs');
 
 // show line number of spec that failed
 var Reporter = require('jasmine-terminal-reporter');
-var reporter = new Reporter({ isVerbose: false });
+var reporter = new Reporter({ isVerbose: yargs.argv.verbose });
 var oldSpecDone = reporter.specDone;
 reporter.specDone = function(result) {
   oldSpecDone(result);
@@ -31,6 +31,9 @@ reporter.specDone = function(result) {
 };
 
 module.exports.reporter = reporter;
+gulp.task('test-clean', (done) =>
+  run(`rm -rf ${settings.paths.dist}/spec`, { silent: true }).exec(done)
+);
 
 gulp.task('test-generated', function() {
   var specPath = `${settings.paths.dist}/spec/generated`;
@@ -56,7 +59,7 @@ gulp.task('test-copied', function() {
     specSources = [`${specPath}/${arg}Spec.js`];
   gulp.src(specSources)
     .pipe(jasmine({
-      verbose: false,
+      verbose: yargs.argv.verbose,
       includeStackTrace: yargs.argv.verbose,
       reporter
     }));

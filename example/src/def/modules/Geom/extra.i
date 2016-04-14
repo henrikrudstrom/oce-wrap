@@ -17,18 +17,8 @@
 }*/
 
 
-
-
-/*%extend Geom_Axis1Placement {
-  //heyhey
-  const Handle_Geom_Axis1Placement handle = 0;
-  Handle_Geom_Axis1Placement Handle(){
-    if($self->_handle == 0)
-      $self->_handle = new Handle_Geom_Axis1Placement($self);
-    return $self->_handle;
-  }
-}*/
 /*
+
 %typemap(in) Handle_Geom_Axis1Placement {
   // heyin1
   void *argp ;
@@ -36,8 +26,8 @@
   $1 = new Handle_Geom_AxisPlacement((const Geom_Axis1Placement *)argp);
   
   //$1 = &((Handle_Geom_Axis1Placement *)(argp))->Handle();
-}*/
-/*
+}
+
 %typemap(in) Handle_Geom_AxisPlacement& {
   // heyin
   void *argp ;
@@ -50,7 +40,12 @@
   // heyout
   //Geom_Geometry* tmp = ($1).Get();
   $result = SWIG_NewPointerObj($1, SWIGTYPE_p_Geom_Geometry, SWIG_POINTER_OWN |  0 );
+  $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&$1, SWIGTYPE_p_Handle_Geom_Geometry, SWIG_POINTER_OWN |  0 ));
+}
+%feature("myfeat") newHandle {
+  
 }*/
+
 
 /*
 %{
@@ -62,3 +57,9 @@
 %template(Handle_Geom_AxisPlacement) Handle<Geom_AxisPlacement>;
 %template(Handle_Geom_Axis1Placement) Handle<Geom_Axis1Placement>;
 */
+/*
+%feature("handle") Geom_Geometry { 
+   //wwww
+   $action
+   $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&$result, SWIGTYPE_p_Handle_Geom_Geometry, SWIG_POINTER_OWN |  0 ));
+};*/
