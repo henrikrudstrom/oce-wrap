@@ -1,0 +1,8 @@
+  {
+    "oce": {
+      "include": "/usr/local/include/oce",
+      "lib": "/usr/local/lib"
+    },
+    "xmlGenerator":  "castxml",
+    "xmlGeneratorPath": "/usr/bin/castxml"
+  }
