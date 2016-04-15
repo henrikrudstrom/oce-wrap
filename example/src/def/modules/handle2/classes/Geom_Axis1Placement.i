@@ -15,8 +15,5 @@ class Handle_Geom_Axis1Placement : public Handle_Geom_AxisPlacement {
         const Handle_Geom_Axis1Placement Reversed(){
           return ((Geom_Axis1Placement*)($self)->Access())->Reversed();
         }
-                const gp_Ax1 Axis(){
-                  return ((Geom_Axis1Placement*)($self)->Access())->Axis();
-                }
   }
 };

@@ -75,12 +75,17 @@ gulp.task('swig-hack-handles', function(){
     gulp.src([`${settings.paths.cxx}/*_wrap.cxx`])
     .pipe(replace(expr, str => {
       var clsName = str.match(/\w+_\w+/)[0];
+      if(clsName.startsWith('Handle_'))
+        return str;
       if(!headers.get('Handle_' + clsName))
         return str
       var statement = `
     // hacked
-    self->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&result, SWIGTYPE_p_Handle_${clsName}, SWIG_POINTER_OWN |  0 ));`
-      return str// + statement;
+    Handle_Geom_Geometry *handle;
+    handle = (Handle_${clsName} *)new Handle_${clsName}((${clsName} const *)(result));
+    self->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_${clsName}));
+    //self->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(new Handle_${clsName}(result), SWIGTYPE_p_Handle_${clsName}, SWIG_POINTER_OWN |  0 ));`
+      return str + statement;
 
     }))
     .pipe(gulp.dest(settings.paths.cxx));
