@@ -28,7 +28,7 @@ gulp.task('dist', ['build'], function(done) {
 });
 
 gulp.task('test', function(done) {
-  runSequence('test-clean', 'copy-spec', 'render-tests', 'test-generated', done);
+  runSequence('test-clean', 'copy-spec', 'render-tests', 'just-test', done);
 });
 
 gulp.task('all', function(done) {

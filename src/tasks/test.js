@@ -8,7 +8,7 @@ const gulp = require('gulp');
 const run = require('gulp-run');
 const render = require('../render.js');
 const settings = require('../settings.js');
-
+var rename = require('gulp-rename');
 const jasmine = require('gulp-jasmine');
 const gutil = require('gulp-util');
 const yargs = require('yargs');
@@ -30,10 +30,13 @@ reporter.specDone = function(result) {
   }
 };
 
+
 module.exports.reporter = reporter;
 gulp.task('test-clean', (done) =>
   run(`rm -rf ${settings.paths.dist}/spec`, { silent: true }).exec(done)
 );
+
+
 gulp.task('render-tests', function(done) {
   const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
   render.write(settings.paths.dist + '/spec/', render('renderTest', configuredModules));
@@ -41,6 +44,8 @@ gulp.task('render-tests', function(done) {
     `cp -rf ${settings.paths.definition}/create.js ${settings.paths.dist}/spec/create.js`
   ).exec(done);
 });
+
+
 gulp.task('copy-spec', function() {
   return gulp.src([
     `${settings.paths.definition}/spec/**/*.js`,
@@ -50,52 +55,14 @@ gulp.task('copy-spec', function() {
   .pipe(gulp.dest(`${settings.paths.dist}/spec`));
 });
 
-gulp.task('test-generated', function() {
-  var specPath = `${settings.paths.dist}/spec`;
-  var specSources = settings.build.modules.map(mod => `${specPath}/${mod}/*Spec.js`);
 
+gulp.task('just-test', ['copy-spec'], function() {
+  var specSource = `${settings.paths.dist}/spec/`;
   var arg = yargs.argv.spec;
   if (arg)
-    specSources = [`${specPath}/${arg}Spec.js`];
-  // specSources = specSources.map(src => glob.sync(src))
-  //   .reduce((a, b) => a.concat(b));
-  console.log("SPECSOURCES", specSources)
-  gulp.src(specSources)
-    .pipe(debug({title: 'unicorn:'}))
-    .pipe(jasmine({
-      verbose: yargs.argv.verbose,
-      includeStackTrace: yargs.argv.verbose,
-      reporter
-    }));
-});
-
-gulp.task('test-copied', function() {
-  var specPath = `${settings.paths.dist}/spec/`;
-  var specSources = [`${specPath}/*Spec.js`];
-
-  var arg = yargs.argv.spec;
-  if (arg)
-    specSources = [`${specPath}/${arg}Spec.js`];
-  gulp.src(specSources)
-    .pipe(debug({title: 'unicorn:'}))
-    .pipe(jasmine({
-      verbose: yargs.argv.verbose,
-      includeStackTrace: yargs.argv.verbose,
-      reporter
-    }));
-});
-
-gulp.task('test-handle', ['copy-spec'], function() {
-  var specSource = `${settings.paths.dist}/spec/handleSpec.js`;
-  gulp.src(specSource)
-    .pipe(jasmine({
-      verbose: yargs.argv.verbose,
-      includeStackTrace: yargs.argv.verbose,
-      reporter
-    }));
-});
-gulp.task('test-g', ['copy-spec'], function() {
-  var specSource = `${settings.paths.dist}/spec/**/*Spec.js`;
+    specSource += yargs.argv.spec + 'Spec.js';
+  else
+    specSource += '**/*Spec.js';
   gulp.src(specSource)
     .pipe(debug({title: 'unicorn:'}))
     .pipe(jasmine({
