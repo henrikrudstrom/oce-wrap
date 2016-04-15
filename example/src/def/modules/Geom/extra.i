@@ -15,16 +15,19 @@
      array->Set(3, SWIG_From_double(*$4));
      $result = array;
 }*/
+class Standard_Transient {};
+class MMgt_TShared : public Standard_Transient {};
+class Handle_Standard_Transient {};
+class Handle_MMgt_TShared : public Handle_Standard_Transient {};
 
 
-/*
 
-%typemap(in) Handle_Geom_Axis1Placement {
+/*%typemap(in) Handle_Geom_Axis1Placement {
   // heyin1
   void *argp ;
   int res = SWIG_ConvertPtr($input, &argp, SWIGTYPE_p_Geom_Axis1Placement,  0 );
   $1 = new Handle_Geom_AxisPlacement((const Geom_Axis1Placement *)argp);
-  
+
   //$1 = &((Handle_Geom_Axis1Placement *)(argp))->Handle();
 }
 
@@ -41,16 +44,17 @@
   //Geom_Geometry* tmp = ($1).Get();
   $result = SWIG_NewPointerObj($1, SWIGTYPE_p_Geom_Geometry, SWIG_POINTER_OWN |  0 );
   $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&$1, SWIGTYPE_p_Handle_Geom_Geometry, SWIG_POINTER_OWN |  0 ));
-}
-%feature("myfeat") newHandle {
-  
 }*/
 
-
 /*
+%feature("myfeat") newHandle {
+
+}
+
+
 %{
- #include <Standard_Transient.hxx> 
- #include <Standard_Handle.hxx> 
+ #include <Standard_Transient.hxx>
+ #include <Standard_Handle.hxx>
  #include <Standard_DefineHandle.hxx>
 %}
 %template(Handle_Geom_Geometry) Handle<Geom_Geometry>;
@@ -58,7 +62,7 @@
 %template(Handle_Geom_Axis1Placement) Handle<Geom_Axis1Placement>;
 */
 /*
-%feature("handle") Geom_Geometry { 
+%feature("handle") Geom_Geometry {
    //wwww
    $action
    $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&$result, SWIGTYPE_p_Handle_Geom_Geometry, SWIG_POINTER_OWN |  0 ));

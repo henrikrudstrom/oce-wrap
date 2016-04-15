@@ -85,15 +85,17 @@ function renderTest(cls, member, testSrc) {
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
   if(member.cls !== 'constructor')
     unwrapped.push(member.returnType || member.type)
-  
+
   //signature.concat(member.returnType || member.type).indexOf('_') !== -1
+  console.log(unwrapped)
   if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
     disable = 'x';
-  
+
   console.log(unwrapped, disable)
 
   var src = `\n
   ${disable}it('${signature}', function(){
+    console.log('${signature}');
 ${testSrc}
   });`;
   return src;
@@ -109,7 +111,7 @@ function renderMemberFunction(cls, calldef) {
     var res = obj.${calldef.name}(${args});
     if(res)
        var res_h = res._handle;`
-    
+
   if (returnType === 'int' || returnType === 'double')
     testSrc += '\n    expect(typeof res).toBe(\'number\');';
   else if (returnType === 'bool')

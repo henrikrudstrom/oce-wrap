@@ -53,7 +53,9 @@ ${includeIfExists('extra.i')}
 ${typemaps}
 ${typedefs.join('\n')}
 ${enums.join('\n')}
+${parts.get('handles')}
 ${parts.get('classIncludes')}
+${parts.get('extends')}
 `
   };
 };

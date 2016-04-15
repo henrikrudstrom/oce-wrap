@@ -78,19 +78,20 @@ gulp.task('swig-hack-handles', function(){
       if(!headers.get('Handle_' + clsName))
         return str
       var statement = `
+    // hacked
     self->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&result, SWIGTYPE_p_Handle_${clsName}, SWIG_POINTER_OWN |  0 ));`
-      return str + statement;
-      
+      return str// + statement;
+
     }))
     .pipe(gulp.dest(settings.paths.cxx));
 })
 
 function replacePointerWithHandle(file){
-  
-  
-  
+
+
+
 }
- 
+
 
 
 gulp.task('copy-sources', function(done) {

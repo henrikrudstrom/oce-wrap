@@ -28,7 +28,7 @@ gulp.task('dist', ['build'], function(done) {
 });
 
 gulp.task('test', function(done) {
-  runSequence('test-clean', 'render-tests', 'test-generated', done);
+  runSequence('test-clean', 'copy-spec', 'render-tests', 'test-generated', done);
 });
 
 gulp.task('all', function(done) {
@@ -51,9 +51,12 @@ gulp.task('copy-headers', function() {
     .pipe(gulp.dest(settings.paths.inc));
 });
 gulp.task('copy-spec', function() {
-  return gulp.src(`${settings.paths.definition}/modules/**/spec/*.js`)
-    .pipe(rename({ dirname: '' }))
-    .pipe(gulp.dest(`${settings.paths.dist}/spec`));
+  return gulp.src([
+    `${settings.paths.definition}/modules/**/spec/*.js`,
+    `${settings.paths.definition}/spec/*.js`
+  ])
+  .pipe(rename({ dirname: '' }))
+  .pipe(gulp.dest(`${settings.paths.dist}/spec`));
 });
 gulp.task('copy-js', function() {
   return gulp.src(`${settings.paths.definition}/modules/**/lib/*.js`)

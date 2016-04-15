@@ -14,6 +14,7 @@ const loadModules = require('../modules.js');
 const depend = require('../dependencies.js');
 const paths = settings.paths;
 const common = require('./lib/common.js');
+const conf = require('../conf.js');
 
 var reader = depend();
 
@@ -56,8 +57,9 @@ ${toolkitDeps(mod)}
 function configureModule(modName, done) {
   const buildPath = `${paths.gyp}/${modName}`;
   console.log(modName);
-  var mod = loadModules().getModule(modName);
-  console.log(mod.name)
+  var mod = loadModules().getModule(modName) || new conf.Conf();
+  conf.name = modName
+  console.log(mod)
   writeConfig(mod, buildPath);
   run('node-gyp configure', {
     cwd: buildPath,

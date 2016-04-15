@@ -81,8 +81,10 @@ function initialize(settings) {
     modules: glob.sync(`${settings.paths.definition}/modules/*.js`)
       .map((file) => path.basename(file).replace('.js', ''))
   };
-  if(yargs.argv.module)
-    settings.build.modules = arrify(yargs.argv.module)
+  if (yargs.argv.module)
+    settings.build.modules = yargs.argv.module.split(',');
+  if (yargs.argv.modules)
+    settings.build.modules = yargs.argv.modules.split(',');
 
   module.exports = settings;
 }

@@ -66,7 +66,7 @@ function processModules(mods) {
 }
 
 function configure(configurationFiles, outputPath) {
-  var mods = configurationFiles.map(configureModule);
+  var mods = configurationFiles.map(configureModule).filter(mod => mod !== null);
   processModules(mods);
 
   mods.forEach((mod) => {

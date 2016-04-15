@@ -17,12 +17,13 @@ module.exports = function(mod) {
     .argout('Bounds')
     .argout('TransformParameters')
     .argout('Coefficients');
-  //mod.noHandle('*');
-  mod.include('Handle_Geom_Geometry');
-  mod.include('Handle_Geom_Surface');
-  mod.include('Handle_Geom_ElementarySurface');
-  mod.include('Handle_Geom_SphericalSurface');
-  mod.include('Handle_Geom_CylindricalSurface');
-  mod.include('Handle_Geom_AxisPlacement');
-  mod.include('Handle_Geom_Axis1Placement');
+  mod.noHandle('*');
+  // mod.include('Handle_Geom_Geometry');
+  // mod.include('Handle_Geom_Surface');
+  // mod.include('Handle_Geom_ElementarySurface');
+  // mod.include('Handle_Geom_SphericalSurface');
+  // mod.include('Handle_Geom_CylindricalSurface');
+  // mod.include('Handle_Geom_AxisPlacement');
+  // mod.include('Handle_Geom_Axis1Placement');
+  mod.find('*').include('*')
 };
