@@ -42,8 +42,8 @@ gulp.task('test-generated', function() {
   var arg = yargs.argv.spec;
   if (arg)
     specSources = [`${specPath}/${arg}Spec.js`];
-  specSources = specSources.map(src => glob.sync(src))
-    .reduce((a, b) => a.concat(b));
+  // specSources = specSources.map(src => glob.sync(src))
+  //   .reduce((a, b) => a.concat(b));
   console.log("SPECSOURCES", specSources)
   gulp.src(specSources)
     .pipe(jasmine({
@@ -77,7 +77,15 @@ gulp.task('test-handle', ['copy-spec'], function() {
       reporter
     }));
 });
-
+gulp.task('test-g', ['copy-spec'], function() {
+  var specSource = `${settings.paths.dist}/spec/generated/Geom/Axis1PlacementSpec.js`;
+  gulp.src(specSource)
+    .pipe(jasmine({
+      verbose: yargs.argv.verbose,
+      includeStackTrace: yargs.argv.verbose,
+      reporter
+    }));
+});
 
 gulp.task('render-tests', function(done) {
   const configuredModules = glob.sync(`${settings.paths.config}/*.json`);

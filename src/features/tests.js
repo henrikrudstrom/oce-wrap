@@ -86,12 +86,9 @@ function renderTest(cls, member, testSrc) {
   if(member.cls !== 'constructor')
     unwrapped.push(member.returnType || member.type)
 
-  //signature.concat(member.returnType || member.type).indexOf('_') !== -1
-  console.log(unwrapped)
   if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
     disable = 'x';
 
-  console.log(unwrapped, disable)
 
   var src = `\n
   ${disable}it('${signature}', function(){

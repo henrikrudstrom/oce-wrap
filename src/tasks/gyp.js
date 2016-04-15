@@ -56,10 +56,8 @@ ${toolkitDeps(mod)}
 
 function configureModule(modName, done) {
   const buildPath = `${paths.gyp}/${modName}`;
-  console.log(modName);
   var mod = loadModules().getModule(modName) || new conf.Conf();
   conf.name = modName
-  console.log(mod)
   writeConfig(mod, buildPath);
   run('node-gyp configure', {
     cwd: buildPath,

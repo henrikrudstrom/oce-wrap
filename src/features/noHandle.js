@@ -25,13 +25,15 @@ module.exports.renderSwig = function(cls) {
   if (cls.cls !== 'class' || !cls.handle)
     return false;
   var typemapsrc = `
-/*%typemap(in) Handle_${name}& {
+%typemap(in) Handle_${name}& {
   // handlein
   void *argpointer ;
-  int res = SWIG_ConvertPtr($input, &argpointer, SWIGTYPE_p_${name},  0 );
-  $1 = new Handle_${name}((const ${name} *)argpointer);
-  $input->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj($1, SWIGTYPE_p_Handle_${name}, SWIG_POINTER_OWN |  0 ));
-}*/
+  //std::cout << "stand by..." << std::endl;
+  int res = SWIG_ConvertPtr($input->ToObject()->Get(SWIGV8_SYMBOL_NEW("_handle")), &argpointer, SWIGTYPE_p_Handle_${name}, 0);
+  //std::cout << "result: " << res << std::endl;
+  //$1 = (Handle_${name} *)(argpointer);
+  $1 = (Handle_${name} *)new Handle_${name}(argpointer);
+}
 
 %typemap(out) Handle_${name} {
   // lookup type

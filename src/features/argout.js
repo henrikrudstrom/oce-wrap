@@ -1,12 +1,12 @@
 const conf = require('../conf.js');
 module.exports.name = 'asStatic';
-conf.Conf.prototype.argout = function argout(expr){
+conf.Conf.prototype.argout = function argout(expr) {
   this.transform(expr, (mem) => {
     if (mem.cls !== 'memfun') return false;
     var outArgIndexes = mem.arguments
       .map((arg, index) => index)
       .filter(index => mem.arguments[index].decl.indexOf('&') !== -1);
-    if(outArgIndexes.length < 1) return false;
+    if (outArgIndexes.length < 1) return false;
 
     // out arguments to argouts property
     mem.argouts = outArgIndexes.map(index => mem.arguments[index])
@@ -21,13 +21,12 @@ conf.MultiConf.prototype.argout = function property(getter, setter) {
 };
 
 
-function swigConvert(type, arg){
-  console.log("swig convert: " + type)
-  if(type.indexOf('Standard_Real') ==! -1)
+function swigConvert(type, arg) {
+  if (type.indexOf('Standard_Real') !== -1)
     return `SWIG_From_double(*${arg})`;
-  if(type.indexOf('Standard_Boolean') ==! -1)
+  if (type.indexOf('Standard_Boolean') !== -1)
     return `SWIG_From_bool(*${arg})`;
-  if(type.indexOf('Standard_Integer') ==! -1)
+  if (type.indexOf('Standard_Integer') !== -1)
     return `SWIG_From_int(*${arg})`; // TODO: not sure this one exists
 
   return `SWIG_NewPointerObj((new ${type}((const ${type}&)${arg})), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
@@ -36,9 +35,8 @@ function swigConvert(type, arg){
 
 }
 
-module.exports.renderSwig = function(decl){
-  if(!decl.argouts) return false;
-  console.log("RENDER TYPEMAP")
+module.exports.renderSwig = function(decl) {
+  if (!decl.argouts) return false;
   var sigArgs = decl.argouts
     .map(arg => `${arg.decl}${arg.name}`)
     .join(', ')

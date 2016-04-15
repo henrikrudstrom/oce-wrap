@@ -7,11 +7,20 @@ function bla(ap) {
 }
 describe('a handle', function() {
   it('returns handles as objects', function() {
+    console.log("jha")
     var ap1 = new Geom.Axis1Placement(new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1));
     var ap2 = new Geom.Axis1Placement(new gp.Pnt(1, 1, 1), new gp.Dir(0, 1, 0));
     var ap3 = ap1.translated(new gp.Vec(2, 3, 4));
     expect(ap3.constructor.name).toBe('_exports_Axis1Placement')
-    var angle = ap3.angle(ap1._handle);
+    var angle = ap3.angle(ap1);
+  });
+  it('accepts objects as handles', function() {
+    console.log("hmm")
+    var ap1 = new Geom.Axis1Placement(new gp.Pnt(1, 1, 1), new gp.Dir(0, 0, 1));
+    var ap2 = new Geom.Axis1Placement(new gp.Pnt(1, 1, 1), new gp.Dir(0, 1, 0));
+    var ap3 = ap1.translated(new gp.Vec(2, 3, 4));
+    var angle = ap2.angle(ap1);
+    console.log(angle)
   });
 
   it('it plays well with garbage collectors', function() {
@@ -25,7 +34,7 @@ describe('a handle', function() {
         console.log("ho" + i, ap1._handle);
 
       var ap3 = ap1.translated(new gp.Vec(2, 3, 4));
-      var angle = ap1.angle(ap2._handle);
+      var angle = ap1.angle(ap2);
 
     }
     console.timeEnd('cgp')
