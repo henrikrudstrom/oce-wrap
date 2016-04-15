@@ -5,21 +5,22 @@ conf.Conf.prototype.noHandle = function(expr) {
   this.find(expr).forEach(cls => {
     if (cls.key.startsWith('Handle_')) return;
     this.include('Handle_' + cls.name);
-    this.get('Handle_' + cls.name).include('Handle_' + cls.name + '(*)');
-
-  })
+    var handle = this.get('Handle_' + cls.name);
+    if (handle)
+      handle.include('Handle_' + cls.name + '(*)');
+  });
   this.transform(expr, (obj) => {
     if (obj.key.startsWith('Handle_')) return;
     this.typemap('Handle_' + obj.key, obj.key);
     obj.handle = true;
   });
-}
+};
 
-conf.Conf.prototype.downCastToThis = function(expr){
+conf.Conf.prototype.downCastToThis = function(expr) {
   this.find(expr).forEach(mem => {
     mem.downCastToThis = true;
   });
-}
+};
 
 conf.MultiConf.prototype.noHandle = function noHandle(expr, newName) {
   this.map((decl) => decl.noHandle(expr, newName));

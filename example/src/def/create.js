@@ -1,7 +1,7 @@
 var gp = require('../lib/gp.node');
 var brepTest = require('../lib/brepTest.node');
 var Geom = require('../lib/Geom.node');
-creategp = {
+var creategp = {
   XYZ() {
     return new gp.XYZ(5, 5, 5);
   },
@@ -43,7 +43,7 @@ creategp = {
     ), 5);
   }
 };
-createbrepTest = {
+var createbrepTest = {
   MakeFace() {
     return new brepTest.MakeFace();
   },
@@ -61,16 +61,14 @@ createbrepTest = {
   }
 
 };
-createGeom = {
-  SphericalSurface () {
+var createGeom = {
+  SphericalSurface() {
     return new Geom.SphericalSurface(creategp.Ax3(), 10);
   },
-  CylindricalSurface () {
+  CylindricalSurface() {
     return new Geom.CylindricalSurface(creategp.Ax3(), 10);
   },
-    CylindricalSurface () {
-    return new Geom.CylindricalSurface(creategp.Ax3(), 10);
-  },
+
   Axis1Placement() {
     return new Geom.Axis1Placement(creategp.Ax1());
   },
@@ -86,8 +84,18 @@ createGeom = {
   ElementarySurface() {
     return createGeom.CylindricalSurface();
   },
-
-}
+  BezierCurve() {
+    var points = [
+      new gp.Pnt(1, 2, 3), new gp.Pnt(2, 3, 4),
+      new gp.Pnt(3, 4, 5), new gp.Pnt(4, 5, 6)
+    ];
+    var arr = new Geom.Array1OfPnt(0, 4);
+    points.forEach((pnt, index) => arr.setValue(index, pnt));
+    return new Geom.BezierCurve(arr);
+  }
+};
 module.exports = {
-  gp: creategp, Geom: createGeom, brepTest: createbrepTest
-}
+  gp: creategp,
+  Geom: createGeom,
+  brepTest: createbrepTest
+};
