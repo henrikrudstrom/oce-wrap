@@ -1,0 +1,12 @@
+{
+  "gp.Trsf": [
+    "transforms(gp.double, gp.double, gp.double)",
+    "setValues(gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double, gp.double)"
+  ],
+  "Geom.CylindricalSurface": [
+    "vperiod()"
+  ],
+  "Geom.SphericalSurface": [
+    "vperiod()"
+  ]
+}

@@ -28,10 +28,13 @@ function configureModule(file) {
 
 function translateTypes(mods) {
   var typedict = createTypeDict(mods);
-  mods.forEach((mod) => {
-    mod.declarations.map(
-      (decl) => decl.bases ? decl.bases : []
-    ).forEach((base) => base.name = typedict(base.name))
+  mods.forEach(mod => {
+    mod.declarations.forEach(cls =>
+      (cls.bases || []).forEach(base => (base.name = typedict(base.name)))
+    );
+
+
+    //mod.declarations.map((decl) => (decl.bases ? decl.bases : []).forEach((base) => base.name = typedict(base.name))
 
     mod.declarations.map(
         (decl) => (decl.declarations ? decl.declarations : [])

@@ -15,8 +15,18 @@ conf.Conf.prototype.noHandle = function(expr) {
   });
 }
 
+conf.Conf.prototype.downCastToThis = function(expr){
+  this.find(expr).forEach(mem => {
+    mem.downCastToThis = true;
+  });
+}
+
 conf.MultiConf.prototype.noHandle = function noHandle(expr, newName) {
   this.map((decl) => decl.noHandle(expr, newName));
+  return this;
+};
+conf.MultiConf.prototype.downCastToThis = function downCastToThis(expr, newName) {
+  this.map((decl) => decl.downCastToThis(expr, newName));
   return this;
 };
 
@@ -28,11 +38,8 @@ module.exports.renderSwig = function(cls) {
 %typemap(in) Handle_${name}& {
   // handlein
   void *argpointer ;
-  //std::cout << "stand by..." << std::endl;
   int res = SWIG_ConvertPtr($input->ToObject()->Get(SWIGV8_SYMBOL_NEW("_handle")), &argpointer, SWIGTYPE_p_Handle_${name}, 0);
-  //std::cout << "result: " << res << std::endl;
-  //$1 = (Handle_${name} *)(argpointer);
-  $1 = (Handle_${name} *)new Handle_${name}(argpointer);
+  $1 = (Handle_${name} *)(argpointer);
 }
 
 %typemap(out) Handle_${name} {
@@ -44,30 +51,7 @@ module.exports.renderSwig = function(cls) {
   // attach handle
   Handle_${name} *handle = (Handle_${name} *)new Handle_${name}($1);
   $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_${name}));
-}`
-;
+}`;
 
-
-  // %nodefaultctor Handle_${name};
-  var handlessrc = `
-class Handle_${name} : public Handle_${cls.source().bases[0].name} {
-public:
-  Handle_${name}(const ${name} *anItem);
-
+  return { name: 'typemaps.i', src: typemapsrc };
 };
-`
-  var extendssrc = `
-%extend Handle_${name} {
-  ${name}* getObject(){
-    return (${name}*)self->Access();
-  }
-}
-`
-
-  return [
-    //{ name: 'handles', src: handlessrc },
-    { name: 'extends', src: extendssrc },
-    { name: 'typemaps.i', src: typemapsrc }
-  ];
-  //return { name: 'handles.i', handlessrc };
-}

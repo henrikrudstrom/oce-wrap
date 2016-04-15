@@ -1,4 +1,5 @@
 var modules = require('../modules.js')();
+var settings = require('../settings.js');
 const glob = require('glob');
 const fs = require('fs');
 module.exports.renderTest = function(cls, parts) {
@@ -25,22 +26,29 @@ function findConstructor(type) {
 
 function parseTests() {
   var specs = {};
-  glob.sync('src/spec/**/*Spec.js').forEach(file => {
-    var itexp = / *x?it\('(\w+\(.*\))',((?:.|\n)*?\}\));/g;
-    var descExp = /describe\('(?:\w|\.|_)*',((?:.|\n)*?)(?=describe)/g;
-    var src = fs.readFileSync(file).toString();
-
-    src.match(descExp).forEach(desc => {
-      var suite = desc.match(/describe\('(.+)'/)[1];
-      desc.match(itexp).forEach(it => {
-        var name = it.match(/it\('(\w+\(.*\))'/)[1];
-        specs[`${suite}#${name}`] = it;
-      });
+  glob.sync(`${settings.paths.definition}/spec/**/*Spec.js`)
+    .concat(glob.sync(`${settings.paths.definition}/spec/*Spec.js`))
+    .forEach(file => {
+      console.log(file)
+      var itexp = / *x?it\('(\w+\(.*\))',((?:.|\n)*?\}\));/g;
+      var descExp = /describe\('((?:\w|\.|_| )*)',((?:.|\n)*?}\)(\n| |;)*}\)?)/g;
+      var src = fs.readFileSync(file).toString();
+      var matches = src.match(descExp)
+      if (matches)
+        matches.forEach(desc => {
+          var suite = desc.match(/describe\('(.+)'/)[1];
+          var smatches = desc.match(itexp);
+          if (smatches)
+            smatches.forEach(it => {
+              var name = it.match(/it\('(\w+\(.*\))'/)[1];
+              specs[`${suite}#${name}`] = it;
+            });
+        });
     });
-  });
   return specs;
 }
 var overridenTests = parseTests();
+var notWorking = JSON.parse(fs.readFileSync(`${settings.paths.definition}/spec/notWorking.json`));
 
 
 var nextInt = 0;
@@ -71,28 +79,41 @@ function createValue(typeName) {
 }
 module.exports.createValue = createValue;
 
-function renderTest(cls, member, testSrc) {
-  var signature = `${member.name}`;
-  if(member.arguments)
-    signature += `(${member.arguments.map(arg => arg.type).join(', ')})`;
+function signature(member) {
+  var sig = `${member.name}`;
+  if (member.arguments)
+    sig += `(${member.arguments.map(arg => arg.type).join(', ')})`;
+  return sig;
+}
 
-  var key = `${cls.parent}.${cls.name}#${signature}`;
-  if (overridenTests.hasOwnProperty(key))
-    return overridenTests[key];
+
+function renderTest(cls, member, testSrc) {
+  var sig = `${member.name}`;
+  if (member.arguments)
+    sig += `(${member.arguments.map(arg => arg.type).join(', ')})`;
+
+  var key = `${cls.parent}.${cls.name}#${sig}`;
+  if (overridenTests.hasOwnProperty(key)) {
+    return `// ${sig} - Redefined.`;
+  }
 
   // disable tests for members with unwrapped arguments/return type
-  var disable = ''
+  var disable = '';
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
-  if(member.cls !== 'constructor')
-    unwrapped.push(member.returnType || member.type)
+  if (member.cls !== 'constructor')
+    unwrapped.push(member.returnType || member.type);
 
   if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
-    disable = 'x';
+    disable = '// arguments or return type not wrapped\n  x';
 
-
+  var qualifiedName = cls.parent + '.' + cls.name;
+  if (qualifiedName in notWorking) {
+    if (notWorking[qualifiedName].find(s => s === sig))
+      disable = '// TODO: not working\n  x';
+  }
   var src = `\n
-  ${disable}it('${signature}', function(){
-    console.log('${signature}');
+  ${disable}it('${sig}', function(){
+    // console.log('${sig}')
 ${testSrc}
   });`;
   return src;
@@ -105,10 +126,9 @@ function renderMemberFunction(cls, calldef) {
   var testSrc = `\
     var obj = create.${cls.parent}.${cls.name}();
     var obj_h = obj._handle;
-    var res = obj.${calldef.name}(${args});
-    if(res)
-       var res_h = res._handle;`
-
+    var res = obj.${calldef.name}(${args});`;
+  if (calldef.downCastToThis)
+    returnType = cls.name;
   if (returnType === 'int' || returnType === 'double')
     testSrc += '\n    expect(typeof res).toBe(\'number\');';
   else if (returnType === 'bool')
@@ -143,24 +163,40 @@ function renderProperty(cls, prop) {
   return renderTest(cls, prop, src);
 }
 
+function getInheritedDeclarations(cls) {
+  var decls = [cls.declarations]
+    .concat((cls.bases || []).map(base => {
+      var baseCls = modules.get(base.name);
+      if (baseCls) {
+        return getInheritedDeclarations(baseCls);
+      }
+      return [];
+    }))
+    .reduce((a, b) => a.concat(b));
+  var sigs = decls.map(signature);
+  return decls.filter((mem, index) => sigs.indexOf(signature(mem)) === index);
+}
 
-function renderClassSuite(cls, imports) {
+function renderClassSuite(mod, cls, imports) {
+  var declarations = getInheritedDeclarations(cls);
 
-  var calldefs = cls.declarations
+
+
+  var calldefs = declarations
     .filter(decl => decl.cls === 'memfun' || decl.cls === 'constructor');
 
-  var constructorTests = cls.declarations
+  var constructorTests = declarations
     .filter(decl => decl.cls === 'constructor')
     .map(decl => renderConstructor(cls, decl));
   // var functionTests = [];
-  var functionTests = cls.declarations
+  var functionTests = declarations
     .filter(decl => decl.cls === 'memfun')
     .map(decl => renderMemberFunction(cls, decl));
 
-  var propertyTests = cls.declarations
+  var propertyTests = declarations
     .filter(decl => decl.cls === 'property')
     .map(decl => renderProperty(cls, decl));
-  var clsSrc = `\n
+  var clsSrc = `\
 ${imports}
 var create = require('../create.js')
 describe('${cls.parent}.${cls.name}', function(){
@@ -180,13 +216,13 @@ module.exports.renderClassSuite = renderClassSuite;
 module.exports.renderTest = function(decl, parts) {
   if (decl.cls !== 'module') return false;
   var imports = [decl.name].concat(decl.moduleDepends || [])
-    .map(mod => (`var ${mod} = require('../../../lib/${mod}.node');`))
+    .map(mod => (`var ${mod} = require('../../lib/${mod}.node');`))
     .join('\n');
   return decl.declarations
     .filter(d => d.cls === 'class')
     .filter(cls => !cls.name.startsWith('Handle_'))
-    //.filter(cls => !cls.abstract)
+    .filter(cls => !cls.abstract)
     .map(cls =>
-      ({ name: `${cls.name}Spec.js`, src: renderClassSuite(cls, imports) })
+      ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports) })
     );
 };

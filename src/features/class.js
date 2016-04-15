@@ -25,7 +25,7 @@ module.exports.renderSwig = function(cls, parts) {
   var srcCls = cls.source();
   var base = '';
   if (srcCls.bases.length > 0) {
-    base = ' : ' + cls.bases[0].access + ' ' + cls.bases[0].name;
+    base = ' : ' + srcCls.bases[0].access + ' ' + srcCls.bases[0].name;
   }
   const constructors = cls.declarations
     .filter((mem) => mem.cls === 'constructor')

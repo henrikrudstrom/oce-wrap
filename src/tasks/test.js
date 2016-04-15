@@ -12,7 +12,7 @@ const settings = require('../settings.js');
 const jasmine = require('gulp-jasmine');
 const gutil = require('gulp-util');
 const yargs = require('yargs');
-
+var debug = require('gulp-debug');
 
 // show line number of spec that failed
 var Reporter = require('jasmine-terminal-reporter');
@@ -34,9 +34,24 @@ module.exports.reporter = reporter;
 gulp.task('test-clean', (done) =>
   run(`rm -rf ${settings.paths.dist}/spec`, { silent: true }).exec(done)
 );
+gulp.task('render-tests', function(done) {
+  const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
+  render.write(settings.paths.dist + '/spec/', render('renderTest', configuredModules));
+  run(
+    `cp -rf ${settings.paths.definition}/create.js ${settings.paths.dist}/spec/create.js`
+  ).exec(done);
+});
+gulp.task('copy-spec', function() {
+  return gulp.src([
+    `${settings.paths.definition}/spec/**/*.js`,
+    `${settings.paths.definition}/spec/*.js`
+  ])
+  .pipe(rename({ dirname: '' }))
+  .pipe(gulp.dest(`${settings.paths.dist}/spec`));
+});
 
 gulp.task('test-generated', function() {
-  var specPath = `${settings.paths.dist}/spec/generated`;
+  var specPath = `${settings.paths.dist}/spec`;
   var specSources = settings.build.modules.map(mod => `${specPath}/${mod}/*Spec.js`);
 
   var arg = yargs.argv.spec;
@@ -46,6 +61,7 @@ gulp.task('test-generated', function() {
   //   .reduce((a, b) => a.concat(b));
   console.log("SPECSOURCES", specSources)
   gulp.src(specSources)
+    .pipe(debug({title: 'unicorn:'}))
     .pipe(jasmine({
       verbose: yargs.argv.verbose,
       includeStackTrace: yargs.argv.verbose,
@@ -61,6 +77,7 @@ gulp.task('test-copied', function() {
   if (arg)
     specSources = [`${specPath}/${arg}Spec.js`];
   gulp.src(specSources)
+    .pipe(debug({title: 'unicorn:'}))
     .pipe(jasmine({
       verbose: yargs.argv.verbose,
       includeStackTrace: yargs.argv.verbose,
@@ -78,19 +95,12 @@ gulp.task('test-handle', ['copy-spec'], function() {
     }));
 });
 gulp.task('test-g', ['copy-spec'], function() {
-  var specSource = `${settings.paths.dist}/spec/generated/Geom/Axis1PlacementSpec.js`;
+  var specSource = `${settings.paths.dist}/spec/**/*Spec.js`;
   gulp.src(specSource)
+    .pipe(debug({title: 'unicorn:'}))
     .pipe(jasmine({
       verbose: yargs.argv.verbose,
       includeStackTrace: yargs.argv.verbose,
       reporter
     }));
-});
-
-gulp.task('render-tests', function(done) {
-  const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
-  render.write(settings.paths.dist + '/spec/generated/', render('renderTest', configuredModules));
-  run(
-    `cp -rf ${settings.paths.definition}/create.js ${settings.paths.dist}/spec/generated/create.js`
-  ).exec(done);
 });

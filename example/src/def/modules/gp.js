@@ -15,8 +15,6 @@ module.exports = function(mod) {
   mod.include('gp_Ax2');
   mod.include('gp_Ax3');
   mod.include('gp_Trsf');
-  mod.include('gp_Sphere');
-  mod.include('gp_Cylinder');
   //mod.include('gp_*');
 
   mod.find('*').include('*');

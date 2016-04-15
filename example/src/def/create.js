@@ -1,6 +1,6 @@
-var gp = require('../../lib/gp.node');
-var brepTest = require('../../lib/brepTest.node');
-var Geom = require('../../lib/Geom.node');
+var gp = require('../lib/gp.node');
+var brepTest = require('../lib/brepTest.node');
+var Geom = require('../lib/Geom.node');
 creategp = {
   XYZ() {
     return new gp.XYZ(5, 5, 5);
@@ -67,10 +67,10 @@ createGeom = {
   },
   CylindricalSurface () {
     return new Geom.CylindricalSurface(creategp.Ax3(), 10);
-  }, 
+  },
     CylindricalSurface () {
     return new Geom.CylindricalSurface(creategp.Ax3(), 10);
-  }, 
+  },
   Axis1Placement() {
     return new Geom.Axis1Placement(creategp.Ax1());
   },
@@ -79,14 +79,14 @@ createGeom = {
   },
   Geometry() {
     return createGeom.CylindricalSurface();
-  }, 
+  },
   Surface() {
     return createGeom.CylindricalSurface();
-  }, 
+  },
   ElementarySurface() {
     return createGeom.CylindricalSurface();
-  }, 
-  
+  },
+
 }
 module.exports = {
   gp: creategp, Geom: createGeom, brepTest: createbrepTest
