@@ -4,7 +4,8 @@ module.exports = function(mod) {
   mod.depends('gp')
   mod.camelCase('*::*');
   mod.removePrefix('*');
-
+  mod.include('Standard_Type')
+  mod.include('Handle_Standard_Type')
   mod.include('Geom_Geometry');
   mod.include('Geom_Surface');
   mod.include('Geom_ElementarySurface');
@@ -17,7 +18,7 @@ module.exports = function(mod) {
     .argout('Bounds')
     .argout('TransformParameters')
     .argout('Coefficients');
-  //mod.noHandle('*');
+  mod.noHandle('*');
   mod.include('Handle_Geom_Geometry');
   mod.include('Handle_Geom_Surface');
   mod.include('Handle_Geom_ElementarySurface');

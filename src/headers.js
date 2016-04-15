@@ -59,7 +59,7 @@ function find(expr) {
   }
   return common
     .find(getModule(mod), expr)
-    .filter(res => !res.copyConstructor); //TODO: wrong home
+    //.filter(res => !res.copyConstructor); //TODO: wrong home
 }
 
 function get(name) {

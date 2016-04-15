@@ -25,19 +25,26 @@ module.exports.renderSwig = function(cls) {
   if (cls.cls !== 'class' || !cls.handle)
     return false;
   var typemapsrc = `
-%typemap(in) Handle_${name}& {
+/*%typemap(in) Handle_${name}& {
   // handlein
   void *argpointer ;
   int res = SWIG_ConvertPtr($input, &argpointer, SWIGTYPE_p_${name},  0 );
   $1 = new Handle_${name}((const ${name} *)argpointer);
   $input->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj($1, SWIGTYPE_p_Handle_${name}, SWIG_POINTER_OWN |  0 ));
-}
+}*/
 
 %typemap(out) Handle_${name} {
-  // handleout
-  $result = SWIG_NewPointerObj($1.Access(), SWIGTYPE_p_${name}, SWIG_POINTER_OWN |  0 );
-  $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(&$1, SWIGTYPE_p_Handle_${name}, SWIG_POINTER_OWN |  0 ));
-}`;
+  // lookup type
+  std::string name($1->DynamicType()->Name());
+  const std::string lookup_typename = name + " *";
+  swig_type_info * const outtype = SWIG_TypeQuery(lookup_typename.c_str());
+  $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), outtype, $owner);
+  // attach handle
+  Handle_${name} *handle = (Handle_${name} *)new Handle_${name}($1);
+  $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_${name}));
+}`
+;
+
 
   // %nodefaultctor Handle_${name};
   var handlessrc = `
@@ -51,11 +58,6 @@ public:
 %extend Handle_${name} {
   ${name}* getObject(){
     return (${name}*)self->Access();
-  }
-}
-%extend ${name} {
-  Handle_${name}* getHandle(){
-    return new Handle_${name};
   }
 }
 `

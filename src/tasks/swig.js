@@ -12,7 +12,7 @@ const settings = require('../settings.js');
 const headers = require('../headers.js');
 const exec = require('child_process').exec;
 
-const flags = '-javascript -node -c++ -DSWIG_TYPE_TABLE=occ.js';
+const flags = '-javascript -node -c++ -debug-tmused -DSWIG_TYPE_TABLE=occ.js';
 const otherFlags = '-w302,401,314,509,512 -DCSFDB -DHAVE_CONFIG_H -DOCC_CONVERT_SIGNALS'; // TODO:
 const include = ['-I/usr/include/node', `-I${settings.oce.include}`];
 
@@ -81,7 +81,7 @@ gulp.task('swig-hack-handles', function(){
         return str
       var statement = `
     // hacked
-    Handle_Geom_Geometry *handle;
+    Handle_${clsName} *handle;
     handle = (Handle_${clsName} *)new Handle_${clsName}((${clsName} const *)(result));
     self->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_${clsName}));
     //self->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewPointerObj(new Handle_${clsName}(result), SWIGTYPE_p_Handle_${clsName}, SWIG_POINTER_OWN |  0 ));`
