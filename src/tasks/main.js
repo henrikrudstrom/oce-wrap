@@ -20,7 +20,7 @@ gulp.task('render', function(done) {
 });
 
 gulp.task('build', ['render'], function(done) {
-  runSequence('gyp-clean', 'gyp-configure', 'gyp-build', 'copy-gyp', 'render-tests', done);
+  runSequence('gyp-clean', 'write-config', 'gyp-configure', 'gyp-build', 'copy-gyp', 'render-tests', done);
 });
 
 gulp.task('dist', ['build'], function(done) {
@@ -69,7 +69,7 @@ gulp.task('copy', function(done) {
 });
 
 gulp.task('copy-gyp', function(done) {
-  return gulp.src(`${settings.paths.gyp}/*/build/Release/*.node`)
+  return gulp.src(`${settings.paths.dist}/build/Release/*.node`)
     .pipe(rename({ dirname: '' }))
     .pipe(gulp.dest(`${settings.paths.dist}/lib/`));
 });

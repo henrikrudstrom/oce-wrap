@@ -17,7 +17,8 @@ var defaultsettings = {
   oce: {
     include: '/usr/local/include/oce',
     lib: '/usr/local/lib',
-    parseToolkits: ['TKG3d', 'TKG2d', 'TKernel', 'TKMath', 'TKAdvTools',
+    parseToolkits: [
+      'TKG3d', 'TKG2d', 'TKernel', 'TKMath', 'TKAdvTools',
       'TKGeomBase', 'TKBRep', 'TKGeomAlgo', 'TKTopAlgo'
     ]
   },
@@ -67,7 +68,7 @@ function initialize(settings) {
 
   settings.paths = extend({}, settings.paths, {
     swig: path.join(settings.paths.build, 'swig'),
-    cxx: path.join(settings.paths.build, 'cxx'),
+    cxx: path.join(settings.paths.dist, 'src'),
     inc: path.join(settings.paths.build, 'inc'),
     gyp: path.join(settings.paths.build, 'gyp'),
     config: path.join(settings.paths.build, 'config'),

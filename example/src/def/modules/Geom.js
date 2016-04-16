@@ -15,7 +15,7 @@ module.exports = function(mod) {
   mod.include('Geom_Curve');
   mod.include('Geom_BoundedCurve');
   mod.include('Geom_BezierCurve');
-  mod.include('TColgp_Array1OfPnt');
+  //mod.include('TColgp_Array1OfPnt');
 
 
   mod.find('*').include('*');
