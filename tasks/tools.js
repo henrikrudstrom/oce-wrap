@@ -1,6 +1,6 @@
-const settings = require('../settings.js');
+const settings = require('../src/settings.js');
 settings.initialize();
-var headers = require('../headers.js');
+var headers = require('../src/headers.js');
 var yargs = require('yargs')
 
 function cleanTypeName(ret) {

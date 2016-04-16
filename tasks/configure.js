@@ -2,8 +2,8 @@ module.exports = function(gulp) {
   const glob = require('glob');
   const run = require('gulp-run');
 
-  const configure = require('../configure.js');
-  const settings = require('../settings.js');
+  const configure = require('../src/configure.js');
+  const settings = require('../src/settings.js');
   require('./parse.js');
 
   gulp.task('configure', ['configure-clean', 'parse-headers'], function(done) {

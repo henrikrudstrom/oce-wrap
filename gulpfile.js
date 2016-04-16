@@ -10,7 +10,7 @@ const gulp = require('gulp');
 const jasmine = require('gulp-jasmine');
 const gutil = require('gulp-util');
 const yargs = require('yargs');
-require('./src/tasks/parse.js');
+require('./tasks/parse.js')(gulp);
 
 
 

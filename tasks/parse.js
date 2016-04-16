@@ -1,17 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const mkdirp = require('mkdirp');
-const yargs = require('yargs');
-
-const parseScript = path.join(__dirname, 'python/parse_headers.py');
-
 module.exports = function(gulp) {
+  const fs = require('fs');
+  const path = require('path');
+  const mkdirp = require('mkdirp');
+  const yargs = require('yargs');
+  const runSequence = require('run-sequence').use(gulp);
   const run = require('gulp-run');
   const gutil = require('gulp-util');
-  var runSequence = require('run-sequence').use(gulp);
-  const settings = require('../settings.js');
+  console.log(__dirname)
+  const settings = require('../src/settings.js');
   const common = require('./lib/common.js');
 
+  const parseScript = path.join(__dirname, 'python/parse_headers.py');
 
   function cacheFile(moduleName) {
     return `${settings.paths.headerCache}/${moduleName}.json`;

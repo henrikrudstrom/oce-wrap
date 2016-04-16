@@ -1,14 +1,15 @@
-const path = require('path');
-const fs = require('fs');
-const mkdirp = require('mkdirp');
-const async = require('async');
-const run = require('gulp-run');
-const render = require('../render.js');
-const settings = require('../settings.js');
-const headers = require('../headers.js');
-const exec = require('child_process').exec;
-
 module.exports = function(gulp) {
+  const path = require('path');
+  const fs = require('fs');
+  const mkdirp = require('mkdirp');
+  const async = require('async');
+  const run = require('gulp-run');
+
+  const render = require('../src/render.js');
+  const settings = require('../src/settings.js');
+  const headers = require('../src/headers.js');
+
+  const exec = require('child_process').exec;
   const flags = '-javascript -node -c++ -debug-tmused -DSWIG_TYPE_TABLE=occ.js';
   const otherFlags = '-w302,401,314,509,512 -DCSFDB -DHAVE_CONFIG_H -DOCC_CONVERT_SIGNALS'; // TODO:
   const include = ['-I/usr/include/node', `-I${settings.oce.include}`];
@@ -19,7 +20,7 @@ module.exports = function(gulp) {
     const includes = include.join(' ');
     mkdirp.sync(path.dirname(output));
     const cmd = `${settings.swig} ${flags} ${otherFlags} ${includes} -o ${output} ${input}`;
-    console.log(cmd)
+    console.log(cmd);
     exec(cmd, done);
   }
 

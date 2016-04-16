@@ -48,7 +48,10 @@ function parseTests() {
   return specs;
 }
 var overridenTests = parseTests();
-var notWorking = JSON.parse(fs.readFileSync(`${settings.paths.definition}/spec/notWorking.json`));
+var pendingFile = `${settings.paths.definition}/spec/notWorking.json`;
+var notWorking = {};
+if (fs.existsSync(pendingFile))
+  notWorking = JSON.parse(fs.readFileSync(pendingFile));
 
 
 var nextInt = 0;

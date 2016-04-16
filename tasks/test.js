@@ -1,19 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const glob = require('glob');
-const mkdirp = require('mkdirp');
-const async = require('async');
-const runSequence = require('run-sequence');
-const run = require('gulp-run');
-const render = require('../render.js');
-const settings = require('../settings.js');
-var rename = require('gulp-rename');
-const jasmine = require('gulp-jasmine');
+// show line number of spec that failed
 const gutil = require('gulp-util');
 const yargs = require('yargs');
-var debug = require('gulp-debug');
-
-// show line number of spec that failed
 var Reporter = require('jasmine-terminal-reporter');
 var reporter = new Reporter({ isVerbose: yargs.argv.verbose });
 var oldSpecDone = reporter.specDone;
@@ -33,6 +20,13 @@ reporter.specDone = function(result) {
 
 module.exports.reporter = reporter;
 module.exports = function(gulp) {
+  const glob = require('glob');
+  const run = require('gulp-run');
+  const render = require('../src/render.js');
+  const settings = require('../src/settings.js');
+  var rename = require('gulp-rename');
+  const jasmine = require('gulp-jasmine');
+
   gulp.task('test-clean', (done) =>
     run(`rm -rf ${settings.paths.dist}/spec`, { silent: true }).exec(done)
   );

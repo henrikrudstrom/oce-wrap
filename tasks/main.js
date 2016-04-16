@@ -1,4 +1,4 @@
-var settings = require('../settings.js');
+var settings = require('../src/settings.js');
 
 
 //const gulp = require('gulp');

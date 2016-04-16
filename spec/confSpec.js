@@ -285,31 +285,25 @@ describe('module object', function() {
     expect(method.argouts.length).toBe(4)
     expect(method.arguments.length).toBe(0)
     expect(method.returnType).toBe('Array')
-    
+
   });
-  it('can hide handles', function(){
+  it('can hide handles', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
     mod.camelCase('*::*');
     mod.removePrefix('*');
 
     mod.include('Geom_Axis1Placement');
-    
     mod.include('Geom_AxisPlacement');
     mod.find('*').include('*');
     mod.noHandle('Geom_*');
     mod.process();
     configure.processModules(mod);
-    //adds the handle class
-    expect(mod.declarations.length).toBe(4)
+    // adds the handle class
+    expect(mod.declarations.length).toBe(4);
     var obj = mod.get('Geom_AxisPlacement');
-    var handle = mod.get('Handle_Geom_AxisPlacement');
-    expect(typeof handle).toBe('object');
-    expect(handle.declarations.length).toBe(0);
-    expect(obj.get('Angle').arguments[0].type).toBe('Geom.AxisPlacement')
-    
-    
-  })
+    expect(obj.get('Angle').arguments[0].type).toBe('Geom.AxisPlacement');
+  });
 });
 
 
@@ -319,10 +313,10 @@ describe('MultiConf', function() {
     conf.createMultiConf(a);
     expect(a[0]).toBe(1);
     expect(a[1]).toBe(3);
-    var sum = a.reduce((a, b) => a + b);
+    var sum = a.reduce((k, b) => k + b);
     expect(sum).toBe(9);
-    expect(typeof a.include).toBe('function')
-    expect(typeof a.exclude).toBe('function')
+    expect(typeof a.include).toBe('function');
+    expect(typeof a.exclude).toBe('function');
   });
 });
 

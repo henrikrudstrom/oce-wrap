@@ -1,12 +1,11 @@
-const fs = require('fs');
-const run = require('gulp-run');
-const path = require('path');
-
 module.exports = function(gulp) {
-  const settings = require('../settings.js');
-  const loadModules = require('../modules.js');
-  const depend = require('../dependencies.js');
-  const conf = require('../conf.js');
+  const fs = require('fs');
+  const run = require('gulp-run');
+  const path = require('path');
+  const settings = require('../src/settings.js');
+  const loadModules = require('../src/modules.js');
+  const depend = require('../src/dependencies.js');
+  const conf = require('../src/conf.js');
 
   const paths = settings.paths;
   var reader = depend();
