@@ -10,7 +10,7 @@ var defaultsettings = {
   paths: {
     build: 'build',
     dist: 'dist',
-    definition: 'src/def',
+    definition: 'src',
     cache: 'cache',
     generator: generatorPath
   },
@@ -69,7 +69,7 @@ function initialize(settings) {
   settings.paths = extend({}, settings.paths, {
     swig: path.join(settings.paths.build, 'swig'),
     cxx: path.join(settings.paths.dist, 'src'),
-    inc: path.join(settings.paths.build, 'inc'),
+    inc: path.join(settings.paths.dist, 'inc'),
     gyp: path.join(settings.paths.build, 'gyp'),
     config: path.join(settings.paths.build, 'config'),
     headerCache: path.join(settings.paths.generator, 'cache/headers'),
@@ -77,7 +77,6 @@ function initialize(settings) {
   });
 
   settings.oce = extend(settings.oce, oceData(settings.oce.parseToolkits));
-
   settings.build = {
     modules: glob.sync(`${settings.paths.definition}/modules/*.js`)
       .map((file) => path.basename(file).replace('.js', ''))
@@ -86,7 +85,7 @@ function initialize(settings) {
     settings.build.modules = yargs.argv.module.split(',');
   if (yargs.argv.modules)
     settings.build.modules = yargs.argv.modules.split(',');
-
+  console.log(settings)
   module.exports = settings;
 }
 

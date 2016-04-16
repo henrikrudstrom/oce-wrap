@@ -2,7 +2,7 @@
   "name": "oce-wrap",
   "version": "0.0.1",
   "description": "Wrap generator for for Opencascade Solid modelling kernel",
-  "main": "gulpfile.js",
+  "main": "index.js",
   "directories": {
     "doc": "doc",
     "example": "examples",

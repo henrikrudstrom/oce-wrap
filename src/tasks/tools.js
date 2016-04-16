@@ -22,7 +22,7 @@ function memberDepends(mem, type, uses) {
 
 // return the type names that this class depends on
 function classDepends(cls, type, uses) {
-  
+
 }
 
 
@@ -30,7 +30,7 @@ function classDepends(cls, type, uses) {
 function findUsage(type){
   var uses = [];
   headers.listModules().forEach(modName => {
-    
+
     var mod = headers.getModule(modName);
     mod.declarations
       .filter(decl => decl.cls === 'class')
