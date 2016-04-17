@@ -4,6 +4,6 @@ module.exports = function(mod) {
   mod.include('gp_Pnt*');
   mod.include('gp_Vec*');
   mod.find('*').include('*');
-  mod.camelCase('*::*');
+  mod.find('*').camelCase('*');
   mod.removePrefix('*');
 };

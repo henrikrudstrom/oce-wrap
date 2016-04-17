@@ -1,7 +1,8 @@
 const settings = require('./settings.js');
 const common = require('./common.js');
 const fs = require('fs');
-var glob = require('glob')
+const glob = require('glob');
+
 function cleanTypeName(ret) {
   ret = ret.replace(/&|\*/, '');
   ret = ret.replace('const', '');
@@ -27,7 +28,9 @@ function processType(type) {
 }
 
 function loadModule(mod) {
-  var data = JSON.parse(fs.readFileSync(`${settings.paths.headerCache}/${mod}.json`));
+  var file = `${settings.paths.headerCache}/${mod}.json`
+  if (!fs.existsSync(file)) return null;
+  var data = JSON.parse(fs.readFileSync(file));
   data.declarations = data.typedefs
     .concat(data.enums)
     .concat(data.classes)
@@ -46,20 +49,17 @@ function getModule(mod) {
   return modules[mod];
 }
 
-function listModules(){
+function listModules() {
   return glob.sync(`${settings.paths.headerCache}/*.json`)
     .map(file => file.match(/\/(\w+).json/)[1])
 }
 
 function find(expr) {
-
-  var mod = expr.replace('Handle_', '').split('_')[0];
-  if (mod === 'Geom') {
-    var modu = getModule(mod);
-  }
-  return common
-    .find(getModule(mod), expr)
-    .filter(res => !res.copyConstructor); //TODO: wrong home
+  var modName = expr.replace('Handle_', '').split('_')[0];
+  var mod = getModule(modName);
+  if (!mod) return [];
+  return common.find(mod, expr)
+    .filter(res => !res.copyConstructor); // TODO: wrong home
 }
 
 function get(name) {

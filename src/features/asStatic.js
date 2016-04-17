@@ -1,4 +1,5 @@
 const extend = require('extend');
+const camelCase = require('camel-case');
 const conf = require('../conf.js');
 const common = require('../common.js');
 const headers = require('../headers.js');
@@ -6,22 +7,26 @@ const headers = require('../headers.js');
 
 module.exports.name = 'asStatic';
 
-function includeAsStatic(clsName, template, valueFunc) {
+function includeAsStatic(expr, template, valueFunc) {
+  var clsName = expr.split('(')[0];
   var cls = headers.get(clsName);
   var returnType = cls.declarations.find(decl => decl.name === valueFunc).returnType;
 
-  var name = common.removePrefix(cls.name);
+  var name = camelCase(common.removePrefix(cls.name));
   var res = cls.declarations
     .filter(decl => decl.cls === 'constructor')
     .filter(decl => !decl.copyConstructor)
+    .filter(decl => {
+      return common.match(expr, decl.key)
+    })
     .map(cons => {
       var args = cons.arguments.map(arg => extend({}, arg));
       return {
         name,
-        key: cls.name + '::' + cons.key,
+        key: cons.key,
         cls: 'staticfunc',
         parent: this.name,
-        sourceParent: this.name,
+        sourceParent: cls.name,
         originCls: cls.name,
         returnType,
         sourceReturnType: returnType,

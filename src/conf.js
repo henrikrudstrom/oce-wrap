@@ -59,11 +59,11 @@ function mapSources(declaration) {
     var decl = d;
     decl.source = function(keyProp) {
       keyProp = keyProp || 'key';
-      if (declaration.cls === 'module')
+      // TODO: this is getting ugly
+      if (decl.cls === 'class' || decl.cls === 'typedef' || decl.cls === 'enum')
         return headers.get(this[keyProp]);
-      var query = decl[keyProp];
-      if (query.indexOf('::') === -1)
-        query = declaration.key + '::' + decl[keyProp];
+      var parentKey = decl.sourceParent || declaration.key;
+      var query = parentKey + '::' + decl[keyProp];
 
       return headers.get(query);
     };

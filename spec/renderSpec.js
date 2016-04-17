@@ -85,7 +85,6 @@ describe('render tests', function() {
     var res = render('renderTest', configuredModules);
     render.write(settings.paths.dist + '/test', res);
     //var res = testsFeature.renderClassSuite(modules().get('other.Vec'))
-    console.log(res);
 
   })
 });

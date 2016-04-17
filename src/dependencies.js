@@ -43,7 +43,9 @@ function dependencyReader(mods) {
     }
     visited[cls.name] = true;
 
-
+    if (!cls.declarations) {
+      return memberDepends(cls);
+    }
     var res = cls.declarations
       .filter((mem) => !options.constructorsOnly || mem.cls === 'constructor')
       .map(mem => memberDepends(mem, options.wrapped))

@@ -110,10 +110,7 @@ function renderTest(cls, member, testSrc) {
   if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
     disable = '// arguments or return type not wrapped\n  x';
 
-  //var qualifiedName = cls.parent + '.' + cls.name;
   if (specOverride.notWorking(cls.parent + '.' + cls.name, sig)) {
-    //if (qualifiedName in notWorking) {
-    //if (notWorking[qualifiedName].find(s => s === sig))
     disable = '// TODO: not working\n  x';
   }
   var src = `\n

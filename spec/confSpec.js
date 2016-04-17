@@ -164,7 +164,7 @@ describe('module object', function() {
     mod.include('gp_*')
     mod.find('*')
       .include('*');
-    mod.camelCase('*::*');
+    mod.find('*').camelCase('*');
     mod.process();
 
     mod.find('gp_Vec::SetX');
@@ -271,7 +271,7 @@ describe('module object', function() {
   it('can handle argouts', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
-    mod.camelCase('*::*');
+    mod.find('*').camelCase('*');
     mod.removePrefix('*');
 
     mod.include('Geom_Geometry');
@@ -290,7 +290,7 @@ describe('module object', function() {
   it('can hide handles', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
-    mod.camelCase('*::*');
+    mod.find('*').camelCase('*');
     mod.removePrefix('*');
 
     mod.include('Geom_Axis1Placement');
@@ -309,13 +309,13 @@ describe('module object', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
     mod.depends('gp');
-    mod.camelCase('*::*');
+    mod.find('*').camelCase('*');
     mod.removePrefix('*');
     mod.include('Geom_Geometry');
     mod.include('Geom_Curve');
     mod.include('Geom_Conic');
     mod.include('Geom_Circle');
-    mod.find('Geom_Circle').includeGCMake('GC_MakeCircle');
+    mod.find('Geom_Circle').includeGCMake('GC_MakeCircle(*)');
     mod.noHandle('*');
     mod.process();
     configure.processModules(mod);
@@ -327,6 +327,28 @@ describe('module object', function() {
     expect(statics[0].source()).not.toBe(null);
     expect(statics[0].source().name).toBe('GC_MakeCircle');
     expect(statics.every(s => s.returnType === 'Geom.Circle')).toBe(true);
+  });
+  it('can wrap BRepBuilder as module static functions', function() {
+    var mod = new conf.Conf();
+    mod.name = 'Geom';
+    mod.find('*').camelCase('*');
+
+    mod.removePrefix('*');
+    mod.include('Geom_Geometry');
+    mod.include('Geom_Curve');
+
+    mod.includeBRepBuilder('BRepBuilderAPI_MakeEdge(Handle_Geom_*)', 'Edge');
+    mod.noHandle('*');
+    mod.process();
+    configure.processModules(mod);
+
+    var statics = mod.find('BRepBuilderAPI_MakeEdge');
+    expect(statics.length).toBe(6);
+    // expect(statics[0].returnType).toBe('Geom.Circle');
+    expect(statics[0].name).toBe('makeEdge');
+    // expect(statics[0].source()).not.toBe(null);
+    // expect(statics[0].source().name).toBe('GC_MakeCircle');
+    // expect(statics.every(s => s.returnType === 'Geom.Circle')).toBe(true);
   });
 });
 

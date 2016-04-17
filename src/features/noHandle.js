@@ -1,10 +1,13 @@
 var conf = require('../conf.js');
+var headers = require('../headers.js');
 
 conf.Conf.prototype.noHandle = function(expr) {
-  console.log(expr)
   this.find(expr).forEach(cls => {
     if (cls.key.startsWith('Handle_')) return;
-    this.include('Handle_' + cls.name);
+    var handleKey = 'Handle_' + cls.name;
+    if (!headers.get(handleKey)) return;
+
+    this.include(handleKey);
     var handle = this.get('Handle_' + cls.name);
     if (handle)
       handle.include('Handle_' + cls.name + '(*)');

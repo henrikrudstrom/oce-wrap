@@ -4,6 +4,6 @@ module.exports = function(mod) {
   mod.include('gp_Ax2');
   mod.include('gp_Ax3');
   mod.find('*').include('*');
-  mod.camelCase('*::*');
+  mod.find('*').camelCase('*');
   mod.removePrefix('*');
 };

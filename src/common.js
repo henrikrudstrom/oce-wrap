@@ -54,8 +54,8 @@ function getDecl(data, name, matcher) {
 }
 
 function removePrefix(name) {
-  var m = name.match(/^((?:Handle_)*)([a-z|A-Z|0-9]+_?)(\w+)$/);
-  if (!m) return name;
+  var m = name.match(/^((?:Handle_)*)([a-z|A-Z|0-9]+_?)(\w*)$/);
+  if (!m[3]) return name;
   return m[1] + m[3];
 }
 
