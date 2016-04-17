@@ -71,7 +71,7 @@ module.exports = function(gulp) {
     Handle_${clsName} *handle;
     handle = (Handle_${clsName} *)new Handle_${clsName}((${clsName} const *)(result));
     self->ToObject()->Set(
-      SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_${clsName}));`;
+      SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_Standard_Transient));`;
 
         return str + statement;
       }))

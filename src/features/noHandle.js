@@ -39,7 +39,7 @@ module.exports.renderSwig = function(cls) {
 %typemap(in) Handle_${name}& {
   // handlein
   void *argpointer ;
-  int res = SWIG_ConvertPtr($input->ToObject()->Get(SWIGV8_SYMBOL_NEW("_handle")), &argpointer, SWIGTYPE_p_Handle_${name}, 0);
+  int res = SWIG_ConvertPtr($input->ToObject()->Get(SWIGV8_SYMBOL_NEW("_handle")), &argpointer, SWIGTYPE_p_Handle_Standard_Transient, 0);
   $1 = (Handle_${name} *)(argpointer);
 }
 
@@ -51,7 +51,7 @@ module.exports.renderSwig = function(cls) {
   $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), outtype, $owner);
   // attach handle
   Handle_${name} *handle = (Handle_${name} *)new Handle_${name}($1);
-  $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_${name}));
+  $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_Standard_Transient));
 }`;
 
   return { name: 'typemaps.i', src: typemapsrc };
