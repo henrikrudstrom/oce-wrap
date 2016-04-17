@@ -6,6 +6,7 @@ const headers = require('../headers.js');
 module.exports.name = 'asStatic';
 conf.Conf.prototype.includeGCMake = function(clsName) {
   var cls = headers.get(clsName);
+
   var returnType = cls.get('Value').returnType;
   var name = cls.name.replace('GC_Make', '');
   var res = cls.declarations

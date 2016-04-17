@@ -2,9 +2,7 @@ var modules = require('../modules.js')();
 var settings = require('../settings.js');
 const glob = require('glob');
 const fs = require('fs');
-module.exports.renderTest = function(cls, parts) {
-
-};
+const path = require('path');
 
 function validType(typeName) {
   if (typeName === 'int') return true;
@@ -29,11 +27,11 @@ function parseTests() {
   glob.sync(`${settings.paths.definition}/spec/**/*Spec.js`)
     .concat(glob.sync(`${settings.paths.definition}/spec/*Spec.js`))
     .forEach(file => {
-      console.log(file)
+      //console.log(file);
       var itexp = / *x?it\('(\w+\(.*\))',((?:.|\n)*?\}\));/g;
       var descExp = /describe\('((?:\w|\.|_| )*)',((?:.|\n)*?}\)(\n| |;)*}\)?)/g;
       var src = fs.readFileSync(file).toString();
-      var matches = src.match(descExp)
+      var matches = src.match(descExp);
       if (matches)
         matches.forEach(desc => {
           var suite = desc.match(/describe\('(.+)'/)[1];
@@ -48,10 +46,12 @@ function parseTests() {
   return specs;
 }
 var overridenTests = parseTests();
-var pendingFile = `${settings.paths.definition}/spec/notWorking.json`;
-var notWorking = {};
-if (fs.existsSync(pendingFile))
-  notWorking = JSON.parse(fs.readFileSync(pendingFile));
+//var pendingFile = `${settings.paths.definition}/spec/notWorking.json`;
+var specOverride = require(
+  path.relative(__dirname, `${settings.paths.definition}/spec/notWorking.js`)
+);
+// if (fs.existsSync(pendingFile))
+//   notWorking = JSON.parse(fs.readFileSync(pendingFile));
 
 
 var nextInt = 0;
@@ -60,7 +60,7 @@ var nextBool = false;
 
 function int() {
   nextInt += 1;
-  return 1; //nextInt.toString();
+  return 1; // nextInt.toString();
 }
 
 function double() {
@@ -109,14 +109,15 @@ function renderTest(cls, member, testSrc) {
   if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
     disable = '// arguments or return type not wrapped\n  x';
 
-  var qualifiedName = cls.parent + '.' + cls.name;
-  if (qualifiedName in notWorking) {
-    if (notWorking[qualifiedName].find(s => s === sig))
-      disable = '// TODO: not working\n  x';
+  //var qualifiedName = cls.parent + '.' + cls.name;
+  if (specOverride.notWorking(cls.parent + '.' + cls.name, sig)) {
+    //if (qualifiedName in notWorking) {
+    //if (notWorking[qualifiedName].find(s => s === sig))
+    disable = '// TODO: not working\n  x';
   }
   var src = `\n
   ${disable}it('${sig}', function(){
-    console.log('${sig}')
+    // console.log('${sig}')
 ${testSrc}
   });`;
   return src;
@@ -128,10 +129,12 @@ function renderMemberFunction(cls, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
   var testSrc = `\
     var obj = create.${cls.parent}.${cls.name}();
-    var obj_h = obj._handle;
     var res = obj.${calldef.name}(${args});`;
   if (calldef.downCastToThis)
     returnType = cls.name;
+  var override = specOverride.returnType(cls.parent + '.' + cls.name, signature(calldef));
+  if (override)
+    returnType = override;
   if (returnType === 'int' || returnType === 'double')
     testSrc += '\n    expect(typeof res).toBe(\'number\');';
   else if (returnType === 'bool')
