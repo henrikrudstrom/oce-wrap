@@ -18,13 +18,15 @@ function dependencyReader(mods) {
 
   // return the type names that class member depends on
   function memberDepends(mem) {
-    return [mem.returnType]
-      .concat(mem.arguments ? mem.arguments.map((a) => a.type) : [])
+    var srcMem = mem.source();
+    return [srcMem.returnType]
+      .concat(mem.depends || [])
+      .concat(srcMem.arguments ? srcMem.arguments.map((a) => a.type) : [])
       .filter((t, index, array) => array.indexOf(t) === index);
   }
 
   // return the type names that this class depends on
-  function classDepends(cls, recursive, constructorsOnly, visited) {
+  function classDepends(cls, recursive, source, constructorsOnly, visited) {
     var firstCall = false;
     if (visited === undefined) {
       firstCall = true;
@@ -38,9 +40,11 @@ function dependencyReader(mods) {
       return [];
     }
     visited[cls.name] = true;
+
+
     var res = cls.declarations
       .filter((mem) => !constructorsOnly || mem.cls === 'constructor')
-      .map(memberDepends)
+      .map(mem => memberDepends(mem))
       .reduce((a, b) => a.concat(b), [])
       .filter(unique)
       .filter((name) => name && name !== 'void');
@@ -54,27 +58,29 @@ function dependencyReader(mods) {
       ).filter(unique);
     }
 
+    // dont include this class in dependency list
     if (firstCall) {
       var qualifiedName = cls.name;
       if (cls.parent)
         qualifiedName = cls.parent + '.' + cls.name;
       return res.filter((name) => name !== qualifiedName);
     }
+    //cache result
     cache[cls.name] = res;
     return res;
   }
 
-  function moduleDepends(mod) {
-    return mod.declarations
-      .map((d) => classDepends(d, false))
-      .reduce((a, b) => a.concat(b), [])
-      .filter((d, index, array) => array.indexOf(d) === index);
-  }
+  // function moduleDepends(mod) {
+  //   return mod.declarations
+  //     .map((d) => classDepends(d, false))
+  //     .reduce((a, b) => a.concat(b), [])
+  //     .filter((d, index, array) => array.indexOf(d) === index);
+  // }
 
 
   function toolkitDepends(mod) {
     var deps = mod.declarations
-      .map((d) => classDepends(d.source(), false))
+      .map((d) => classDepends(d, false))
       .concat(mod.declarations.map(cls => cls.source().name))
       .reduce((a, b) => a.concat(b), [])
       .map(cls => modName(cls))
@@ -102,7 +108,7 @@ function dependencyReader(mods) {
 
   return {
     classDepends,
-    moduleDepends,
+    //moduleDepends,
     toolkitDepends
   };
 }

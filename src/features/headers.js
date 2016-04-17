@@ -2,7 +2,7 @@ module.exports.renderSwig = function(decl) {
   var reader = require('../dependencies.js')();
   if (decl.cls !== 'module') return false;
   var depends = decl.declarations
-    .map((d) => reader.classDepends(d.source(), false))
+    .map((d) => reader.classDepends(d, false))
     .concat(decl.declarations.map(d => d.source().name))
     .concat(decl.declarations
       .map(d => (d.bases ? d.source().bases.map(b => b.name) : []))
