@@ -21,7 +21,6 @@ function keyMatcher(exp, matchValue, wrapped) {
     if (wrapped !== undefined) {
       key = obj.name;
     }
-    //console.log("N", obj.name, "K", obj.key, wrapped, key)
     if (exp.indexOf('(') === -1 && key.indexOf('(') !== -1)
       key = key.split('(')[0];
     return match(exp, key) ? matchValue : !matchValue;
@@ -40,8 +39,8 @@ function find(data, expr, wrapped) {
   }
 
   var types = data.declarations.filter(keyMatcher(type, true, wrapped));
-
   if (member === undefined) return types;
+
   return types.map((t) => t.declarations)
     .reduce((a, b) => a.concat(b), [])
     .filter(keyMatcher(member, true, wrapped));
@@ -54,9 +53,16 @@ function getDecl(data, name, matcher) {
   throw new Error('headers.get expected one result, got multiple');
 }
 
+function removePrefix(name) {
+  var m = name.match(/^((?:Handle_)*)([a-z|A-Z|0-9]+_?)(\w+)$/);
+  if (!m) return name;
+  return m[1] + m[3];
+}
+
 module.exports = {
   match,
   find,
   get: getDecl,
-  matcher: keyMatcher
+  matcher: keyMatcher,
+  removePrefix
 };

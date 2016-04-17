@@ -304,6 +304,30 @@ describe('module object', function() {
     var obj = mod.get('Geom_AxisPlacement');
     expect(obj.get('Angle').arguments[0].type).toBe('Geom.AxisPlacement');
   });
+
+  it('can wrap GC_Make as static functions', function() {
+    var mod = new conf.Conf();
+    mod.name = 'Geom';
+    mod.depends('gp');
+    mod.camelCase('*::*');
+    mod.removePrefix('*');
+    mod.include('Geom_Geometry');
+    mod.include('Geom_Curve');
+    mod.include('Geom_Conic');
+    mod.include('Geom_Circle');
+    mod.find('Geom_Circle').includeGCMake('GC_MakeCircle');
+    mod.noHandle('*');
+    mod.process();
+    configure.processModules(mod);
+
+    var statics = mod.get('Geom_Circle').declarations.filter(decl => decl.cls === 'staticfunc');
+    expect(statics.length).toBe(8);
+    expect(statics[0].returnType).toBe('Geom.Circle');
+    expect(statics[0].name).toBe('makeCircle');
+    expect(statics[0].source()).not.toBe(null);
+    expect(statics[0].source().name).toBe('GC_MakeCircle');
+    expect(statics.every(s => s.returnType === 'Geom.Circle')).toBe(true);
+  });
 });
 
 

@@ -10,7 +10,7 @@ module.exports = function(gulp) {
   const headers = require('../src/headers.js');
 
   const exec = require('child_process').exec;
-  const flags = '-javascript -node -c++ -debug-tmused -DSWIG_TYPE_TABLE=occ.js';
+  const flags = '-javascript -node -c++ -DSWIG_TYPE_TABLE=occ.js';
   const otherFlags = '-w302,401,314,509,512 -DCSFDB -DHAVE_CONFIG_H -DOCC_CONVERT_SIGNALS'; // TODO:
   const include = ['-I/usr/include/node', `-I${settings.oce.include}`];
 

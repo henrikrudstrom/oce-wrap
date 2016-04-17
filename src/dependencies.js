@@ -17,16 +17,18 @@ function dependencyReader(mods) {
   var cache = {};
 
   // return the type names that class member depends on
-  function memberDepends(mem) {
-    var srcMem = mem.source();
-    return [srcMem.returnType]
+  function memberDepends(mem, source) {
+    if (source)
+      mem = mem.source();
+    return [mem.returnType]
       .concat(mem.depends || [])
-      .concat(srcMem.arguments ? srcMem.arguments.map((a) => a.type) : [])
+      .concat(mem.arguments ? mem.arguments.map((a) => a.type) : [])
       .filter((t, index, array) => array.indexOf(t) === index);
   }
 
   // return the type names that this class depends on
-  function classDepends(cls, recursive, source, constructorsOnly, visited) {
+  function classDepends(cls, options, visited) {
+    options = options || {};
     var firstCall = false;
     if (visited === undefined) {
       firstCall = true;
@@ -43,17 +45,17 @@ function dependencyReader(mods) {
 
 
     var res = cls.declarations
-      .filter((mem) => !constructorsOnly || mem.cls === 'constructor')
-      .map(mem => memberDepends(mem))
+      .filter((mem) => !options.constructorsOnly || mem.cls === 'constructor')
+      .map(mem => memberDepends(mem, options.wrapped))
       .reduce((a, b) => a.concat(b), [])
       .filter(unique)
       .filter((name) => name && name !== 'void');
 
-    if (recursive) {
+    if (options.recursive) {
       res = res.concat(
         res.map((name) => mods.get(name))
         .filter((c) => c !== null)
-        .map((c) => classDepends(c, recursive, constructorsOnly, visited))
+        .map((c) => classDepends(c, options, visited))
         .reduce((a, b) => a.concat(b), [])
       ).filter(unique);
     }

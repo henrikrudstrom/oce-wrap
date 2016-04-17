@@ -3,6 +3,7 @@ require('./features/depends.js');
 require('./features/property.js');
 require('./features/argout.js');
 require('./features/noHandle.js');
+require('./features/asStatic.js');
 const fs = require('fs');
 const mkdirp = require('mkdirp');
 const glob = require('glob');

@@ -85,7 +85,6 @@ function initialize(settings) {
     settings.build.modules = yargs.argv.module.split(',');
   if (yargs.argv.modules)
     settings.build.modules = yargs.argv.modules.split(',');
-  console.log(settings)
   module.exports = settings;
 }
 

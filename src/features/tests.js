@@ -47,6 +47,7 @@ function parseTests() {
 }
 var overridenTests = parseTests();
 //var pendingFile = `${settings.paths.definition}/spec/notWorking.json`;
+
 var specOverride = require(
   path.relative(__dirname, `${settings.paths.definition}/spec/notWorking.js`)
 );
@@ -145,7 +146,27 @@ function renderMemberFunction(cls, calldef) {
     expect(res.constructor.name.replace('_exports_', '')).toBe('${returnType}');`;
   return renderTest(cls, calldef, testSrc);
 }
-
+function renderStaticFunction(cls, calldef) {
+  var returnType = calldef.returnType.indexOf('.') !== -1 ?
+    calldef.returnType.split('.')[1] : calldef.returnType;
+  var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
+  var testSrc = `\
+    var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
+  if (calldef.downCastToThis)
+    returnType = cls.name;
+  var override = specOverride.returnType(cls.parent + '.' + cls.name, signature(calldef));
+  if (override)
+    returnType = override;
+  if (returnType === 'int' || returnType === 'double')
+    testSrc += '\n    expect(typeof res).toBe(\'number\');';
+  else if (returnType === 'bool')
+    testSrc += '\n    expect(typeof res).toBe(\'boolean\');';
+  else if (returnType !== 'void')
+    testSrc += `
+    expect(typeof res).toBe('object');
+    expect(res.constructor.name.replace('_exports_', '')).toBe('${returnType}');`;
+  return renderTest(cls, calldef, testSrc);
+}
 
 function renderConstructor(cls, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
@@ -195,6 +216,9 @@ function renderClassSuite(mod, cls, imports) {
     .filter(decl => decl.cls === 'constructor')
     .map(decl => renderConstructor(cls, decl));
   // var functionTests = [];
+  var staticFunctions = declarations
+    .filter(decl => decl.cls === 'staticfunc')
+    .map(decl => renderStaticFunction(cls, decl));
   var functionTests = declarations
     .filter(decl => decl.cls === 'memfun')
     .map(decl => renderMemberFunction(cls, decl));
@@ -207,6 +231,7 @@ ${imports}
 var create = require('../create.js')
 describe('${cls.parent}.${cls.name}', function(){
 ${constructorTests.join('\n')}
+${staticFunctions.join('\n')}
 ${functionTests.join('\n')}
 ${propertyTests.join('\n')}
 });
@@ -214,10 +239,6 @@ ${propertyTests.join('\n')}
   return clsSrc;
 }
 module.exports.renderClassSuite = renderClassSuite;
-
-
-
-
 
 module.exports.renderTest = function(decl, parts) {
   if (decl.cls !== 'module') return false;
@@ -232,3 +253,21 @@ module.exports.renderTest = function(decl, parts) {
       ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports) })
     );
 };
+
+// function renderClass(decl, parts){
+//   var clsSrc = `\
+// ${imports}
+// var create = require('../create.js')
+// describe('${cls.parent}.${cls.name}', function(){
+// ${parts.get(decl.name+'Spec').join('\n')}
+// });
+// `;
+// }
+//
+// module.exports.renderTest = function(decl, parts) {
+//   if (decl.cls === 'module'){
+//
+//   }
+//
+//   if (decl.cls === 'class') return renderClass(decl, parts);
+// };

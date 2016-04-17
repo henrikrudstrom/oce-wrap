@@ -61,7 +61,9 @@ function mapSources(declaration) {
       keyProp = keyProp || 'key';
       if (declaration.cls === 'module')
         return headers.get(this[keyProp]);
-      var query = declaration.key + '::' + decl[keyProp];
+      var query = decl[keyProp];
+      if (query.indexOf('::') === -1)
+        query = declaration.key + '::' + decl[keyProp];
 
       return headers.get(query);
     };
@@ -127,7 +129,8 @@ Conf.prototype = {
 };
 
 module.exports = {
-  Conf, MultiConf,
+  Conf,
+  MultiConf,
   createMultiConf,
   mapSources
 };

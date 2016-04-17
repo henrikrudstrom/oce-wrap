@@ -52,7 +52,7 @@ describe('classDepends', function() {
   it('can process recursive dependencies', function() {
     var reader = depend(headers);
     var point = headers.get('Geom_Point');
-    var deps = reader.classDepends(point, true);
+    var deps = reader.classDepends(point, { recursive: true });
     var res = [
       'Standard_Real', 'gp_Pnt', 'Handle_Geom_Point', 'Handle_Standard_Type',
       'gp_XYZ', 'Standard_Integer', 'Standard_Boolean', 'gp_Ax1', 'gp_Ax2', 'gp_Trsf',

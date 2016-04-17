@@ -5,7 +5,7 @@ const conf = require('../src/conf.js');
 const render = require('../src/render.js');
 
 
-describe('Swig Renderer', function() {
+xdescribe('Swig Renderer', function() {
   var features = ['rename', 'property'].map((name) =>
     require(`../src/features/${name}.js`)
   );

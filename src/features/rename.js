@@ -1,6 +1,7 @@
 module.exports.name = 'property';
 
 const conf = require('../conf.js');
+const common = require('../common.js');
 const camelCase = require('camel-case');
 
 function rename(expr, name) {
@@ -12,7 +13,7 @@ function rename(expr, name) {
     obj.rename = true;
     obj.name = nameFunc(obj.name, obj);
 
-    // rename parent property of child declarations
+    // rename parent property of child declarations TODO: handle this in configure.js
     if (!obj.declarations) return;
     obj.declarations.forEach((decl) => {
       decl.parent = obj.name;
@@ -29,20 +30,18 @@ function renameCamelCase(expr) {
 
 function removePrefix(expr) {
   return this.rename(expr, (name) => {
-    var match = name.match(/^((?:Handle_)*)([a-z|A-Z|0-9]+_?)(\w+)$/);
-    if (!match) return name;
-    return match[1] + match[3];
+    return common.removePrefix(name);
   });
 }
 
 conf.Conf.prototype.rename = rename;
 conf.Conf.prototype.camelCase = renameCamelCase;
 conf.Conf.prototype.removePrefix = removePrefix;
-conf.MultiConf.prototype.rename = function rename(expr, newName) {
+conf.MultiConf.prototype.rename = function(expr, newName) {
   this.map((decl) => decl.rename(expr, newName));
   return this;
 };
-conf.MultiConf.prototype.camelCase = function camelCase(expr) {
+conf.MultiConf.prototype.camelCase = function(expr) {
   this.map((decl) => decl.camelCase(expr));
   return this;
 };

@@ -12,10 +12,6 @@ const gutil = require('gulp-util');
 const yargs = require('yargs');
 require('./tasks/parse.js')(gulp);
 
-
-
-
-
 // show line number of spec that failed
 var Reporter = require('jasmine-terminal-reporter');
 var reporter = new Reporter({ isVerbose: true });
@@ -33,6 +29,7 @@ reporter.specDone = function(result) {
 module.exports.reporter = reporter;
 
 gulp.task('test', function() {
+  console.log("MYTEST")
   var specSources = ['spec/*Spec.js'];
   var arg = yargs.argv.spec;
   if (arg)
