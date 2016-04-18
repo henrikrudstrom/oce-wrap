@@ -62,7 +62,7 @@ function mapSources(declaration) {
       // TODO: this is getting ugly
       if (decl.cls === 'class' || decl.cls === 'typedef' || decl.cls === 'enum')
         return headers.get(this[keyProp]);
-      var parentKey = decl.sourceParent || declaration.key;
+      var parentKey = decl.parentKey || declaration.key;
       var query = parentKey + '::' + decl[keyProp];
 
       return headers.get(query);

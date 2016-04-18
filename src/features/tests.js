@@ -115,7 +115,7 @@ function renderTest(cls, member, testSrc) {
   }
   var src = `\n
   ${disable}it('${sig}', function(){
-    // console.log('${sig}')
+    console.log('${sig}')
 ${testSrc}
   });`;
   return src;

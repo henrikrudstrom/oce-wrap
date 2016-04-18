@@ -26,7 +26,8 @@ function includeAsStatic(expr, template, valueFunc) {
         key: cons.key,
         cls: 'staticfunc',
         parent: this.name,
-        sourceParent: cls.name,
+        sourceParent: this.name,
+        parentKey: cls.name,
         originCls: cls.name,
         returnType,
         sourceReturnType: returnType,
@@ -68,12 +69,12 @@ var templates = {
 }`;
   },
   renderBRepBuilder(decl, source, args, argNames) {
-    return `%extend ${decl.sourceParent} {
+    return `%inline {
   static const ${decl.sourceReturnType} ${decl.name}(${args}){
     ${source.parent}* obj = new ${source.parent}(${argNames});
-    if(obj->IsDone())
-      return obj->${decl.valueFunc}();
-    return SWIGV8_NULL(); //TODO check error
+    if(!obj->IsDone())
+      SWIG_V8_Raise("could not make edge"); // TODO check error
+    return obj->${decl.valueFunc}();
   }
 }`;
   }
