@@ -1,4 +1,5 @@
 var modules = require('../modules.js')();
+var common = require('../common.js');
 var settings = require('../settings.js');
 const glob = require('glob');
 const fs = require('fs');
@@ -60,14 +61,6 @@ function createValue(typeName) {
 }
 module.exports.createValue = createValue;
 
-function signature(member) {
-  var sig = `${member.name}`;
-  if (member.arguments)
-    sig += `(${member.arguments.map(arg => arg.type).join(', ')})`;
-  return sig;
-}
-
-
 function renderTest(cls, member, testSrc) {
   var sig = `${member.name}`;
   if (member.arguments)
@@ -77,7 +70,7 @@ function renderTest(cls, member, testSrc) {
   if (overridenTests.hasOwnProperty(key)) {
     return `// ${sig} - Redefined.`;
   }
-
+  console.log(member.name, member.cls, sig, member.type)
   // disable tests for members with unwrapped arguments/return type
   var disable = '';
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
@@ -120,7 +113,7 @@ function memberReturnType(cls, member, suiteKey) {
     returnType = cls.name;
 
 
-  var override = specOverride.returnType(suiteKey, signature(member));
+  var override = specOverride.returnType(suiteKey, common.signature(member));
   if (override)
     returnType = override;
   return returnType;
@@ -151,7 +144,7 @@ function renderFreeFunction(mod, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
   var testSrc = `\
     var res = ${mod.name}.${calldef.name}(${args});`;
-  var sig = signature(calldef);
+  var sig = common.signature(calldef);
 
   var returnType = memberReturnType(mod, calldef, mod.name);
   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
@@ -195,8 +188,8 @@ function getInheritedDeclarations(cls) {
       return [];
     }))
     .reduce((a, b) => a.concat(b));
-  var sigs = decls.map(signature);
-  return decls.filter((mem, index) => sigs.indexOf(signature(mem)) === index);
+  var sigs = decls.map(common.signature);
+  return decls.filter((mem, index) => sigs.indexOf(common.signature(mem)) === index);
 }
 
 function renderClassSuite(mod, cls, imports) {

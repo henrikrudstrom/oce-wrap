@@ -111,6 +111,7 @@ Conf.prototype = {
       fn = decl => !expr(decl);
     }
     this.declarations = this.declarations.filter(fn);
+    return this;
   },
   transform(expr, fn) {
     this.stacks.transform.push(() => {
