@@ -88,10 +88,11 @@ Conf.prototype = {
 
   include(expr) {
     if (Array.isArray(expr)) expr.map(this.include.bind(this));
-    if (this.cls && (this.cls === 'class' || this.cls === 'enum' || this.cls === 'typedef'))
-      expr = `${this.key}::${expr}`;
+    if (typeof expr !== 'function')
+      if (this.cls && (this.cls === 'class' || this.cls === 'enum' || this.cls === 'typedef'))
+        expr = `${this.key}::${expr}`;
 
-    // query parsed headers for declaration
+      // query parsed headers for declaration
     var res = headers.find(expr)
       .map((decl) => processInclude(decl, this));
 
@@ -102,7 +103,14 @@ Conf.prototype = {
     return this;
   },
   exclude(expr) {
-    this.declarations = this.declarations.filter(common.matcher(expr, false));
+    //console.log("EXPR", expr)
+    var fn;
+    if (typeof expr !== 'function')
+      fn = common.matcher(expr, false)
+    else {
+      fn = decl => !expr(decl);
+    }
+    this.declarations = this.declarations.filter(fn);
   },
   transform(expr, fn) {
     this.stacks.transform.push(() => {

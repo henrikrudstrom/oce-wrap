@@ -30,17 +30,20 @@ function keyMatcher(exp, matchValue, wrapped) {
 }
 
 function find(data, expr, wrapped) {
-  var type = expr;
-  var member = undefined;
-  var splitter = '::';
-  if (wrapped)
-    splitter = '.';
-  if (expr.indexOf(splitter)) {
-    type = expr.split(splitter)[0];
-    member = expr.split(splitter)[1];
+  if (expr !== 'function') {
+    var type = expr;
+    var member = undefined;
+    var splitter = '::';
+    if (wrapped)
+      splitter = '.';
+    if (expr.indexOf(splitter)) {
+      type = expr.split(splitter)[0];
+      member = expr.split(splitter)[1];
+    }
+    expr = keyMatcher(type, true, wrapped);
   }
 
-  var types = data.declarations.filter(keyMatcher(type, true, wrapped));
+  var types = data.declarations.filter(expr);
   if (member === undefined) return types;
 
   return types.map((t) => t.declarations)
