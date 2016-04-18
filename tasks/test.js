@@ -1,6 +1,9 @@
 // show line number of spec that failed
 const gutil = require('gulp-util');
 const yargs = require('yargs');
+const path = require('path');
+const fs = require('fs');
+const exec = require('child_process').exec;
 var Reporter = require('jasmine-terminal-reporter');
 var reporter = new Reporter({ isVerbose: yargs.argv.verbose });
 var oldSpecDone = reporter.specDone;
@@ -68,4 +71,27 @@ module.exports = function(gulp) {
         reporter
       }));
   });
+
+  gulp.task('diff-ref', function(done) {
+    var subpath = yargs.argv.folder;
+    var refPath = path.join(settings.paths.dist, 'test-ref', subpath);
+    var pth = path.join(settings.paths.dist, subpath);
+    if (!subpath)
+      return;
+    exec('rm -rf ' + refPath, () => exec(`cp -rf ${pth} ${refPath}`, done));
+  });
+  gulp.task('diff-test', function(done) {
+    var subpath = yargs.argv.folder;
+    if (!subpath)
+      return;
+    var refPath = path.join(settings.paths.dist, 'test-ref', subpath)
+    var pth = path.join(settings.paths.dist, subpath)
+    exec(`diff -r ${refPath} ${pth}`,
+      (error, stdout, stderr) => {
+        gutil.log(stdout);
+        return done();
+      }
+    )
+
+  })
 };

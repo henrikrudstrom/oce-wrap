@@ -1,12 +1,14 @@
 module.exports.renderJS = function(decl, parts) {
   if (decl.cls !== 'enum') return false;
+  var source = decl.source();
   var values = decl.values.map(val => `${val[0]}: ${val[1]}`).join(',\n  ');
-  return {
-    name: decl.parent + 'JS',
-    src: `\
+  var jsSrc = `\
 mod.${decl.name} = {
-  ${values}
+${values}
 }
-`
-  };
+`;
+  return [{
+    name: decl.parent + 'JS',
+    src: jsSrc
+  }];
 };
