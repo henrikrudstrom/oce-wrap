@@ -1,6 +1,6 @@
-module.exports.name = 'property'
+module.exports.name = 'property';
 const conf = require('../conf.js');
-const headers = require('../headers.js');
+
 conf.Conf.prototype.property = function(getter, setter, name) {
   this.transform(getter, (getMethod) => {
     if (getMethod.cls === 'constructor') return false;

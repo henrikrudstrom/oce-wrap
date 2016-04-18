@@ -48,7 +48,7 @@ conf.Conf.prototype.includeGCMake = function(clsName) {
 };
 conf.Conf.prototype.includeBRepBuilder = function(clsName, valueFunc) {
   return this.includeAsStatic(clsName, 'BRepBuilder', valueFunc);
-}
+};
 
 conf.MultiConf.prototype.includeGCMake = function(clsName) {
   this.map((decl) => decl.includeGCMake(clsName));

@@ -42,11 +42,9 @@ conf.MultiConf.prototype.rename = function(expr, newName) {
   return this;
 };
 conf.MultiConf.prototype.camelCase = function(expr) {
-  this.map((decl) => decl.camelCase ? decl.camelCase(expr) : decl);
+  this.map((decl) => (decl.camelCase ? decl.camelCase(expr) : decl));
   return this;
 };
-
-
 
 module.exports.renderSwig = function(decl) {
   if (decl.cls === 'module') {
@@ -64,7 +62,7 @@ module.exports.renderSwig = function(decl) {
     };
   else if (decl.cls === 'memfun' || decl.cls === 'variable') {
     var srcDecl = decl.source();
-    var args = srcDecl.arguments.map(arg => arg.decl).join(', ')
+    var args = srcDecl.arguments.map(arg => arg.decl).join(', ');
     return {
       name: 'renames.i',
       src: `%rename("${decl.name}") ${srcDecl.parent}::${srcDecl.name}(${args});`

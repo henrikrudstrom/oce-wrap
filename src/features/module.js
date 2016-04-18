@@ -62,7 +62,7 @@ ${parts.get('moduleDepends')}
 
 
 
-//%include "properties.i"
+// %include "properties.i"
 
 ${parts.get('featureIncludes')}
 ${includeIfExists('extra.i')}

@@ -4,24 +4,6 @@ const glob = require('glob');
 const fs = require('fs');
 const path = require('path');
 
-function validType(typeName) {
-  if (typeName === 'int') return true;
-  if (typeName === 'double') return true;
-  if (typeName === 'bool') return true;
-  return modules.get(typeName) !== null;
-}
-
-function findConstructor(type) {
-  var constructors = type.declarations
-    .filter(decl => decl.cls === 'constructor')
-    .filter(decl => decl.arguments.every(arg => validType(arg.type)));
-  var withArgs = constructors.filter(decl => decl.arguments.length > 0);
-
-  if (withArgs.length < 1)
-    return constructors[0];
-  return withArgs[0];
-}
-
 function parseTests() {
   var specs = {};
   glob.sync(`${settings.paths.definition}/spec/**/*Spec.js`)
@@ -101,7 +83,7 @@ function renderTest(cls, member, testSrc) {
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
   if (member.cls !== 'constructor')
     unwrapped.push(member.returnType || member.type);
-  //console.log("UNWRAPPED", unwrapped)
+
   if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
     disable = '// arguments or return type not wrapped\n  x';
 
@@ -130,7 +112,7 @@ function expectType(returnType) {
 }
 
 function memberReturnType(cls, member, suiteKey) {
-  var type = modules.get(member.returnType)
+  var type = modules.get(member.returnType);
   if (type && type.cls === 'enum') return 'Integer';
   var returnType = member.returnType.indexOf('.') !== -1 ?
     member.returnType.split('.')[1] : member.returnType;
@@ -220,9 +202,6 @@ function getInheritedDeclarations(cls) {
 function renderClassSuite(mod, cls, imports) {
   var declarations = getInheritedDeclarations(cls);
 
-  var calldefs = declarations
-    .filter(decl => decl.cls === 'memfun' || decl.cls === 'constructor');
-
   var constructorTests = declarations
     .filter(decl => decl.cls === 'constructor')
     .map(decl => renderConstructor(cls, decl));
@@ -262,6 +241,6 @@ module.exports.renderTest = function(decl, parts) {
     .filter(cls => !cls.abstract)
     .map(cls =>
       ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports) })
-    )
-    //.concat([{ name: decl.name + 'AutoSpec.js', src: renderModuleSuite(decl, imports) }]);
+    );
+    // .concat([{ name: decl.name + 'AutoSpec.js', src: renderModuleSuite(decl, imports) }]);
 };

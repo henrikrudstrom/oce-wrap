@@ -8,7 +8,7 @@ conf.Conf.prototype.depends = function(moduleName) {
 module.exports.renderSwig = function(decl, parts) {
   if (decl.cls !== 'module' || decl.moduleDepends === undefined) return false;
 
-  return [ {
+  return [{
     name: 'moduleDepends',
     src: decl.moduleDepends.map(
       (modName) => `%import "../${modName}/module.i"`
