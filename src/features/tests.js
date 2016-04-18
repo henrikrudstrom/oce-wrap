@@ -70,7 +70,7 @@ function renderTest(cls, member, testSrc) {
   if (overridenTests.hasOwnProperty(key)) {
     return `// ${sig} - Redefined.`;
   }
-  console.log(member.name, member.cls, sig, member.type)
+
   // disable tests for members with unwrapped arguments/return type
   var disable = '';
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
@@ -134,7 +134,7 @@ function renderStaticFunction(cls, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
   var testSrc = `\
     var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
-
+  console.log("RENDER STATIC", calldef.name)
   var returnType = memberReturnType(cls, calldef, cls.parent + '.' + cls.name);
   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   return renderTest(cls, calldef, testSrc);
@@ -177,7 +177,7 @@ function renderProperty(cls, prop) {
     expect(obj.${prop.name}).toBe(val);`;
   return renderTest(cls, prop, src);
 }
-
+// TODO: doesnt include static functions...
 function getInheritedDeclarations(cls) {
   var decls = [cls.declarations]
     .concat((cls.bases || []).map(base => {
@@ -199,7 +199,10 @@ function renderClassSuite(mod, cls, imports) {
     .filter(decl => decl.cls === 'constructor')
     .map(decl => renderConstructor(cls, decl));
   // var functionTests = [];
-  var staticFunctions = declarations
+  //
+  //console.log(mod.name, cls.name, cls.declarations.filter(decl => decl.cls === 'staticfunc').map(decl => decl.name))
+  //console.log(mod.name, cls.name, "SDFDSF!", declarations.filter(decl => decl.cls === 'staticfunc').map(decl => decl.name))
+  var staticFunctions = cls.declarations
     .filter(decl => decl.cls === 'staticfunc')
     .map(decl => renderStaticFunction(cls, decl));
   var functionTests = declarations

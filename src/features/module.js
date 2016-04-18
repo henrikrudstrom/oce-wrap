@@ -14,13 +14,33 @@ function renderEnum(en) {
   }).join(',\n');
   return `enum ${en.source().name} {\n${values}\n};`;
 }
+
+function requires(mod, modules) {
+  var res = []
+  if (mod === null || !mod.moduleDepends) return res;
+
+  return mod.moduleDepends.concat(
+    mod.moduleDepends.map(m =>
+      requires(modules.get(m))
+    )
+    .concat((a, b) => a.concat(b))
+  );
+}
+
 module.exports.renderJS = function(decl, parts) {
   if (decl.cls !== 'module')
     return false;
+  //var modules = require('../modules.js')();
+  var reqs = '';
+  if (decl.moduleDepends)
+    reqs = decl.moduleDepends
+      .map(r => `const ${r} = require('./${r}.js');`)
+      .join('\n');
   console.log(parts, decl.name)
   return {
     name: decl.name + '.js',
     src: `\
+${reqs}
 const mod = require('./${decl.name}.node');
 ${parts.get(decl.name + 'JS')}
 
