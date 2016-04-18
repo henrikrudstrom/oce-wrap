@@ -11,11 +11,11 @@ function createMultiConf(decls) {
 }
 
 MultiConf.prototype.include = function include(expr) {
-  this.map((decl) => decl.include(expr));
+  this.map((decl) => decl.include ? decl.include(expr) : decl);
   return this;
 };
 MultiConf.prototype.exclude = function exclude(expr) {
-  this.map((decl) => decl.exclude(expr));
+  this.map((decl) => decl.exclude ? decl.exclude(expr) : decl);
   return this;
 };
 

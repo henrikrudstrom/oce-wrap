@@ -165,6 +165,50 @@ function renderStaticFunction(cls, calldef) {
   return renderTest(cls, calldef, testSrc);
 }
 
+function renderFreeFunction(mod, calldef) {
+  var returnType = calldef.returnType.indexOf('.') !== -1 ?
+    calldef.returnType.split('.')[1] : calldef.returnType;
+  var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
+  var testSrc = `\
+    var res = ${mod.name}.${calldef.name}(${args});`;
+  var sig =  signature(calldef);
+  var override = specOverride.returnType(mod.name,sig);
+  if (override)
+    returnType = override;
+  if (returnType === 'int' || returnType === 'double')
+    testSrc += '\n    expect(typeof res).toBe(\'number\');';
+  else if (returnType === 'bool')
+    testSrc += '\n    expect(typeof res).toBe(\'boolean\');';
+  else if (returnType !== 'void')
+    testSrc += `
+    expect(typeof res).toBe('object');
+    expect(res.constructor.name.replace('_exports_', '')).toBe('${returnType}');`;
+    
+  var src = `\n
+  it('${sig}', function(){
+    console.log('${sig}')
+${testSrc}
+  });`;
+  return src;
+}
+
+function renderModuleSuite(mod, imports) {
+  var functionTests = mod.declarations
+    .filter(decl => decl.cls === 'staticfunc')
+    .map(decl => renderFreeFunction(mod, decl));
+
+  var clsSrc = `\
+${imports}
+var create = require('../create.js')
+describe('${mod.name}', function(){
+${functionTests.join('\n')}
+});
+`;
+  return clsSrc;
+}
+
+
+
 function renderConstructor(cls, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
 
@@ -248,23 +292,6 @@ module.exports.renderTest = function(decl, parts) {
     .filter(cls => !cls.abstract)
     .map(cls =>
       ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports) })
-    );
+    )
+    //.concat([{name: decl.name+'AutoSpec.js', src: renderModuleSuite(decl, imports)}])
 };
-
-// function renderClass(decl, parts){
-//   var clsSrc = `\
-// ${imports}
-// var create = require('../create.js')
-// describe('${cls.parent}.${cls.name}', function(){
-// ${parts.get(decl.name+'Spec').join('\n')}
-// });
-// `;
-// }
-//
-// module.exports.renderTest = function(decl, parts) {
-//   if (decl.cls === 'module'){
-//
-//   }
-//
-//   if (decl.cls === 'class') return renderClass(decl, parts);
-// };

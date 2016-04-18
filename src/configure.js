@@ -39,7 +39,7 @@ function translateTypes(mods) {
 
     mod.declarations.map(
         (decl) => (decl.declarations ? decl.declarations : [])
-      )
+      ).concat(mod.declarations.filter(d => d.cls === 'staticfunc'))
       .reduce((a, b) => a.concat(b), [])
       .forEach(
         (mem) => {
@@ -71,6 +71,7 @@ function processModules(mods) {
 
 function configure(configurationFiles, outputPath) {
   var mods = configurationFiles.map(configureModule).filter(mod => mod !== null);
+  console.log("PROCESS", mods.map(m => m.name))
   processModules(mods);
 
   mods.forEach((mod) => {

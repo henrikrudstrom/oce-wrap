@@ -22,10 +22,8 @@ module.exports.renderSwig = function(decl) {
         d = res.key;
 
       }
-      console.log(d)
       var handle = headers.get('Handle_'+d);
       if(handle !== null){
-        console.log("====================", d)
         return [d, handle.name]
       }
       return [d];

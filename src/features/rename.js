@@ -30,6 +30,7 @@ function renameCamelCase(expr) {
 
 function removePrefix(expr) {
   return this.rename(expr, (name) => {
+    if(name.indexOf('TopAbs') !== -1)
     return common.removePrefix(name);
   });
 }
@@ -42,7 +43,7 @@ conf.MultiConf.prototype.rename = function(expr, newName) {
   return this;
 };
 conf.MultiConf.prototype.camelCase = function(expr) {
-  this.map((decl) => decl.camelCase(expr));
+  this.map((decl) => decl.camelCase ? decl.camelCase(expr) : decl);
   return this;
 };
 

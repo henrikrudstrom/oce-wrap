@@ -39,13 +39,16 @@ module.exports.renderSwig = function(decl, parts) {
     name: 'module.i',
     src: `\
 // Module ${decl.name}
+%module(package="OCC") ${decl.name}
+${parts.get('moduleIncludes')}
+%include ../common/ModuleHeader.i
+%include "headers.i"
+
 // dependencies
 ${parts.get('moduleDepends')}
 
 
-%module(package="OCC") ${decl.name}
-%include ../common/ModuleHeader.i
-%include "headers.i"
+
 //%include "properties.i"
 
 ${parts.get('featureIncludes')}
