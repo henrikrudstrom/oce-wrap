@@ -30,7 +30,6 @@ function renameCamelCase(expr) {
 
 function removePrefix(expr) {
   return this.rename(expr, (name) => {
-    if(name.indexOf('TopAbs') !== -1)
     return common.removePrefix(name);
   });
 }
@@ -65,9 +64,10 @@ module.exports.renderSwig = function(decl) {
     };
   else if (decl.cls === 'memfun' || decl.cls === 'variable') {
     var srcDecl = decl.source();
+    var args = srcDecl.arguments.map(arg => arg.decl).join(', ')
     return {
       name: 'renames.i',
-      src: `%rename("${decl.name}") ${srcDecl.parent}::${srcDecl.name};`
+      src: `%rename("${decl.name}") ${srcDecl.parent}::${srcDecl.name}(${args});`
     };
   }
   return false;

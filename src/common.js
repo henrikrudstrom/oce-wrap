@@ -21,6 +21,8 @@ function keyMatcher(exp, matchValue, wrapped) {
     if (wrapped !== undefined) {
       key = obj.name;
     }
+    //console.log(exp, key)
+    //if(!exp && !key) console.log("UNDEFINED", obj, "...")
     if (exp.indexOf('(') === -1 && key.indexOf('(') !== -1)
       key = key.split('(')[0];
     return match(exp, key) ? matchValue : !matchValue;

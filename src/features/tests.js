@@ -106,7 +106,7 @@ function renderTest(cls, member, testSrc) {
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
   if (member.cls !== 'constructor')
     unwrapped.push(member.returnType || member.type);
-
+  //console.log("UNWRAPPED", unwrapped)
   if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
     disable = '// arguments or return type not wrapped\n  x';
 
