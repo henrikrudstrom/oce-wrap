@@ -55,6 +55,8 @@ function processInclude(decl, parent) {
 // adds .source() function to declarations, maps wrapped definition
 // to the original from the headers.
 function mapSources(declaration) {
+  if (!declaration.declarations)
+    return declaration;
   declaration.declarations.forEach((d) => {
     var decl = d;
     decl.source = function(keyProp) {

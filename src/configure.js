@@ -10,6 +10,7 @@ const glob = require('glob');
 const path = require('path');
 const arrify = require('arrify');
 const settings = require('./settings.js');
+
 var conf = require('./conf.js');
 var createTypeDict = require('./typedict.js')
 
@@ -60,10 +61,6 @@ function translateTypes(mods) {
 function processModules(mods) {
   mods = arrify(mods);
   mods.forEach(mod => {
-    mod.rename('Standard_Real', 'double');
-    mod.rename('Standard_Integer', 'int');
-    mod.rename('Standard_Boolean', 'bool');
-    mod.rename('Standard_CString', 'string');
     mod.process();
   });
   translateTypes(mods);
@@ -71,7 +68,6 @@ function processModules(mods) {
 
 function configure(configurationFiles, outputPath) {
   var mods = configurationFiles.map(configureModule).filter(mod => mod !== null);
-  console.log("PROCESS", mods.map(m => m.name))
   processModules(mods);
 
   mods.forEach((mod) => {

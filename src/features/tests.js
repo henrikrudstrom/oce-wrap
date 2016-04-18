@@ -27,7 +27,6 @@ function parseTests() {
   glob.sync(`${settings.paths.definition}/spec/**/*Spec.js`)
     .concat(glob.sync(`${settings.paths.definition}/spec/*Spec.js`))
     .forEach(file => {
-      //console.log(file);
       var itexp = / *x?it\('(\w+\(.*\))',((?:.|\n)*?\}\));/g;
       var descExp = /describe\('((?:\w|\.|_| )*)',((?:.|\n)*?}\)(\n| |;)*}\)?)/g;
       var src = fs.readFileSync(file).toString();
@@ -46,14 +45,10 @@ function parseTests() {
   return specs;
 }
 var overridenTests = parseTests();
-//var pendingFile = `${settings.paths.definition}/spec/notWorking.json`;
 
 var specOverride = require(
   path.relative(__dirname, `${settings.paths.definition}/spec/notWorking.js`)
 );
-// if (fs.existsSync(pendingFile))
-//   notWorking = JSON.parse(fs.readFileSync(pendingFile));
-
 
 var nextInt = 0;
 var nextDouble = 0.0;
@@ -75,10 +70,10 @@ function bool() {
 }
 
 function createValue(typeName) {
-  if (typeName.split('.')[1] === 'int') return int();
-  if (typeName.split('.')[1] === 'double') return double();
-  if (typeName.split('.')[1] === 'bool') return bool();
-  if (typeName.split('.')[1] === 'string') return '';
+  if (typeName === 'Integer') return int();
+  if (typeName === 'Double') return double();
+  if (typeName === 'Boolean') return bool();
+  if (typeName === 'String') return '';
   return `create.${typeName}()`;
 }
 module.exports.createValue = createValue;
@@ -133,9 +128,9 @@ function renderMemberFunction(cls, calldef) {
   var override = specOverride.returnType(cls.parent + '.' + cls.name, signature(calldef));
   if (override)
     returnType = override;
-  if (returnType === 'int' || returnType === 'double')
+  if (returnType === 'Integer' || returnType === 'Double')
     testSrc += '\n    expect(typeof res).toBe(\'number\');';
-  else if (returnType === 'bool')
+  else if (returnType === 'Boolean')
     testSrc += '\n    expect(typeof res).toBe(\'boolean\');';
   else if (returnType !== 'void')
     testSrc += `
@@ -183,7 +178,7 @@ function renderFreeFunction(mod, calldef) {
     testSrc += `
     expect(typeof res).toBe('object');
     expect(res.constructor.name.replace('_exports_', '')).toBe('${returnType}');`;
-    
+
   var src = `\n
   it('${sig}', function(){
     console.log('${sig}')

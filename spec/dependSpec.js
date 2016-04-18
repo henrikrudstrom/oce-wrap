@@ -14,9 +14,9 @@ describe('classDepends', function() {
     var mod1 = new conf.Conf();
     mod1.name = 'gp';
     mod1.include('gp_*');
-    mod1.include('Standard_Real');
-    mod1.include('Standard_Integer');
-    mod1.include('Standard_Boolean');
+    // mod1.include('Standard_Real');
+    // mod1.include('Standard_Integer');
+    // mod1.include('Standard_Boolean');
     mod1.find('gp_*').include('*');
     mod1.removePrefix('*');
     mod1.process();
@@ -42,8 +42,8 @@ describe('classDepends', function() {
     var reader = depend(modules);
     var deps = reader.classDepends(pnt);
     var res = [
-      'gp.XYZ', 'gp.double', 'gp.int',
-      'gp.bool', 'gp.Ax1', 'gp.Ax2', 'gp.Trsf', 'gp.Vec'
+      'gp.XYZ', 'Double', 'Integer',
+      'Boolean', 'gp.Ax1', 'gp.Ax2', 'gp.Trsf', 'gp.Vec'
     ];
     res.sort();
     deps.sort();
@@ -71,7 +71,7 @@ describe('classDepends', function() {
       'gp.Ax1', 'gp.Ax2', 'gp.Ax2d', 'gp.Ax3', 'gp.Dir', 'gp.Dir2d',
       'gp.EulerSequence', 'gp.Mat', 'gp.Mat2d', 'gp.Pnt2d', 'gp.Quaternion',
       'gp.Trsf', 'gp.Trsf2d', 'gp.TrsfForm', 'gp.Vec', 'gp.Vec2d', 'gp.XY',
-      'gp.XYZ', 'gp.bool', 'gp.double', 'gp.int'
+      'gp.XYZ', 'Boolean', 'Double', 'Integer'
     ];
     res.sort();
     deps.sort();

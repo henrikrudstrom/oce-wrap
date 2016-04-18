@@ -1,14 +1,20 @@
 const settings = require('./settings.js');
 const extend = require('extend');
+const builtins = require('./builtinModule.js');
+
 module.exports = function typedict(mods) {
   if (mods === undefined)
     mods = settings.build.modules;
 
+  mods = [builtins()].concat(mods);
 
   var dict = {};
   mods.forEach((mod) => {
     mod.declarations.forEach((decl) => {
-      dict[decl.key] = `${mod.name}.${decl.name}`;
+      if (mod.name === 'builtins')
+        dict[decl.key] = decl.name;
+      else
+        dict[decl.key] = `${mod.name}.${decl.name}`;
     });
   });
 
@@ -17,12 +23,6 @@ module.exports = function typedict(mods) {
       dict[tm.from] = dict[tm.to];
     }));
 
-  // extend(dict, {
-  //   Standard_Real: 'double',
-  //   Standard_Boolean: 'bool',
-  //   Standard_CString: 'string',
-  //   Standard_Integer: 'int'
-  // });
   return (name) => {
     if (dict.hasOwnProperty(name)) return dict[name];
     return name;

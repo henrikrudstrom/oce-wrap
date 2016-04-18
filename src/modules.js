@@ -3,6 +3,7 @@ const common = require('./common.js');
 const conf = require('./conf.js');
 const fs = require('fs');
 const glob = require('glob');
+const builtins = require('./builtinModule.js');
 
 function moduleQuery(mods) {
   if (typeof mods === 'string') {
@@ -14,6 +15,7 @@ function moduleQuery(mods) {
       JSON.parse(fs.readFileSync(file))
     );
   }
+  mods = [builtins()].concat(mods);
 
   var modules = {};
   mods.forEach((mod) => {
@@ -27,19 +29,16 @@ function moduleQuery(mods) {
       mod = expr.split('.')[0];
       expr = expr.split('.')[1];
     } else {
-      // TODO: dont return strings....
-      return ['string', 'bool', 'int', 'double', 'void', 'Array'].filter(type => common.match(expr, type));
-      //throw new Error('wild card modules not supported (yet)');
+      mod = 'builtins';
     }
-    
+
     var res = common.find(modules[mod], expr, true);
-    if(res.length === 1){
-      if(res[0] === 'undefined' || res[0] === null || res[0] === undefined){
+    if (res.length === 1) {
+      if (res[0] === 'undefined' || res[0] === null || res[0] === undefined) {
         throw new Error('sholdnt happen');
-      }  
+      }
     }
     return res;
-    
   }
 
   function getModule(name) {

@@ -14,17 +14,17 @@ module.exports.renderSwig = function(decl) {
     .filter((d, index, array) => array.indexOf(d) === index)
     .filter(d => d !== 'undefined' && d !== undefined)
     .map(d => {
+      // check if type is a wrapped type or a native header
       var res = modules.get(d);
-      //console.log(d, typeof res)
-      if(typeof res === 'string')
-        return [];
-      if (res !== null && res !== undefined && res !== 'undefined' && typeof res !== 'string'){
+      if (res === null) {
+        if (headers.get(d) === null)
+          return [];
+      } else {
         d = res.key;
-
       }
-      var handle = headers.get('Handle_'+d);
-      if(handle !== null){
-        return [d, handle.name]
+      var handle = headers.get('Handle_' + d);
+      if (handle !== null) {
+        return [d, handle.name];
       }
       return [d];
     })
