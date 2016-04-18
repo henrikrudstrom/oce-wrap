@@ -14,7 +14,20 @@ function renderEnum(en) {
   }).join(',\n');
   return `enum ${en.source().name} {\n${values}\n};`;
 }
+module.exports.renderJS = function(decl, parts) {
+  if (decl.cls !== 'module')
+    return false;
+  console.log(parts, decl.name)
+  return {
+    name: decl.name + '.js',
+    src: `\
+const mod = require('./${decl.name}.node');
+${parts.get(decl.name + 'JS')}
 
+module.exports = mod;
+`
+  }
+};
 
 
 module.exports.renderSwig = function(decl, parts) {

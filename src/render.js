@@ -7,7 +7,7 @@ const settings = require('./settings.js');
 const conf = require('./conf.js');
 
 var features = settings.features || [
-  'rename', 'property', 'depends', 'headers', 'class', 'typemap', 'asStatic', 'argout', 'noHandle', 'module',  'tests'
+  'rename', 'property', 'depends', 'headers', 'class', 'enum', 'typemap', 'asStatic', 'argout', 'noHandle', 'module', 'tests'
 ];
 var featureModules = features.map((name) => require(`./features/${name}.js`));
 
@@ -47,8 +47,11 @@ Parts.prototype = {
 function renderFeature(method, parts, decl, feature) {
   if (decl.declarations)
     decl.declarations.forEach((d) => renderFeature(method, parts, d, feature));
-  if (feature.hasOwnProperty(method))
-    parts.add(feature[method](decl, parts));
+  if (feature.hasOwnProperty(method)) {
+    var res = feature[method](decl, parts);
+    if (res)
+      parts.add(res);
+  }
 }
 
 
@@ -68,13 +71,16 @@ function render(method, mod, feats) {
   return parts;
 }
 
-function writeParts(dest, parts) {
+function writeParts(dest, parts, options) {
+  options = options || {};
   if (Array.isArray(parts)) {
-    return parts.forEach((p) => writeParts(dest, p));
+    return parts.forEach((p) => writeParts(dest, p, options));
   }
 
   parts.files().forEach((part) => {
     var file = path.join(dest, parts.name, part.name);
+    if (options.flat)
+      file = path.join(dest, part.name);
     mkdirp.sync(path.dirname(file));
     fs.writeFileSync(file, part.src);
   });

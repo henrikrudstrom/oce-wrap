@@ -279,7 +279,7 @@ module.exports.renderClassSuite = renderClassSuite;
 module.exports.renderTest = function(decl, parts) {
   if (decl.cls !== 'module') return false;
   var imports = [decl.name].concat(decl.moduleDepends || [])
-    .map(mod => (`var ${mod} = require('../../lib/${mod}.node');`))
+    .map(mod => (`var ${mod} = require('../../lib/${mod}.js');`))
     .join('\n');
   return decl.declarations
     .filter(d => d.cls === 'class')

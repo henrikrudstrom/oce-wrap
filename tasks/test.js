@@ -35,9 +35,12 @@ module.exports = function(gulp) {
   gulp.task('render-tests', function(done) {
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
     render.write(settings.paths.dist + '/spec/', render('renderTest', configuredModules));
-    // run(
-    //   `cp -rf ${settings.paths.definition}/create.js ${settings.paths.dist}/spec/create.js`
-    // ).exec(done);
+    done();
+  });
+  gulp.task('render-js', function(done) {
+    const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
+    var parts = render('renderJS', configuredModules)
+    render.write(settings.paths.dist + '/lib/', parts, { flat: true });
     done();
   });
 
