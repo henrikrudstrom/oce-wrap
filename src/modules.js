@@ -30,7 +30,15 @@ function moduleQuery(mods) {
       return ['string', 'bool', 'int', 'double', 'void', 'Array'].filter(type => common.match(expr, type));
       //throw new Error('wild card modules not supported (yet)');
     }
-    return common.find(modules[mod], expr, true);
+    
+    var res = common.find(modules[mod], expr, true);
+    if(res.length === 1){
+      if(res[0] === 'undefined' || res[0] === null || res[0] === undefined){
+        throw new Error('sholdnt happen');
+      }  
+    }
+    return res;
+    
   }
 
   function getModule(name) {

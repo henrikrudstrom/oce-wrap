@@ -10,7 +10,19 @@ var moduleReader = require('../src/modules.js');
 var depend = require('../src/dependencies.js');
 
 describe('classDepends', function() {
-
+  beforeEach(function() {
+    var mod1 = new conf.Conf();
+    mod1.name = 'gp';
+    mod1.include('gp_*');
+    mod1.include('Standard_Real');
+    mod1.include('Standard_Integer');
+    mod1.include('Standard_Boolean');
+    mod1.find('gp_*').include('*');
+    mod1.removePrefix('*');
+    mod1.process();
+    configure.processModules([mod1]);
+    this.mod = mod1;
+  })
 
   it('can process source dependencies', function() {
     var reader = depend(headers);
@@ -25,19 +37,7 @@ describe('classDepends', function() {
   });
 
   it('can process wrapped dependencies', function() {
-    var mod1 = new conf.Conf();
-    mod1.name = 'gp';
-    mod1.include('gp_*');
-    mod1.include('Standard_Real');
-    mod1.include('Standard_Integer');
-    mod1.include('Standard_Boolean');
-    mod1.find('gp_*').include('*');
-    mod1.removePrefix('*');
-    mod1.process();
-    configure.processModules([mod1]);
-
-
-    var modules = moduleReader([mod1]);
+    var modules = moduleReader([this.mod]);
     var pnt = modules.get('gp.Pnt');
     var reader = depend(modules);
     var deps = reader.classDepends(pnt);
@@ -45,6 +45,66 @@ describe('classDepends', function() {
       'gp.XYZ', 'gp.double', 'gp.int',
       'gp.bool', 'gp.Ax1', 'gp.Ax2', 'gp.Trsf', 'gp.Vec'
     ];
+    res.sort();
+    deps.sort();
+    expect(deps).toEqual(res);
+  });
+  it('can process source dependencies', function() {
+    var modules = moduleReader([this.mod]);
+    var pnt = modules.get('gp.Pnt');
+    var reader = depend(modules);
+    var deps = reader.classDepends(pnt, { source: true });
+    var res = [
+      'gp_XYZ', 'Standard_Real', 'Standard_Integer',
+      'Standard_Boolean', 'gp_Ax1', 'gp_Ax2', 'gp_Trsf', 'gp_Vec'
+    ];
+    res.sort();
+    deps.sort();
+    expect(deps).toEqual(res);
+  });
+  it('can process recursive wrapped dependencies', function() {
+    var modules = moduleReader([this.mod]);
+    var pnt = modules.get('gp.Pnt');
+    var reader = depend(modules);
+    var deps = reader.classDepends(pnt, { recursive: true });
+    var res = [
+      'gp.Ax1', 'gp.Ax2', 'gp.Ax2d', 'gp.Ax3', 'gp.Dir', 'gp.Dir2d',
+      'gp.EulerSequence', 'gp.Mat', 'gp.Mat2d', 'gp.Pnt2d', 'gp.Quaternion',
+      'gp.Trsf', 'gp.Trsf2d', 'gp.TrsfForm', 'gp.Vec', 'gp.Vec2d', 'gp.XY',
+      'gp.XYZ', 'gp.bool', 'gp.double', 'gp.int'
+    ];
+    res.sort();
+    deps.sort();
+    expect(deps).toEqual(res);
+  });
+  xit('can process recursive wrapped source dependencies', function() {
+    var modules = moduleReader([this.mod]);
+    var pnt = modules.get('gp.Pnt');
+    var reader = depend(modules);
+    var deps = reader.classDepends(pnt, { recursive: true, source: true });
+    var res = [
+      'gp_Ax1', 'gp_Ax2', 'gp_Ax2d', 'gp_Ax3', 'gp_Dir', 'gp_Dir2d',
+      'gp_EulerSequence', 'gp_Mat', 'gp_Mat2d', 'gp_Pnt2d', 'gp_Quaternion',
+      'gp_Trsf', 'gp_Trsf2d', 'gp_TrsfForm', 'gp_Vec', 'gp_Vec2d', 'gp_XY',
+      'gp_XYZ', 'Standard_Boolean', 'Standard_Real', 'Standard_Integer'
+    ];
+    res.sort();
+    deps.sort();
+    expect(deps).toEqual(res);
+  });
+  it('can process recursive dependencies', function() {
+    var reader = depend(headers);
+    var point = headers.get('Geom_Point');
+    var deps = reader.classDepends(point, { recursive: true });
+    var res = [
+      'Standard_Real', 'gp_Pnt', 'Handle_Geom_Point', 'Handle_Standard_Type',
+      'gp_XYZ', 'Standard_Integer', 'Standard_Boolean', 'gp_Ax1', 'gp_Ax2', 'gp_Trsf',
+      'gp_Vec', 'gp_Mat', 'gp_Dir', 'gp_Trsf2d', 'gp_Quaternion', 'gp_Ax3',
+      'gp_TrsfForm', 'gp_Pnt2d', 'gp_Ax2d', 'gp_Vec2d', 'gp_XY', 'gp_Mat2d', 'gp_Dir2d',
+      'gp_EulerSequence', 'Handle_Standard_Transient', 'Standard_Transient',
+      'Standard_OStream', 'Standard_CString', 'Standard_Type', 'Standard_Address'
+    ];
+
     res.sort();
     deps.sort();
     expect(deps).toEqual(res);

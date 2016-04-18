@@ -12,7 +12,6 @@ function modName(name) {
   return matchRes[1];
 }
 
-
 function dependencyReader(mods) {
   var cache = {};
 
@@ -48,7 +47,7 @@ function dependencyReader(mods) {
     }
     var res = cls.declarations
       .filter((mem) => !options.constructorsOnly || mem.cls === 'constructor')
-      .map(mem => memberDepends(mem, options.wrapped))
+      .map(mem => memberDepends(mem, options.source))
       .reduce((a, b) => a.concat(b), [])
       .filter(unique)
       .filter((name) => name && name !== 'void');
@@ -65,22 +64,15 @@ function dependencyReader(mods) {
     // dont include this class in dependency list
     if (firstCall) {
       var qualifiedName = cls.name;
+      var separator = options.source ? '_' : '.';
       if (cls.parent)
-        qualifiedName = cls.parent + '.' + cls.name;
+        qualifiedName = cls.parent + separator + cls.name;
       return res.filter((name) => name !== qualifiedName);
     }
     //cache result
     cache[cls.name] = res;
     return res;
   }
-
-  // function moduleDepends(mod) {
-  //   return mod.declarations
-  //     .map((d) => classDepends(d, false))
-  //     .reduce((a, b) => a.concat(b), [])
-  //     .filter((d, index, array) => array.indexOf(d) === index);
-  // }
-
 
   function toolkitDepends(mod) {
     var deps = mod.declarations
@@ -94,21 +86,6 @@ function dependencyReader(mods) {
         m1 => deps.some((m2) => m1 === m2)
       )).map(tk => tk.name);
   }
-
-  // function toolkitDepends2(mod) {
-  //   var
-  //   var modDeps = moduleDepends(mod)
-  //     .map(cls => modules.get(cls))
-  //     .filter(cls => cls !== null)
-  //     .map(cls => modName(cls.key))
-  //     .concat('Standard') // TODO: temp fix
-  //     .filter((cls, index, array) => array.indexOf(cls) === index);
-  //   console.log(modDeps, "cls", classes)
-  //   return settings.oce.toolkits
-  //     .filter(tk => tk.modules.some(
-  //       m1 => modDeps.some((m2) => m1 === m2)
-  //     )).map(tk => tk.name);
-  // }
 
   return {
     classDepends,
