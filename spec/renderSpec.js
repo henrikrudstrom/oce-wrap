@@ -75,9 +75,9 @@ describe('render tests', function() {
     configure(definedModules, settings.paths.config);
   });
   it('can create values', function() {
-    expect(createValue('gp.int')).toBe(1);
-    expect(createValue('gp.double')).toBe('0.5');
-    expect(createValue('gp.bool')).toBe('true');
+    expect(createValue('Integer')).toBe(1);
+    expect(createValue('Double')).toBe('0.5');
+    expect(createValue('Boolean')).toBe('true');
     expect(createValue('other.Vec')).toBe('create.other.Vec()');
   });
   it('can render tests', function(){
