@@ -15,8 +15,12 @@ module.exports = function(gulp) {
   const include = ['-I/usr/include/node', `-I${settings.oce.include}`];
 
   function runSwig(moduleName, done) {
-    const output = path.join(settings.paths.cxx, `${moduleName}_wrap.cxx`);
     const input = path.join(settings.paths.swig, `${moduleName}/module.i`);
+    if(!fs.existsSync(input)) 
+      return done();
+    
+    const output = path.join(settings.paths.cxx, `${moduleName}_wrap.cxx`);
+    
     const includes = include.join(' ');
     mkdirp.sync(path.dirname(output));
     const cmd = `${settings.swig} ${flags} ${otherFlags} ${includes} -o ${output} ${input}`;

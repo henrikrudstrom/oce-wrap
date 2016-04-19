@@ -1,6 +1,7 @@
-const modules = require('../modules.js')();
 const headers = require('../headers.js');
 module.exports.renderSwig = function(decl) {
+  
+  const modules = require('../modules.js')();
   var reader = require('../dependencies.js')(modules);
   if (decl.cls !== 'module') return false;
   var depends = decl.declarations
@@ -28,7 +29,7 @@ module.exports.renderSwig = function(decl) {
       }
       return [d];
     })
-    .reduce((a, b) => a.concat(b))
+    .reduce((a, b) => a.concat(b), [])
     .filter(d => d !== null)
     .map((d) => `#include <${d}.hxx>`)
     .join('\n');

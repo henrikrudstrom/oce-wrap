@@ -62,8 +62,11 @@ function render(method, mod, feats) {
     mod = JSON.parse(fs.readFileSync(mod));
     conf.mapSources(mod);
   }
-
+  
   var parts = new Parts(mod.name);
+  if (mod.noSwig) 
+    return parts;
+  
   (feats || featureModules).forEach((feat) => {
     renderFeature(method, parts, mod, feat);
   });

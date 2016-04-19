@@ -1,4 +1,5 @@
-var modules = require('../modules.js')();
+//initialized on render
+var modules;
 var common = require('../common.js');
 var settings = require('../settings.js');
 const glob = require('glob');
@@ -255,6 +256,7 @@ module.exports.renderClassSuite = renderClassSuite;
 
 module.exports.renderTest = function(decl, parts) {
   if (decl.cls !== 'module') return false;
+  var modules = require('../modules.js')();
   var imports = [decl.name].concat(decl.moduleDepends || [])
     .map(mod => (`var ${mod} = require('../../lib/${mod}.js');`))
     .join('\n');

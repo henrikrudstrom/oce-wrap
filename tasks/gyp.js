@@ -12,15 +12,17 @@ module.exports = function(gulp) {
 
   function gypConfig(modName) {
     var mod = loadModules().getModule(modName) || new conf.Conf();
-    var extra = [];
+    var sources = [];
     if (mod.extraSources)
-      extra = mod.extraSources.map(file => `, "../../cxx/${file}"`);
+      sources = sources.concat(mod.extraSources.map(file => `src/${file}`));
+    if(!mod.noSwig)
+      sources.push(`src/${mod.name}_wrap.cxx`);
     var extraInc = path.join(process.cwd(), settings.paths.inc);
     var shadow = mod.shadowed ? '_' : '';
     return {
       target_name: shadow + mod.name,
-      sources: [`src/${mod.name}_wrap.cxx`].concat(extra),
-      include_dirs: [settings.oce.include, extraInc, settings.paths.inc],
+      sources: sources,
+      include_dirs: [settings.oce.include, extraInc, settings.paths.inc].concat(mod.extraIncludes || []),
       libraries: ['-L' + settings.oce.lib].concat(
         (mod.libraries || reader.toolkitDepends(mod)).map(lib => '-l' + lib)),
       cflags: [
