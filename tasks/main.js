@@ -18,15 +18,15 @@ module.exports = function(gulp) {
 
   gulp.task('render', function(done) {
     runSequence(
-      ['swig-clean', 'configure'], 
-      ['render-swig', 'render-js', 'copy'], 
+      ['swig-clean', 'configure'],
+      ['render-swig', 'render-js', 'copy'],
       'swig-cxx', 'swig-hack-handles', done
     );
   });
 
   gulp.task('build', ['render'], function(done) {
     runSequence(
-      'gyp-clean', 'write-config', 'gyp-configure',
+      'gyp-clean', 'gyp-configure',
       'gyp-build', 'copy-gyp', done
     );
   });
