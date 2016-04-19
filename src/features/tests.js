@@ -61,6 +61,14 @@ function createValue(typeName) {
 }
 module.exports.createValue = createValue;
 
+function requiredTypesWrapped(member) {
+  var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
+  if (member.cls !== 'constructor')
+    unwrapped.push(member.returnType || member.type);
+  console.log('unwrapped', unwrapped)
+  return unwrapped.some(type => type !== 'void' && !modules.get(type));
+}
+
 function renderTest(cls, member, testSrc) {
   var sig = `${member.name}`;
   if (member.arguments)
@@ -72,13 +80,15 @@ function renderTest(cls, member, testSrc) {
   }
 
   // disable tests for members with unwrapped arguments/return type
-  var disable = '';
-  var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
-  if (member.cls !== 'constructor')
-    unwrapped.push(member.returnType || member.type);
 
-  if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
-    disable = '// arguments or return type not wrapped\n  x';
+  var disable = !requiredTypesWrapped(member) ?
+    '' : '// arguments or return type not wrapped\n  x';
+  // var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
+  // if (member.cls !== 'constructor')
+  //   unwrapped.push(member.returnType || member.type);
+  //
+  // if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
+  //   disable = '// arguments or return type not wrapped\n  x';
 
   if (specOverride.notWorking(cls.parent + '.' + cls.name, sig)) {
     disable = '// TODO: not working\n  x';
@@ -134,7 +144,7 @@ function renderStaticFunction(cls, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
   var testSrc = `\
     var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
-  console.log("RENDER STATIC", calldef.name)
+
   var returnType = memberReturnType(cls, calldef, cls.parent + '.' + cls.name);
   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   return renderTest(cls, calldef, testSrc);
@@ -145,15 +155,32 @@ function renderFreeFunction(mod, calldef) {
   var testSrc = `\
     var res = ${mod.name}.${calldef.name}(${args});`;
   var sig = common.signature(calldef);
-
+  // TODO: required types not working
+  var disable = !requiredTypesWrapped(calldef) ?
+    '' : '// arguments or return type not wrapped\n  x';
   var returnType = memberReturnType(mod, calldef, mod.name);
   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   var src = `\n
-  it('${sig}', function(){
+  ${disable}it('${sig}', function(){
     console.log('${sig}')
 ${testSrc}
   });`;
   return src;
+}
+
+function renderModuleSuite(mod, imports) {
+  var functionTests = mod.declarations
+    .filter(decl => decl.cls === 'staticfunc')
+    .map(decl => renderFreeFunction(mod, decl));
+
+  var clsSrc = `\
+${imports}
+var create = require('../create.js')
+describe('${mod.name}', function(){
+${functionTests.join('\n')}
+});
+`;
+  return clsSrc;
 }
 
 function renderConstructor(cls, calldef) {
@@ -237,6 +264,6 @@ module.exports.renderTest = function(decl, parts) {
     .filter(cls => !cls.abstract)
     .map(cls =>
       ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports) })
-    );
-    // .concat([{ name: decl.name + 'AutoSpec.js', src: renderModuleSuite(decl, imports) }]);
+    )
+    .concat([{ name: decl.name + 'AutoSpec.js', src: renderModuleSuite(decl, imports) }]);
 };
