@@ -18,8 +18,9 @@ module.exports = function(gulp) {
 
   gulp.task('render', function(done) {
     runSequence(
-      ['swig-clean', 'configure'], 'render-swig',
-      'copy', 'swig-cxx', 'swig-hack-handles', done
+      ['swig-clean', 'configure'], 
+      ['render-swig', 'render-js', 'copy'], 
+      'swig-cxx', 'swig-hack-handles', done
     );
   });
 

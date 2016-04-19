@@ -22,13 +22,22 @@ function parseTests() {
           if (smatches)
             smatches.forEach(it => {
               var name = it.match(/it\('(\w+\(.*\))'/)[1];
-              specs[`${suite}#${name}`] = it;
+              if(!Array.isArray(specs[suite]))
+                specs[suite] = [];
+              specs[suite].push(name);
             });
         });
     });
+    
+  console.log('Specs', specs);
   return specs;
 }
 var overridenTests = parseTests();
+function isOverriden(suite, spec){
+  if(suite in overridenTests)
+    return overridenTests[suite].indexOf(spec) !== -1;
+  return false;
+}
 
 var specOverride = require(
   path.relative(__dirname, `${settings.paths.definition}/spec/notWorking.js`)
@@ -66,7 +75,7 @@ function requiredTypesWrapped(member) {
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
   if (member.cls !== 'constructor')
     unwrapped.push(member.returnType || member.type);
-  console.log('unwrapped', unwrapped)
+
   return unwrapped.some(type => type !== 'void' && !modules.get(type));
 }
 
@@ -75,15 +84,18 @@ function renderTest(cls, member, testSrc) {
   if (member.arguments)
     sig += `(${member.arguments.map(arg => arg.type).join(', ')})`;
 
-  var key = `${cls.parent}.${cls.name}#${sig}`;
-  if (overridenTests.hasOwnProperty(key)) {
-    return `// ${sig} - Redefined.`;
+  // var key = `${cls.parent}.${cls.name}#${sig}`;
+  // if (overridenTests.hasOwnProperty(key)) {
+  //   return `// ${sig} - Redefined.`;
+  // }
+  
+  if (isOverriden( `${cls.parent}.${cls.name}`, sig)) {
+    return `  // ${sig} - Redefined.`;
   }
-
   // disable tests for members with unwrapped arguments/return type
 
   var disable = !requiredTypesWrapped(member) ?
-    '' : '// arguments or return type not wrapped\n  x';
+    '' : '  // arguments or return type not wrapped\n  x';
   // var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
   // if (member.cls !== 'constructor')
   //   unwrapped.push(member.returnType || member.type);
@@ -92,7 +104,7 @@ function renderTest(cls, member, testSrc) {
   //   disable = '// arguments or return type not wrapped\n  x';
 
   if (specOverride.notWorking(cls.parent + '.' + cls.name, sig)) {
-    disable = '// TODO: not working\n  x';
+    disable = '  // TODO: not working\n  x';
   }
   var src = `\n
   ${disable}it('${sig}', function(){
@@ -156,9 +168,17 @@ function renderFreeFunction(mod, calldef) {
   var testSrc = `\
     var res = ${mod.name}.${calldef.name}(${args});`;
   var sig = common.signature(calldef);
+  
+  if (isOverriden(mod.name, sig)) {
+    return `  // ${sig} - Redefined.`;
+  }
+  
   // TODO: required types not working
   var disable = !requiredTypesWrapped(calldef) ?
-    '' : '// arguments or return type not wrapped\n  x';
+    '' : '  // arguments or return type not wrapped\n  x';
+  if (specOverride.notWorking(mod.name, sig)) {
+    disable = '  // TODO: not working\n  x';
+  }
   var returnType = memberReturnType(mod, calldef, mod.name);
   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   var src = `\n
@@ -256,7 +276,8 @@ module.exports.renderClassSuite = renderClassSuite;
 
 module.exports.renderTest = function(decl, parts) {
   if (decl.cls !== 'module') return false;
-  var modules = require('../modules.js')();
+  modules = require('../modules.js')();
+  
   var imports = [decl.name].concat(decl.moduleDepends || [])
     .map(mod => (`var ${mod} = require('../../lib/${mod}.js');`))
     .join('\n');
