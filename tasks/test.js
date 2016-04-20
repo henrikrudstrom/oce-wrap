@@ -4,6 +4,9 @@ const yargs = require('yargs');
 const path = require('path');
 const fs = require('fs');
 const exec = require('child_process').exec;
+const cover = require('gulp-coverage');
+const coveralls = require('gulp-coveralls');
+
 var Reporter = require('jasmine-terminal-reporter');
 var reporter = new Reporter({ isVerbose: yargs.argv.verbose });
 var oldSpecDone = reporter.specDone;
@@ -42,7 +45,7 @@ module.exports = function(gulp) {
   });
   gulp.task('render-js', function(done) {
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
-    var parts = render('renderJS', configuredModules)
+    var parts = render('renderJS', configuredModules);
     render.write(settings.paths.dist + '/lib/', parts, { flat: true });
     done();
   });
@@ -57,6 +60,8 @@ module.exports = function(gulp) {
   });
 
 
+
+
   gulp.task('just-test', ['copy-spec'], function() {
     var specSource = `${settings.paths.dist}/spec/`;
     var arg = yargs.argv.spec;
@@ -69,7 +74,7 @@ module.exports = function(gulp) {
         verbose: yargs.argv.verbose,
         includeStackTrace: yargs.argv.verbose,
         reporter
-      }));
+      }))
   });
 
   gulp.task('diff-ref', function(done) {
