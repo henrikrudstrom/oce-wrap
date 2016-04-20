@@ -28,7 +28,7 @@ function swigConvert(type, arg) {
     return `SWIG_From_bool(*${arg})`;
   if (type.indexOf('Standard_Integer') !== -1)
     return `SWIG_From_int(*${arg})`; // TODO: not sure this one exists
-  return `SWIG_NewPointerObj((new ${type}((const ${type}&)${arg})), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
+  return `SWIG_NewPointerObj((new ${type}((const ${type})*${arg})), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
 }
 
 module.exports.renderSwig = function(decl) {

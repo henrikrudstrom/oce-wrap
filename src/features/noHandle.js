@@ -43,6 +43,9 @@ module.exports.renderSwig = function(cls) {
   // handlein
   void *argpointer ;
   int res = SWIG_ConvertPtr($input->ToObject()->Get(SWIGV8_SYMBOL_NEW("_handle")), &argpointer, SWIGTYPE_p_Handle_Standard_Transient, 0);
+  if (!SWIG_IsOK(res)) {
+    SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument " "$argnum"" of type '" "${name}""'");
+  }
   $1 = (Handle_${name} *)(argpointer);
 }
 
