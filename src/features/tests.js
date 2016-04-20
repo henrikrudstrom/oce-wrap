@@ -22,19 +22,18 @@ function parseTests() {
           if (smatches)
             smatches.forEach(it => {
               var name = it.match(/it\('(\w+\(.*\))'/)[1];
-              if(!Array.isArray(specs[suite]))
+              if (!Array.isArray(specs[suite]))
                 specs[suite] = [];
               specs[suite].push(name);
             });
         });
     });
-    
-  console.log('Specs', specs);
   return specs;
 }
 var overridenTests = parseTests();
-function isOverriden(suite, spec){
-  if(suite in overridenTests)
+
+function isOverriden(suite, spec) {
+  if (suite in overridenTests)
     return overridenTests[suite].indexOf(spec) !== -1;
   return false;
 }
@@ -88,8 +87,8 @@ function renderTest(cls, member, testSrc) {
   // if (overridenTests.hasOwnProperty(key)) {
   //   return `// ${sig} - Redefined.`;
   // }
-  
-  if (isOverriden( `${cls.parent}.${cls.name}`, sig)) {
+
+  if (isOverriden(`${cls.parent}.${cls.name}`, sig)) {
     return `  // ${sig} - Redefined.`;
   }
   // disable tests for members with unwrapped arguments/return type
@@ -108,7 +107,6 @@ function renderTest(cls, member, testSrc) {
   }
   var src = `\n
   ${disable}it('${sig}', function(){
-    console.log('${sig}')
 ${testSrc}
   });`;
   return src;
@@ -168,11 +166,11 @@ function renderFreeFunction(mod, calldef) {
   var testSrc = `\
     var res = ${mod.name}.${calldef.name}(${args});`;
   var sig = common.signature(calldef);
-  
+
   if (isOverriden(mod.name, sig)) {
     return `  // ${sig} - Redefined.`;
   }
-  
+
   // TODO: required types not working
   var disable = !requiredTypesWrapped(calldef) ?
     '' : '  // arguments or return type not wrapped\n  x';
@@ -183,7 +181,6 @@ function renderFreeFunction(mod, calldef) {
   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   var src = `\n
   ${disable}it('${sig}', function(){
-    console.log('${sig}')
 ${testSrc}
   });`;
   return src;
@@ -277,7 +274,7 @@ module.exports.renderClassSuite = renderClassSuite;
 module.exports.renderTest = function(decl, parts) {
   if (decl.cls !== 'module') return false;
   modules = require('../modules.js')();
-  
+
   var imports = [decl.name].concat(decl.moduleDepends || [])
     .map(mod => (`var ${mod} = require('../../lib/${mod}.js');`))
     .join('\n');

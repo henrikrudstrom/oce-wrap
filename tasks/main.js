@@ -26,7 +26,7 @@ module.exports = function(gulp) {
 
   gulp.task('build', ['render'], function(done) {
     runSequence(
-      'gyp-clean', 'gyp-configure',
+      'gyp-clean', 'gyp-configure', 'copy-js',
       'gyp-build', 'copy-gyp', done
     );
   });
@@ -37,6 +37,9 @@ module.exports = function(gulp) {
 
   gulp.task('test', function(done) {
     runSequence('test-clean', 'copy-spec', 'render-tests', 'just-test', done);
+  });
+  gulp.task('test-full', function(done) {
+    runSequence('render', 'test', done);
   });
 
   gulp.task('all', function(done) {
@@ -67,7 +70,7 @@ module.exports = function(gulp) {
       .pipe(gulp.dest(`${settings.paths.dist}/spec`));
   });
   gulp.task('copy-js', function() {
-    return gulp.src(`${settings.paths.definition}/modules/**/lib/*.js`)
+    return gulp.src(`${settings.paths.definition}/modules/*/*.js`)
       .pipe(rename({ dirname: '' }))
       .pipe(gulp.dest(`${settings.paths.dist}/lib`));
   });
