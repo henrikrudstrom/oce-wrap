@@ -4,16 +4,19 @@ var headers = require('../headers.js');
 conf.Conf.prototype.noHandle = function(expr) {
   this.find(expr).forEach(cls => {
     if (cls.key.startsWith('Handle_')) return;
+
     var handleKey = 'Handle_' + cls.name;
     if (!headers.get(handleKey)) return;
 
     this.include(handleKey);
     var handle = this.get('Handle_' + cls.name);
+
     if (handle)
       handle.include('Handle_' + cls.name + '(*)');
   });
   this.transform(expr, (obj) => {
     if (obj.key.startsWith('Handle_')) return;
+
     this.typemap('Handle_' + obj.key, obj.key);
     obj.handle = true;
   });
@@ -38,6 +41,7 @@ module.exports.renderSwig = function(cls) {
   var name = cls.key;
   if (cls.cls !== 'class' || !cls.handle)
     return false;
+
   var typemapsrc = `
 %typemap(in) Handle_${name}& {
   // handlein

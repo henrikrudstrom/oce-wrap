@@ -3,6 +3,7 @@ module.exports.name = 'asStatic';
 conf.Conf.prototype.argout = function argout(expr) {
   this.transform(expr, (mem) => {
     if (mem.cls !== 'memfun') return false;
+
     var outArgIndexes = mem.arguments
       .map((arg, index) => index)
       .filter(index => mem.arguments[index].decl.indexOf('&') !== -1);
@@ -12,6 +13,7 @@ conf.Conf.prototype.argout = function argout(expr) {
     mem.argouts = outArgIndexes.map(index => mem.arguments[index]);
     mem.arguments = mem.arguments.filter((arg, index) => outArgIndexes.indexOf(index) === -1);
     mem.returnType = 'Array';
+
     return true;
   });
 };
@@ -33,6 +35,7 @@ function swigConvert(type, arg) {
 
 module.exports.renderSwig = function(decl) {
   if (!decl.argouts) return false;
+
   var sigArgs = decl.argouts
     .map(arg => `${arg.decl}${arg.name}`)
     .join(', ');
@@ -55,6 +58,7 @@ module.exports.renderSwig = function(decl) {
 ${assignArgs}
   $result = array;
 }`;
+
   return {
     name: 'typemaps.i',
     src: [inMap, outMap].join('\n')
