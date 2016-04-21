@@ -7,7 +7,7 @@ const settings = require('./settings.js');
 const conf = require('./conf.js');
 
 var features = settings.features || [
-  'rename', 'property', 'depends', 'headers', 'class', 'enum', 'typemap', 'asStatic', 'argout', 'noHandle', 'module', 'tests'
+  'rename', 'property', 'depends', 'headers', 'class', 'enum', 'typemap', 'asStatic', 'customMember', 'argout', 'noHandle', 'module', 'tests'
 ];
 var featureModules = features.map((name) => require(`./features/${name}.js`));
 
@@ -28,6 +28,9 @@ Parts.prototype = {
         this.parts[part.name] = [];
       this.parts[part.name].push(part.src);
     });
+  },
+  contains(partName) {
+    return partName in this.parts;
   },
   get(partName) {
     var parts = this.parts[partName];
@@ -62,11 +65,11 @@ function render(method, mod, feats) {
     mod = JSON.parse(fs.readFileSync(mod));
     conf.mapSources(mod);
   }
-  
+
   var parts = new Parts(mod.name);
-  if (mod.noSwig) 
+  if (mod.noSwig)
     return parts;
-  
+
   (feats || featureModules).forEach((feat) => {
     renderFeature(method, parts, mod, feat);
   });

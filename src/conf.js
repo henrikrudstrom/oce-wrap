@@ -1,4 +1,5 @@
 const extend = require('extend');
+const arrify = require('arrify');
 const headers = require('./headers.js');
 const common = require('./common.js');
 
@@ -45,6 +46,9 @@ function processInclude(decl, parent) {
     newDecl.key = decl.name;
   } else {
     newDecl = extend(true, {}, decl);
+
+    if (decl.key) return newDecl;
+
     newDecl.key = decl.name;
     if (newDecl.cls === 'memfun' || newDecl.cls === 'constructor')
       newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
@@ -85,28 +89,29 @@ Conf.prototype = {
   get(name) {
     return common.get(this, name);
   },
-
+  add(decls) {
+    decls = arrify(decls);
+    this.declarations = this.declarations.concat(decls
+      .map(decl => processInclude(decl, this))
+      //.filter((decl) => !this.declarations.some((d) => d.key === decl.key))
+    );
+  },
   include(expr) {
     if (Array.isArray(expr)) expr.map(this.include.bind(this));
     if (typeof expr !== 'function')
       if (this.cls && (this.cls === 'class' || this.cls === 'enum' || this.cls === 'typedef'))
         expr = `${this.key}::${expr}`;
       // query parsed headers for declaration
-    var res = headers.find(expr)
-      .map((decl) => processInclude(decl, this));
+    var res = headers.find(expr);
     if (res.length < 1) console.log('warning, expression ' + expr + ' returned no results.');
 
-    this.declarations = this.declarations.concat(
-      // dont add existing declarations
-      res.filter((decl) => !this.declarations.some((d) => d.key === decl.key))
-    );
+    this.add(res);
     return this;
   },
   exclude(expr) {
-    //console.log("EXPR", expr)
     var fn;
     if (typeof expr !== 'function')
-      fn = common.matcher(expr, false)
+      fn = common.matcher(expr, false);
     else {
       fn = decl => !expr(decl);
     }

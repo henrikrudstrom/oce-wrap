@@ -6,7 +6,7 @@ function renderTypedef(td) {
   return `typedef ${td.source().type} ${td.source().name};`;
 }
 
-module.exports.name = 'module'
+module.exports.name = 'module';
 
 function renderEnum(en) {
   var values = en.source().values.map(function(v) {
@@ -15,28 +15,16 @@ function renderEnum(en) {
   return `enum ${en.source().name} {\n${values}\n};`;
 }
 
-function requires(mod, modules) {
-  var res = []
-  if (mod === null || !mod.moduleDepends) return res;
-
-  return mod.moduleDepends.concat(
-    mod.moduleDepends.map(m =>
-      requires(modules.get(m))
-    )
-    .concat((a, b) => a.concat(b))
-  );
-}
-
 module.exports.renderJS = function(decl, parts) {
   if (decl.cls !== 'module')
     return false;
-  //var modules = require('../modules.js')();
+
   var reqs = '';
   if (decl.moduleDepends)
     reqs = decl.moduleDepends
-      .map(r => `const ${r} = require('./${r}.js');`)
-      .join('\n');
-  console.log(parts, decl.name)
+    .map(r => `const ${r} = require('./${r}.js');`)
+    .join('\n');
+
   return {
     name: decl.name + '.js',
     src: `\
@@ -46,7 +34,7 @@ ${parts.get(decl.name + 'JS')}
 
 module.exports = mod;
 `
-  }
+  };
 };
 
 
@@ -65,6 +53,10 @@ module.exports.renderSwig = function(decl, parts) {
   function includeIfExists(name) {
     var file = path.join(settings.paths.definition, 'modules', decl.name, name);
     return fs.existsSync(file) ? `%include "${name}"` : `// ${name} not present`;
+  }
+
+  function includeIfDefined(partName) {
+    return parts.contains(partName) ? `%include "${partName}"` : '';
   }
   var typemaps = decl.typemaps ? '%include "typemaps.i"' : '// no typemaps';
 
@@ -92,6 +84,7 @@ ${enums.join('\n')}
 ${parts.get('handles')}
 ${parts.get('classIncludes')}
 ${parts.get('extends')}
+${includeIfDefined('extends.i')}
 `
   };
 };

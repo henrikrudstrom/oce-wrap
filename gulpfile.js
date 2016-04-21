@@ -8,8 +8,8 @@ settings.initialize({
 });
 const gulp = require('gulp');
 const jasmine = require('gulp-jasmine');
-const cover = require('gulp-coverage');
-const coveralls = require('gulp-coveralls');
+// const cover = require('gulp-coverage');
+// const coveralls = require('gulp-coveralls');
 const gutil = require('gulp-util');
 const yargs = require('yargs');
 require('./tasks/parse.js')(gulp);
@@ -37,17 +37,17 @@ gulp.task('test', function() {
   if (arg)
     specSources = `spec/${arg}Spec.js`;
   gulp.src(specSources)
-    .pipe(cover.instrument({
-      pattern: ['src/**/*.js']
-    }))
+    // .pipe(cover.instrument({
+    //   pattern: ['src/**/*.js']
+    // }))
     .pipe(jasmine({
       verbose: true,
       includeStackTrace: yargs.argv.verbose,
       reporter
     }))
-    .pipe(cover.gather())
-    .pipe(cover.format({ reporter: 'lcov' }))
-    .pipe(coveralls());
+    // .pipe(cover.gather())
+    // .pipe(cover.format({ reporter: 'lcov' }))
+    // .pipe(coveralls());
 });
 
 gulp.task('test-conf', function() {
