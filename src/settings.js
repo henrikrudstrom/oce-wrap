@@ -19,7 +19,7 @@ var defaultsettings = {
     lib: '/usr/local/lib',
     parseToolkits: [
       'TKG3d', 'TKG2d', 'TKernel', 'TKMath', 'TKAdvTools',
-      'TKGeomBase', 'TKBRep', 'TKGeomAlgo', 'TKTopAlgo'
+      'TKGeomBase', 'TKBRep', 'TKPrim', 'TKGeomAlgo', 'TKTopAlgo'
     ]
   },
   xmlGenerator: 'gccxml',

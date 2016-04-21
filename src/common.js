@@ -8,12 +8,14 @@ function match(exp, name) {
   exp = replaceAll(exp, '*', '.*');
   //exp = replaceAll(exp, '+', '.+');
   exp = new RegExp('^' + exp + '$');
+
   return exp.test(name);
 }
 
 function keyMatcher(exp, matchValue, wrapped) {
   if (typeof wrapped !== 'boolean' && typeof wrapped !== 'undefined')
     throw new Error();
+
   if (matchValue === undefined)
     matchValue = true;
 
@@ -22,25 +24,27 @@ function keyMatcher(exp, matchValue, wrapped) {
     if (wrapped !== undefined) {
       key = obj.name;
     }
-    //console.log(exp, key)
-    //if(!exp && !key) console.log("UNDEFINED", obj, "...")
+
     if (exp.indexOf('(') === -1 && key.indexOf('(') !== -1)
       key = key.split('(')[0];
+
     return match(exp, key) ? matchValue : !matchValue;
   };
 }
 
 function find(data, expr, wrapped) {
+  var member = undefined;
   if (expr !== 'function') {
     var type = expr;
-    var member = undefined;
     var splitter = '::';
     if (wrapped)
       splitter = '.';
+
     if (expr.indexOf(splitter)) {
       type = expr.split(splitter)[0];
       member = expr.split(splitter)[1];
     }
+
     expr = keyMatcher(type, true, wrapped);
   }
 

@@ -8,3 +8,4 @@ cache/
 ref/
 settings.json
 .coverrun
+.pyc

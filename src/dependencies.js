@@ -66,10 +66,11 @@ function dependencyReader(mods) {
       var qualifiedName = cls.name;
       var separator = options.source ? '_' : '.';
       if (cls.parent)
+        // TODO: source occ class names are qualified by default
         qualifiedName = cls.parent + separator + cls.name;
       return res.filter((name) => name !== qualifiedName);
     }
-    //cache result
+    // cache result
     cache[cls.name] = res;
     return res;
   }
@@ -89,7 +90,6 @@ function dependencyReader(mods) {
 
   return {
     classDepends,
-    //moduleDepends,
     toolkitDepends
   };
 }

@@ -36,7 +36,7 @@ class Module:
     def __init__(self, name, output_path):
         self.name = name
         self.output_path = output_path
-        self.files = glob(oce_include + "/" + name + "_*.hxx")
+        self.files = glob(oce_include + "/" + name + "*.hxx")
         self.files = filter(lambda h: not ignore(h), self.files)
 
         self.ns = parse.parse_files(oce_include, self.files)

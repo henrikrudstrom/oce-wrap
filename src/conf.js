@@ -11,11 +11,11 @@ function createMultiConf(decls) {
 }
 
 MultiConf.prototype.include = function include(expr) {
-  this.map((decl) => decl.include ? decl.include(expr) : decl);
+  this.map(decl => (decl.include ? decl.include(expr) : decl));
   return this;
 };
 MultiConf.prototype.exclude = function exclude(expr) {
-  this.map((decl) => decl.exclude ? decl.exclude(expr) : decl);
+  this.map(decl => (decl.exclude ? decl.exclude(expr) : decl));
   return this;
 };
 
@@ -91,10 +91,10 @@ Conf.prototype = {
     if (typeof expr !== 'function')
       if (this.cls && (this.cls === 'class' || this.cls === 'enum' || this.cls === 'typedef'))
         expr = `${this.key}::${expr}`;
-
       // query parsed headers for declaration
     var res = headers.find(expr)
       .map((decl) => processInclude(decl, this));
+    if (res.length < 1) console.log('warning, expression ' + expr + ' returned no results.');
 
     this.declarations = this.declarations.concat(
       // dont add existing declarations
