@@ -3,9 +3,10 @@ const gutil = require('gulp-util');
 const yargs = require('yargs');
 const path = require('path');
 const fs = require('fs');
+const del = require('del');
 const exec = require('child_process').exec;
-const cover = require('gulp-coverage');
-const coveralls = require('gulp-coveralls');
+const diff = require('gulp-diff');
+
 
 var Reporter = require('jasmine-terminal-reporter');
 var reporter = new Reporter({ isVerbose: yargs.argv.verbose });
@@ -34,36 +35,34 @@ module.exports = function(gulp) {
   const jasmine = require('gulp-jasmine');
 
   gulp.task('test-clean', (done) =>
-    run(`rm -rf ${settings.paths.dist}/spec`, { silent: true }).exec(done)
+    run(`rm -rf ${settings.paths.build}/spec`, { silent: true }).exec(done)
   );
 
 
   gulp.task('render-tests', function(done) {
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
-    render.write(settings.paths.dist + '/spec/', render('renderTest', configuredModules));
+    render.write(settings.paths.build + '/spec/', render('renderTest', configuredModules));
     done();
   });
   gulp.task('render-js', function(done) {
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
     var parts = render('renderJS', configuredModules);
-    render.write(settings.paths.dist + '/lib/', parts, { flat: true });
+    render.write(settings.paths.build + '/lib/', parts, { flat: true });
     done();
   });
 
 
   gulp.task('copy-spec', function() {
+    console.log(`${settings.paths.build}/spec`)
     return gulp.src([
         `${settings.paths.definition}/spec/**/*.js`,
         `${settings.paths.definition}/spec/*.js`
-      ]).pipe(rename({ dirname: '' }))
-      .pipe(gulp.dest(`${settings.paths.dist}/spec`));
+      ])//.pipe(rename({ dirname: '' }))
+      .pipe(gulp.dest(`${settings.paths.build}/spec`));
   });
 
-
-
-
   gulp.task('just-test', ['copy-spec'], function() {
-    var specSource = `${settings.paths.dist}/spec/`;
+    var specSource = `${settings.paths.build}/spec/`;
     var arg = yargs.argv.spec;
     if (arg)
       specSource += yargs.argv.spec + 'Spec.js';
@@ -78,40 +77,46 @@ module.exports = function(gulp) {
   });
   
   
-  var diffPaths = {
-    config: path.join(settings.paths.build, 'config'),
-    swig: path.join(settings.paths.build, 'swig'),
-    src: path.join(settings.paths.dist, 'src'),
-    spec: path.join(settings.paths.dist, 'spec'),
+  function diffTestSubpaths(){
+    var subpaths = ['inc', 'src', 'swig', 'config', 'spec'];
+    if(yargs.argv.folders)
+      subpaths = yargs.argv.folders.split(',');
+    return subpaths;
   }
-  function getPartPaths(){
-    var parts = ['config', 'swig', 'src', 'spec']
-    if(yargs.argv.parts)
-      parts = yargs.argv.parts.split(',');
-    return parts.map(prt => diffPaths[prt]);
-  }
-  gulp.task('diff-copy-ref', function(){
-    var sources = getPartPaths().map(folder => path.join(folder, '**/*.*'));
-    console.log(sources)
+  
+  gulp.task('diff-test-clean', function(){
+    var sources = diffTestSubpaths()
+      .map(folder => path.join('.diff-test-ref', folder, '*.*'));
+    del('.diff-test-ref/**');
+  })
+  
+  gulp.task('diff-test-init', ['diff-test-clean'], function(){
+    var sources = diffTestSubpaths()
+      .map(folder => path.join(settings.paths.build, folder));
+    
     gulp.src(sources, {
-      //base: '../',
-      read: false
-    })
-      .pipe(gulp.dest('./test-ref'))
+        base: 'build/',
+      })
+      .pipe(gulp.dest('.diff-test-ref'))
   });
 
-  gulp.task('diff-ref', function(done) {
-    var subpath = yargs.argv.folder;
-    var refPath = path.join(settings.paths.dist, 'test-ref', subpath);
-    var pth = path.join(settings.paths.dist, subpath);
-    if (!subpath)
-      return;
-    exec('rm -rf ' + refPath, () => exec(`cp -rf ${pth} ${refPath}`, done));
-  });
+
   gulp.task('diff-test', function(done) {
-    var subpath = yargs.argv.folder;
-    if (!subpath)
-      return;
+    
+    var sources = diffTestSubpaths()
+      .map(folder => path.join(settings.paths.build, folder, '*.*'));
+    
+    gulp.src(sources, {
+        base: 'build/',
+      })
+      .pipe(diff('.diff-test-ref'))
+      .pipe(diff.reporter({ fail: true }));
+
+  })
+
+  gulp.task('diff-test2', function(done) {
+    var subpaths = diffTestSubpaths();
+  
     var refPath = path.join(settings.paths.dist, 'test-ref', subpath)
     var pth = path.join(settings.paths.dist, subpath)
     exec(`diff -r ${refPath} ${pth}`,

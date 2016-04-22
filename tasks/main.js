@@ -61,14 +61,14 @@ module.exports = function(gulp) {
       .pipe(rename({ dirname: '' }))
       .pipe(gulp.dest(settings.paths.inc));
   });
-  gulp.task('copy-spec', function() {
-    return gulp.src([
-        `${settings.paths.definition}/modules/**/spec/*.js`,
-        `${settings.paths.definition}/spec/*.js*`
-      ])
-      .pipe(rename({ dirname: '' }))
-      .pipe(gulp.dest(`${settings.paths.dist}/spec`));
-  });
+  // gulp.task('copy-spec', function() {
+  //   return gulp.src([
+  //       `${settings.paths.definition}/modules/**/spec/*.js`,
+  //       `${settings.paths.definition}/spec/*.js*`
+  //     ])
+  //     .pipe(rename({ dirname: '' }))
+  //     .pipe(gulp.dest(`${settings.paths.build}/spec`));
+  // });
   gulp.task('copy-js', function() {
     return gulp.src(`${settings.paths.definition}/modules/*/*.js`)
       .pipe(rename({ dirname: '' }))

@@ -17,6 +17,7 @@ var defaultsettings = {
   oce: {
     include: '/usr/local/include/oce',
     lib: '/usr/local/lib',
+    //used by header parser, determines which headers are parsed and cached
     parseToolkits: [
       'TKG3d', 'TKG2d', 'TKernel', 'TKMath', 'TKAdvTools',
       'TKGeomBase', 'TKBRep', 'TKPrim', 'TKGeomAlgo', 'TKTopAlgo'
@@ -68,11 +69,11 @@ function initialize(settings) {
 
   settings.paths = extend({}, settings.paths, {
     swig: path.join(settings.paths.build, 'swig'),
-    cxx: path.join(settings.paths.dist, 'src'),
-    inc: path.join(settings.paths.dist, 'inc'),
+    cxx: path.join(settings.paths.build, 'src'),
+    inc: path.join(settings.paths.build, 'inc'),
     gyp: path.join(settings.paths.build, 'gyp'),
     config: path.join(settings.paths.build, 'config'),
-    headerCache: path.join(settings.paths.generator, 'cache/headers'),
+    headerCache: 'cache/headers',
     data: path.join(settings.paths.generator, 'data')
   });
 
