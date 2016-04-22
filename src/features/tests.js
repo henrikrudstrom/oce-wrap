@@ -38,9 +38,13 @@ function isOverriden(suite, spec) {
   return false;
 }
 
-var specOverride = require(
-  path.relative(__dirname, `${settings.paths.definition}/spec/notWorking.js`)
-);
+var specOverridePath = path.join(settings.paths.definition, 'spec', 'notWorking.js');
+var specOverride = fs.existsSync(specOverridePath) ? 
+  require(path.relative(__dirname, specOverridePath)) : 
+  { 
+    notWorking(){ return false }, 
+    returnType(){ return false } 
+  };
 
 var nextInt = 0;
 var nextDouble = 0.0;

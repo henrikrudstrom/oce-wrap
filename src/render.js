@@ -2,8 +2,9 @@ const arrify = require('arrify');
 const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
-
 const settings = require('./settings.js');
+settings.initialize();
+
 const conf = require('./conf.js');
 
 var features = settings.features || [

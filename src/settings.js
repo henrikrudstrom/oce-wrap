@@ -86,6 +86,9 @@ function initialize(settings) {
   if (yargs.argv.modules)
     settings.build.modules = yargs.argv.modules.split(',');
   module.exports = settings;
+  module.exports.initialize = function(){
+    console.log('Warning: settings already initialized');
+  }
 }
 
 module.exports.initialize = initialize;

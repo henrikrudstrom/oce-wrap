@@ -76,6 +76,29 @@ module.exports = function(gulp) {
         reporter
       }))
   });
+  
+  
+  var diffPaths = {
+    config: path.join(settings.paths.build, 'config'),
+    swig: path.join(settings.paths.build, 'swig'),
+    src: path.join(settings.paths.dist, 'src'),
+    spec: path.join(settings.paths.dist, 'spec'),
+  }
+  function getPartPaths(){
+    var parts = ['config', 'swig', 'src', 'spec']
+    if(yargs.argv.parts)
+      parts = yargs.argv.parts.split(',');
+    return parts.map(prt => diffPaths[prt]);
+  }
+  gulp.task('diff-copy-ref', function(){
+    var sources = getPartPaths().map(folder => path.join(folder, '**/*.*'));
+    console.log(sources)
+    gulp.src(sources, {
+      //base: '../',
+      read: false
+    })
+      .pipe(gulp.dest('./test-ref'))
+  });
 
   gulp.task('diff-ref', function(done) {
     var subpath = yargs.argv.folder;

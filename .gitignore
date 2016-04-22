@@ -6,6 +6,7 @@ node_modules/
 tmp/
 cache/
 ref/
+coverage/
 settings.json
 .coverrun
 .pyc

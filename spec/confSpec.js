@@ -1,3 +1,12 @@
+/*global expect */
+const settings = require('../src/settings.js');
+settings.initialize({
+  paths: {
+    build: 'spec/test-proj/build',
+    dist: 'spec/test-proj/dist',
+    definition: 'spec/test-proj/def'
+  }
+});
 var headers = require('../src/headers.js');
 
 require('../src/features/rename.js');

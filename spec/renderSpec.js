@@ -1,9 +1,22 @@
+const settings = require('../src/settings.js');
+settings.initialize({
+  paths: {
+    build: 'spec/test-proj/build',
+    dist: 'spec/test-proj/dist',
+    definition: 'spec/test-proj/def'
+  }
+});
 var headers = require('../src/headers.js');
 require('../src/features/rename.js');
 require('../src/features/property.js');
 const conf = require('../src/conf.js');
 const render = require('../src/render.js');
 
+const testsFeature = require('../src/features/tests.js');
+const configure = require('../src/configure.js');
+const glob = require('glob');
+const modules = require('../src/modules');
+const execSync = require('child_process').execSync;
 
 xdescribe('Swig Renderer', function() {
   var features = ['rename', 'property'].map((name) =>
@@ -60,12 +73,7 @@ xdescribe('Swig Renderer', function() {
   //   expect(parts.property).toEqual(res);
   // });
 });
-const testsFeature = require('../src/features/tests.js');
-const configure = require('../src/configure.js');
-const glob = require('glob');
-const modules = require('../src/modules');
-const execSync = require('child_process').execSync;
-const settings = require('../src/settings.js');
+
 
 describe('render tests', function() {
   var createValue = testsFeature.createValue;

@@ -8,10 +8,10 @@ settings.initialize({
 });
 const gulp = require('gulp');
 const jasmine = require('gulp-jasmine');
-// const cover = require('gulp-coverage');
-// const coveralls = require('gulp-coveralls');
+
 const gutil = require('gulp-util');
 const yargs = require('yargs');
+const istanbul = require('gulp-istanbul');
 require('./tasks/parse.js')(gulp);
 
 // show line number of spec that failed
@@ -29,25 +29,28 @@ reporter.specDone = function(result) {
   }
 };
 module.exports.reporter = reporter;
-
-gulp.task('test', function() {
+gulp.task('pre-test', function () {
+  return gulp.src(['src/**/*.js'])
+    // Covering files
+    .pipe(istanbul())
+    // Force `require` to return covered files
+    .pipe(istanbul.hookRequire());
+});
+gulp.task('test', ['pre-test'], function() {
   console.log("MYTEST")
   var specSources = ['spec/*Spec.js'];
   var arg = yargs.argv.spec;
   if (arg)
     specSources = `spec/${arg}Spec.js`;
   gulp.src(specSources)
-    // .pipe(cover.instrument({
-    //   pattern: ['src/**/*.js']
-    // }))
     .pipe(jasmine({
       verbose: true,
       includeStackTrace: yargs.argv.verbose,
       reporter
     }))
-    // .pipe(cover.gather())
-    // .pipe(cover.format({ reporter: 'lcov' }))
-    // .pipe(coveralls());
+    .pipe(istanbul.writeReports())
+    // Enforce a coverage of at least 90%
+    .pipe(istanbul.enforceThresholds({ thresholds: { global: 90 } }));
 });
 
 gulp.task('test-conf', function() {
