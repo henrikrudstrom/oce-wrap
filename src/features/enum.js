@@ -1,3 +1,4 @@
+module.exports.name = 'enum';
 module.exports.renderJS = function(decl) {
   if (decl.cls !== 'enum') return false;
   var values = decl.values.map(val => `${val[0]}: ${val[1]}`).join(',\n  ');

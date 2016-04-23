@@ -1,11 +1,12 @@
 const headers = require('../headers.js');
+module.exports.name = 'headers';
 module.exports.renderSwig = function(decl) {
   
   const modules = require('../modules.js')();
   var reader = require('../dependencies.js')(modules);
   if (decl.cls !== 'module') return false;
   var depends = decl.declarations
-    .map((d) => reader.classDepends(d, { recursive: true }))
+    .map((d) => reader.classDepends(d, { recursive: false }))
     .concat(decl.declarations.map(d => d.source().name))
     .concat(decl.declarations
       .map(d => (d.bases ? d.source().bases.map(b => b.name) : []))
@@ -23,6 +24,7 @@ module.exports.renderSwig = function(decl) {
       } else {
         d = res.key;
       }
+      // TODO: use concat instead of reduce
       var handle = headers.get('Handle_' + d);
       if (handle !== null) {
         return [d, handle.name];

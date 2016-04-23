@@ -84,47 +84,33 @@ module.exports = function(gulp) {
     return subpaths;
   }
   
-  gulp.task('diff-test-clean', function(){
+  gulp.task('diff-test-clean', function(done) {
     var sources = diffTestSubpaths()
       .map(folder => path.join('.diff-test-ref', folder, '*.*'));
-    del('.diff-test-ref/**');
+    del.sync('.diff-test-ref/**');
+    
+    return done();
   })
   
-  gulp.task('diff-test-init', ['diff-test-clean'], function(){
+  gulp.task('diff-test-init', ['diff-test-clean'], function() {
     var sources = diffTestSubpaths()
-      .map(folder => path.join(settings.paths.build, folder));
-    
-    gulp.src(sources, {
+      .map(folder => path.join(settings.paths.build, folder, '**/*'));
+
+    return gulp.src(sources, {
         base: 'build/',
       })
       .pipe(gulp.dest('.diff-test-ref'))
   });
 
 
-  gulp.task('diff-test', function(done) {
-    
+  gulp.task('diff-test', function() {
     var sources = diffTestSubpaths()
-      .map(folder => path.join(settings.paths.build, folder, '*.*'));
+      .map(folder => path.join(settings.paths.build, folder, '**/*'));
     
-    gulp.src(sources, {
+    return gulp.src(sources, {
         base: 'build/',
       })
       .pipe(diff('.diff-test-ref'))
       .pipe(diff.reporter({ fail: true }));
-
-  })
-
-  gulp.task('diff-test2', function(done) {
-    var subpaths = diffTestSubpaths();
-  
-    var refPath = path.join(settings.paths.dist, 'test-ref', subpath)
-    var pth = path.join(settings.paths.dist, subpath)
-    exec(`diff -r ${refPath} ${pth}`,
-      (error, stdout, stderr) => {
-        gutil.log(stdout);
-        return done();
-      }
-    )
-
-  })
+  });
 };

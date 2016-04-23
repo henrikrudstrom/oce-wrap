@@ -1,7 +1,7 @@
 module.exports.name = 'property';
 const conf = require('../conf.js');
 const common = require('../common.js');
-
+module.exports.name = 'property';
 conf.Conf.prototype.property = function(getter, setter, name) {
   this.transform(getter, (getMethod) => {
     if (getMethod.cls === 'constructor') return false;

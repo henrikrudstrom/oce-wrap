@@ -59,8 +59,9 @@ function listModules() {
   return glob.sync(`${settings.paths.headerCache}/*.json`)
     .map(file => file.match(/\/(\w+).json/)[1]);
 }
-
+var cache = {};
 function find(expr) {
+  if(cache.hasOwnProperty(expr)) return cache[expr];
   var modName = expr.replace('Handle_', '')
     .split('::')[0]
     .split('_')[0];
@@ -69,8 +70,10 @@ function find(expr) {
 
   if (!mod) return [];
 
-  return common.find(mod, expr)
+  var res = common.find(mod, expr)
     .filter(res => !res.copyConstructor); // TODO: wrong home
+  cache[expr] = res;
+  return res;
 }
 
 function get(name) {

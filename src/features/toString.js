@@ -1,6 +1,6 @@
 module.exports.name = 'property';
 const conf = require('../conf.js');
-
+module.exports.name = 'toString';
 conf.Conf.prototype.property = function(getter, setter, name) {
   this.transform(getter, (getMethod) => {
     if (getMethod.cls === 'constructor') return false;

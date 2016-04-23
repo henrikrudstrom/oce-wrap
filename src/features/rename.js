@@ -3,7 +3,7 @@ module.exports.name = 'property';
 const conf = require('../conf.js');
 const common = require('../common.js');
 const camelCase = require('camel-case');
-
+module.exports.name = 'rename';
 function rename(expr, name) {
   var nameFunc = name;
   if (typeof nameFunc !== 'function')

@@ -1,5 +1,5 @@
 var conf = require('../conf.js');
-
+module.exports.name = 'typemap';
 conf.Conf.prototype.typemap = function(from, to, getter) {
   if (!this.typemaps)
     this.typemaps = [];

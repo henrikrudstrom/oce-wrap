@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var settings = require('../settings.js');
-
+module.exports.name = 'module';
 function renderTypedef(td) {
   return `typedef ${td.source().type} ${td.source().name};`;
 }

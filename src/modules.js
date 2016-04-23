@@ -22,8 +22,10 @@ function moduleQuery(mods) {
     conf.mapSources(mod);
     modules[mod.name] = mod;
   });
-
+  var cache = {};
   function find(expr) {
+    if(cache.hasOwnProperty(expr))
+      return cache[expr];
     var mod;
     if (expr.indexOf('.') !== -1) {
       mod = expr.split('.')[0];
@@ -38,6 +40,7 @@ function moduleQuery(mods) {
         throw new Error('sholdnt happen');
       }
     }
+    cache[expr] = res;
     return res;
   }
 

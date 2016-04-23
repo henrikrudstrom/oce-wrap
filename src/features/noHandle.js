@@ -1,6 +1,6 @@
 var conf = require('../conf.js');
 var headers = require('../headers.js');
-
+module.exports.name = 'noHandle';
 conf.Conf.prototype.noHandle = function(expr) {
   this.find(expr).forEach(cls => {
     if (cls.key.startsWith('Handle_')) return;

@@ -60,6 +60,7 @@ function renderFeature(method, parts, decl, feature) {
 
 
 function render(method, mod, feats) {
+  //console.time("render-init-" + mod.name);
   if (Array.isArray(mod))
     return mod.map((m) => render(method, m, feats));
   if (typeof mod === 'string') {
@@ -70,9 +71,11 @@ function render(method, mod, feats) {
   var parts = new Parts(mod.name);
   if (mod.noSwig)
     return parts;
-
+  //console.timeEnd('render-init-' + mod.name)
   (feats || featureModules).forEach((feat) => {
+    console.time('render-'+mod.name+'-'+feat.name);
     renderFeature(method, parts, mod, feat);
+    console.timeEnd('render-'+mod.name+'-'+feat.name);
   });
 
   return parts;

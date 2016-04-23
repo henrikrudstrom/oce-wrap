@@ -5,7 +5,7 @@ var settings = require('../settings.js');
 const glob = require('glob');
 const fs = require('fs');
 const path = require('path');
-
+module.exports.name = 'tests';
 function parseTests() {
   var specs = {};
   glob.sync(`${settings.paths.definition}/spec/**/*Spec.js`)

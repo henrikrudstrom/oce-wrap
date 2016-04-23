@@ -1,7 +1,7 @@
 const extend = require('extend');
 const conf = require('../conf.js');
 const headers = require('../headers.js');
-
+module.exports.name = 'customMember';
 conf.Conf.prototype.customMethod = function customMethod(decl) {
   decl = extend({}, decl);
 

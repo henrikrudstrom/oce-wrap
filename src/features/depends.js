@@ -1,4 +1,5 @@
 var conf = require('../conf.js');
+module.exports.name = 'depends';
 conf.Conf.prototype.depends = function(moduleName) {
   if (this.moduleDepends === undefined)
     this.moduleDepends = [];

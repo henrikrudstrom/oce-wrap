@@ -19,7 +19,7 @@ module.exports = function(gulp) {
   gulp.task('render', function(done) {
     runSequence(
       ['swig-clean', 'configure'],
-      ['render-swig', 'render-js', 'copy'],
+      ['render-swig', 'render-js', 'render-tests', 'copy'],
       'swig-cxx', 'swig-hack-handles', done
     );
   });
@@ -61,27 +61,16 @@ module.exports = function(gulp) {
       .pipe(rename({ dirname: '' }))
       .pipe(gulp.dest(settings.paths.inc));
   });
-  // gulp.task('copy-spec', function() {
-  //   return gulp.src([
-  //       `${settings.paths.definition}/modules/**/spec/*.js`,
-  //       `${settings.paths.definition}/spec/*.js*`
-  //     ])
-  //     .pipe(rename({ dirname: '' }))
-  //     .pipe(gulp.dest(`${settings.paths.build}/spec`));
-  // });
+
   gulp.task('copy-js', function() {
     return gulp.src(`${settings.paths.definition}/modules/*/*.js`)
       .pipe(rename({ dirname: '' }))
-      .pipe(gulp.dest(`${settings.paths.dist}/lib`));
+      .pipe(gulp.dest(`${settings.paths.build}/lib`));
   });
 
   gulp.task('copy', function(done) {
     runSequence('copy-swig', 'copy-headers', 'copy-sources', 'copy-js', 'copy-spec', done);
   });
 
-  gulp.task('copy-gyp', function(done) {
-    return gulp.src(`${settings.paths.dist}/build/Release/*.node`)
-      .pipe(rename({ dirname: '' }))
-      .pipe(gulp.dest(`${settings.paths.dist}/lib/`));
-  });
+
 };
