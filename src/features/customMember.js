@@ -1,8 +1,8 @@
 const extend = require('extend');
-const conf = require('../conf.js');
+const features = require('../features.js');
 const headers = require('../headers.js');
 module.exports.name = 'customMember';
-conf.Conf.prototype.customMethod = function customMethod(decl) {
+function customMethod(decl) {
   decl = extend({}, decl);
 
   decl.parent = this.name;
@@ -14,7 +14,7 @@ conf.Conf.prototype.customMethod = function customMethod(decl) {
   return this;
 };
 
-conf.Conf.prototype.topoSubShapes = function topoSubShapes(name, shapeType) {
+function topoSubShapes(name, shapeType) {
   var src = headers.get(
     'TopExp::MapShapes(TopoDS_Shape, TopAbs_ShapeEnum, TopTools_IndexedMapOfShape)'
   );
@@ -29,10 +29,7 @@ conf.Conf.prototype.topoSubShapes = function topoSubShapes(name, shapeType) {
   return this.customMethod(decl);
 };
 
-conf.MultiConf.prototype.topoSubShapes = function(name, shapeType) {
-  this.map((decl) => decl.topoSubShapes(name, shapeType));
-  return this;
-};
+features.registerConfig(topoSubShapes);
 
 function renderTopoMaps(decl) {
   return `\

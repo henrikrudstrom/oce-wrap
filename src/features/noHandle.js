@@ -1,7 +1,8 @@
-var conf = require('../conf.js');
+const features = require('../features.js');
 var headers = require('../headers.js');
 module.exports.name = 'noHandle';
-conf.Conf.prototype.noHandle = function(expr) {
+
+function noHandle(expr) {
   this.find(expr).forEach(cls => {
     if (cls.key.startsWith('Handle_')) return;
 
@@ -20,22 +21,17 @@ conf.Conf.prototype.noHandle = function(expr) {
     this.typemap('Handle_' + obj.key, obj.key);
     obj.handle = true;
   });
-};
+}
 
-conf.Conf.prototype.downCastToThis = function(expr) {
+// specify that the return type of this method will be the same
+// as the class, (for inherited methods etc)
+function downCastToThis(expr) {
   this.find(expr).forEach(mem => {
     mem.downCastToThis = true;
   });
-};
+}
 
-conf.MultiConf.prototype.noHandle = function noHandle(expr, newName) {
-  this.map((decl) => decl.noHandle(expr, newName));
-  return this;
-};
-conf.MultiConf.prototype.downCastToThis = function downCastToThis(expr, newName) {
-  this.map((decl) => decl.downCastToThis(expr, newName));
-  return this;
-};
+features.registerConfig(noHandle, downCastToThis);
 
 module.exports.renderSwig = function(cls) {
   var name = cls.key;

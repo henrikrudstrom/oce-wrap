@@ -1,8 +1,9 @@
-const conf = require('../conf.js');
+const features = require('../features.js');
 const camelCase = require('camel-case');
 module.exports.name = 'asStatic';
-conf.Conf.prototype.argout = function argout(expr, type) {
-  if(type === undefined) throw new Error("argout type must be specified");
+
+function argout(expr, type) {
+  if (type === undefined) throw new Error("argout type must be specified");
   this.pushToStack(5, expr, (mem) => {
     if (mem.cls !== 'memfun') return false;
 
@@ -18,27 +19,16 @@ conf.Conf.prototype.argout = function argout(expr, type) {
 
     return true;
   });
-};
+}
 
-conf.Conf.prototype.argoutArray = function argoutArray(expr){
+function argoutArray(expr) {
   return this.argout(expr, 'Array');
 }
 
-conf.Conf.prototype.argoutObject = function argoutObject(expr){
+function argoutObject(expr) {
   return this.argout(expr, 'Object');
 }
-
-conf.MultiConf.prototype.argoutArray = function property(expr) {
-  this.map((decl) => decl.argoutArray(expr));
-  return this;
-};
-
-conf.MultiConf.prototype.argoutObject = function property(expr) {
-  this.map((decl) => decl.argoutObject(expr));
-  return this;
-};
-
-
+features.registerConfig(argout, argoutArray, argoutObject);
 
 function swigConvert(type, arg) {
   if (type.indexOf('Standard_Real') !== -1)
@@ -64,7 +54,9 @@ function renderArrayOutmap(argouts, sigArgs) {
 
 function renderObjectOutmap(argouts, sigArgs) {
   var assignArgs = argouts
-    .map((arg, index) => `  obj->Set(SWIGV8_STRING_NEW("${camelCase(arg.name)}"), ${swigConvert(arg.type, '$' + (index + 1))});`)
+    .map((arg, index) =>
+      `  obj->Set(SWIGV8_STRING_NEW("${camelCase(arg.name)}"), ${swigConvert(arg.type, '$' + (index + 1))});`
+    )
     .join('\n');
 
   return `%typemap(argout) (${sigArgs}) {// argoutout\n

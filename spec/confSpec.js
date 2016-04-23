@@ -173,7 +173,7 @@ describe('module object', function() {
     mod.include('gp_*')
     mod.find('*')
       .include('*');
-    mod.find('*').camelCase('*');
+    mod.find('*').renameCamelCase('*');
     mod.process();
 
     mod.find('gp_Vec::SetX');
@@ -202,7 +202,7 @@ describe('module object', function() {
     mod.include('gp_Vec');
     var vec = mod.get('gp_Vec');
     vec.include('*');
-    vec.camelCase('*');
+    vec.renameCamelCase('*');
 
     mod.process();
     expect(vec.find('SetY')[0].name).toBe('setY');
@@ -226,7 +226,7 @@ describe('module object', function() {
     mod.include('gp_Vec');
     var vec = mod.get('gp_Vec')
       .include('*X')
-      .camelCase('*')
+      .renameCamelCase('*')
       .property('X', 'SetX');
     mod.process();
 
@@ -242,7 +242,7 @@ describe('module object', function() {
     mod.include('gp_Dir');
     mod.find('*')
       .include('*X')
-    mod.find('*').camelCase('*')
+    mod.find('*').renameCamelCase('*');
     mod.find('*').property('X', 'SetX');
     mod.process();
     var vec = mod.get('gp_Vec');
@@ -280,7 +280,7 @@ describe('module object', function() {
   it('can handle argouts', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
-    mod.find('*').camelCase('*');
+    mod.find('*').renameCamelCase('*');
     mod.removePrefix('*');
 
     mod.include('Geom_Geometry');
@@ -299,7 +299,7 @@ describe('module object', function() {
   it('can hide handles', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
-    mod.find('*').camelCase('*');
+    mod.find('*').renameCamelCase('*');
     mod.removePrefix('*');
 
     mod.include('Geom_Axis1Placement');
@@ -318,7 +318,7 @@ describe('module object', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
     mod.depends('gp');
-    mod.find('*').camelCase('*');
+    mod.find('*').renameCamelCase('*');
     mod.removePrefix('*');
     mod.include('Geom_Geometry');
     mod.include('Geom_Curve');
@@ -340,7 +340,7 @@ describe('module object', function() {
   it('can wrap BRepBuilder as module static functions', function() {
     var mod = new conf.Conf();
     mod.name = 'Geom';
-    mod.find('*').camelCase('*');
+    mod.find('*').renameCamelCase('*');
 
     mod.removePrefix('*');
     mod.include('Geom_Geometry');

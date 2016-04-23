@@ -1,6 +1,6 @@
 const extend = require('extend');
 const camelCase = require('camel-case');
-const conf = require('../conf.js');
+const features = require('../features.js');
 const common = require('../common.js');
 const headers = require('../headers.js');
 
@@ -16,9 +16,7 @@ function includeAsStatic(expr, template, valueFunc) {
   var res = cls.declarations
     .filter(decl => decl.cls === 'constructor')
     .filter(decl => !decl.copyConstructor)
-    .filter(decl => {
-      return common.match(expr, decl.key)
-    })
+    .filter(decl => common.match(expr, decl.key))
     .map(cons => {
       var args = cons.arguments.map(arg => extend({}, arg));
       return {
@@ -41,23 +39,16 @@ function includeAsStatic(expr, template, valueFunc) {
   return this;
 }
 
-conf.Conf.prototype.includeAsStatic = includeAsStatic;
-
-conf.Conf.prototype.includeGCMake = function(clsName) {
+function includeGCMake(clsName) {
   return this.includeAsStatic(clsName, 'GCMake', 'Value');
-};
-conf.Conf.prototype.includeBRepBuilder = function(clsName, valueFunc) {
-  return this.includeAsStatic(clsName, 'BRepBuilder', valueFunc);
-};
+}
 
-conf.MultiConf.prototype.includeGCMake = function(clsName) {
-  this.map((decl) => decl.includeGCMake(clsName));
-  return this;
-};
-conf.MultiConf.prototype.includeBRepBuilder = function(clsName) {
-  this.map((decl) => decl.includeBRepBuilder(clsName));
-  return this;
-};
+function includeBRepBuilder(clsName, valueFunc) {
+  return this.includeAsStatic(clsName, 'BRepBuilder', valueFunc);
+}
+
+features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder);
+
 
 var templates = {
   renderGCMake(decl, source, args, argNames) {

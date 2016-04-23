@@ -27,34 +27,33 @@ function configureModule(file) {
   return mod;
 }
 
+function memberTranslate(typedict) {
+  return mem => {
+    if (mem.returnType)
+      mem.returnType = typedict(mem.returnType);
+    if (mem.type)
+      mem.type = typedict(mem.type);
+    if (mem.arguments)
+      mem.arguments.forEach((arg) => {
+        delete arg.decl;
+        arg.type = typedict(arg.type);
+      });
+  };
+}
 
 function translateTypes(mods) {
   var typedict = createTypeDict(mods);
+  var translateMember = memberTranslate(typedict);
   mods.forEach(mod => {
     mod.declarations.forEach(cls =>
       (cls.bases || []).forEach(base => (base.name = typedict(base.name)))
     );
 
-
-    //mod.declarations.map((decl) => (decl.bases ? decl.bases : []).forEach((base) => base.name = typedict(base.name))
-
     mod.declarations.map(
         (decl) => (decl.declarations ? decl.declarations : [])
       ).concat(mod.declarations.filter(d => d.cls === 'staticfunc'))
       .reduce((a, b) => a.concat(b), [])
-      .forEach(
-        (mem) => {
-          if (mem.returnType)
-            mem.returnType = typedict(mem.returnType);
-          if (mem.type)
-            mem.type = typedict(mem.type);
-          if (mem.arguments)
-            mem.arguments.forEach((arg) => {
-              delete arg.decl;
-              arg.type = typedict(arg.type);
-            });
-        }
-      );
+      .forEach(translateMember);
   });
 }
 

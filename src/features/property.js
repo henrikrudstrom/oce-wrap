@@ -1,8 +1,9 @@
 module.exports.name = 'property';
-const conf = require('../conf.js');
+
+const features = require('../features.js');
 const common = require('../common.js');
 module.exports.name = 'property';
-conf.Conf.prototype.property = function(getter, setter, name) {
+function property(getter, setter, name) {
   this.pushToStack(5, getter, (getMethod) => {
     if (getMethod.cls === 'constructor') return false;
     if (typeof setter === 'string') {
@@ -11,7 +12,7 @@ conf.Conf.prototype.property = function(getter, setter, name) {
     }
     var setMethod = this.get(setter());
 
-    var property = {
+    var propertyDecl = {
       name: name || getMethod.name.replace(/^Get/, ''),
       key: getMethod.key,
       cls: 'property',
@@ -24,17 +25,14 @@ conf.Conf.prototype.property = function(getter, setter, name) {
     };
     this.exclude(getMethod.key);
     if (setMethod) this.exclude(setMethod.key);
-    this.declarations.push(property);
+    this.declarations.push(propertyDecl);
 
-    return property;
+    return propertyDecl;
   });
   return this;
-};
+}
 
-conf.MultiConf.prototype.property = function property(getter, setter) {
-  this.map((decl) => decl.property(getter, setter));
-  return this;
-};
+features.registerConfig(property);
 
 
 module.exports.renderSwig = function(decl) {

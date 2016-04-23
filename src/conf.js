@@ -83,6 +83,7 @@ function mapSources(declaration) {
 
 Conf.prototype = {
   find(expr) {
+    console.log("expr", this.name, expr)
     var res = createMultiConf(common.find(this, expr)); // TODO. search by key not name
     return res;
   },

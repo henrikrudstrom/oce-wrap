@@ -1,12 +1,14 @@
-var conf = require('../conf.js');
+const features = require('../features.js');
 module.exports.name = 'depends';
-conf.Conf.prototype.depends = function(moduleName) {
+function depends(moduleName) {
   if (this.moduleDepends === undefined)
     this.moduleDepends = [];
   this.moduleDepends.push(moduleName);
-};
+}
 
-module.exports.renderSwig = function(decl, parts) {
+features.registerConfig(depends);
+
+module.exports.renderSwig = function(decl) {
   if (decl.cls !== 'module' || decl.moduleDepends === undefined) return false;
 
   return [{

@@ -1,19 +1,22 @@
-module.exports.name = 'property';
-
 const conf = require('../conf.js');
+const features = require('../features.js');
 const common = require('../common.js');
 const camelCase = require('camel-case');
 module.exports.name = 'rename';
+
 function rename(expr, name) {
   var nameFunc = name;
   if (typeof nameFunc !== 'function')
     nameFunc = () => name;
+
   this.pushToStack(5, expr, (obj) => {
     if (obj.cls === 'constructor') return;
+
     obj.rename = true;
     obj.name = nameFunc(obj.name, obj);
 
-    // rename parent property of child declarations TODO: handle this in configure.js
+    // rename parent property of child declarations
+    // TODO: handle this in configure.js
     if (!obj.declarations) return;
     obj.declarations.forEach((decl) => {
       decl.parent = obj.name;
@@ -34,17 +37,7 @@ function removePrefix(expr) {
   });
 }
 
-conf.Conf.prototype.rename = rename;
-conf.Conf.prototype.camelCase = renameCamelCase;
-conf.Conf.prototype.removePrefix = removePrefix;
-conf.MultiConf.prototype.rename = function(expr, newName) {
-  this.map((decl) => decl.rename(expr, newName));
-  return this;
-};
-conf.MultiConf.prototype.camelCase = function(expr) {
-  this.map((decl) => (decl.camelCase ? decl.camelCase(expr) : decl));
-  return this;
-};
+features.registerConfig(rename, renameCamelCase, removePrefix);
 
 module.exports.renderSwig = function(decl) {
   if (decl.cls === 'module') {
