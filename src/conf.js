@@ -33,10 +33,11 @@ function Conf(decl, parent) {
   this.declarations = [];
   // include nothing by default
 
-  this.stacks = {
-    include: [],
-    transform: []
-  };
+  this.stacks = [];
+  // this.stacks = {
+  //   include: [],
+  //   transform: []
+  // };
 }
 
 function processInclude(decl, parent) {
@@ -118,27 +119,27 @@ Conf.prototype = {
     this.declarations = this.declarations.filter(fn);
     return this;
   },
-  transform(expr, fn) {
-    this.stacks.transform.push(() => {
-      this.find(expr).forEach(fn);
-    });
+
+  pushToStack(i, expr, fn) {
+    if (!this.stacks[i])
+      this.stacks[i] = [];
+    this.stacks[i].push(() => this.find(expr).forEach(fn))
   },
 
-  process(stackName) {
-    if (stackName === undefined) {
-      this.process('include');
-      this.process('transform');
-      this.init(); // TODO: should get a better home
-      return;
-    }
+  process() {
+    console.log(this.name)
+    this.stacks.forEach(stack => {
+      if (stack)
+        stack.forEach((fn) => fn());
+    })
+    this.init(); // TODO: should get a better home
     if (this.declarations) {
       this.declarations
-        .filter((decl) => decl.declarations)
-        .forEach((decl) => decl.process(stackName));
+        .filter(decl => decl.declarations)
+        .forEach(decl => decl.process());
     }
-    this.stacks[stackName].forEach((fn) => fn());
-    this.stacks[stackName] = [];
   },
+
   init() {
     mapSources(this);
   }

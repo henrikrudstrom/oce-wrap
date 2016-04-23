@@ -75,23 +75,23 @@ module.exports = function(gulp) {
         reporter
       }))
   });
-  
-  
+
+
   function diffTestSubpaths(){
     var subpaths = ['inc', 'src', 'swig', 'config', 'spec'];
     if(yargs.argv.folders)
       subpaths = yargs.argv.folders.split(',');
     return subpaths;
   }
-  
+
   gulp.task('diff-test-clean', function(done) {
     var sources = diffTestSubpaths()
       .map(folder => path.join('.diff-test-ref', folder, '*.*'));
     del.sync('.diff-test-ref/**');
-    
+
     return done();
   })
-  
+
   gulp.task('diff-test-init', ['diff-test-clean'], function() {
     var sources = diffTestSubpaths()
       .map(folder => path.join(settings.paths.build, folder, '**/*'));
@@ -106,11 +106,11 @@ module.exports = function(gulp) {
   gulp.task('diff-test', function() {
     var sources = diffTestSubpaths()
       .map(folder => path.join(settings.paths.build, folder, '**/*'));
-    
+
     return gulp.src(sources, {
         base: 'build/',
       })
       .pipe(diff('.diff-test-ref'))
-      .pipe(diff.reporter({ fail: true }));
+      .pipe(diff.reporter({ fail: true, changedOnly: true }));
   });
 };

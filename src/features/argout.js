@@ -3,7 +3,7 @@ const camelCase = require('camel-case');
 module.exports.name = 'asStatic';
 conf.Conf.prototype.argout = function argout(expr, type) {
   if(type === undefined) throw new Error("argout type must be specified");
-  this.transform(expr, (mem) => {
+  this.pushToStack(5, expr, (mem) => {
     if (mem.cls !== 'memfun') return false;
 
     var outArgIndexes = mem.arguments
@@ -54,7 +54,7 @@ function renderArrayOutmap(argouts, sigArgs) {
   var assignArgs = argouts
     .map((arg, index) => `  array->Set(${index}, ${swigConvert(arg.type, '$' + (index + 1))});`)
     .join('\n');
-    
+
   return `%typemap(argout) (${sigArgs}) {// argoutout\n
     v8::Handle<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 4);
   ${assignArgs}
@@ -66,7 +66,7 @@ function renderObjectOutmap(argouts, sigArgs) {
   var assignArgs = argouts
     .map((arg, index) => `  obj->Set(SWIGV8_STRING_NEW("${camelCase(arg.name)}"), ${swigConvert(arg.type, '$' + (index + 1))});`)
     .join('\n');
-    
+
   return `%typemap(argout) (${sigArgs}) {// argoutout\n
     v8::Local<v8::Object> obj = SWIGV8_OBJECT_NEW();
   ${assignArgs}
@@ -90,7 +90,7 @@ module.exports.renderSwig = function(decl) {
     .join('\n');
 
   var inMap = `%typemap(in, numinputs=0) (${sigArgs}) (${defArgs}) {\n// argoutin\n ${tmpArgs}\n}`;
-  var outMap = decl.returnType === 'Array' ? 
+  var outMap = decl.returnType === 'Array' ?
     renderArrayOutmap(decl.argouts, sigArgs) :
     renderObjectOutmap(decl.argouts, sigArgs);
 

@@ -8,7 +8,7 @@ function rename(expr, name) {
   var nameFunc = name;
   if (typeof nameFunc !== 'function')
     nameFunc = () => name;
-  this.transform(expr, (obj) => {
+  this.pushToStack(5, expr, (obj) => {
     if (obj.cls === 'constructor') return;
     obj.rename = true;
     obj.name = nameFunc(obj.name, obj);

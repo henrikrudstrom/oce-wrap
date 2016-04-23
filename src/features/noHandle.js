@@ -14,7 +14,7 @@ conf.Conf.prototype.noHandle = function(expr) {
     if (handle)
       handle.include('Handle_' + cls.name + '(*)');
   });
-  this.transform(expr, (obj) => {
+  this.pushToStack(5, expr, (obj) => {
     if (obj.key.startsWith('Handle_')) return;
 
     this.typemap('Handle_' + obj.key, obj.key);
