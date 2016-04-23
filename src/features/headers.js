@@ -1,10 +1,12 @@
 const headers = require('../headers.js');
-module.exports.name = 'headers';
-module.exports.renderSwig = function(decl) {
-  
+const features = require('../features');
+
+function renderHeaders(decl) {
   const modules = require('../modules.js')();
   var reader = require('../dependencies.js')(modules);
+
   if (decl.cls !== 'module') return false;
+
   var depends = decl.declarations
     .map((d) => reader.classDepends(d, { recursive: false }))
     .concat(decl.declarations.map(d => d.source().name))
@@ -43,4 +45,6 @@ module.exports.renderSwig = function(decl) {
 ${depends}
 %}`
   };
-};
+}
+
+features.registerRenderer('swig', 0, renderHeaders);

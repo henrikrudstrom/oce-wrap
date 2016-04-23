@@ -41,12 +41,12 @@ module.exports = function(gulp) {
 
   gulp.task('render-tests', function(done) {
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
-    render.write(settings.paths.build + '/spec/', render('renderTest', configuredModules));
+    render.write(settings.paths.build + '/spec/', render('spec', configuredModules));
     done();
   });
   gulp.task('render-js', function(done) {
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
-    var parts = render('renderJS', configuredModules);
+    var parts = render('js', configuredModules);
     render.write(settings.paths.build + '/lib/', parts, { flat: true });
     done();
   });
@@ -78,7 +78,7 @@ module.exports = function(gulp) {
 
 
   function diffTestSubpaths(){
-    var subpaths = ['inc', 'src', 'swig', 'config', 'spec'];
+    var subpaths = ['swig', 'config', 'spec'];
     if(yargs.argv.folders)
       subpaths = yargs.argv.folders.split(',');
     return subpaths;
@@ -111,6 +111,6 @@ module.exports = function(gulp) {
         base: 'build/',
       })
       .pipe(diff('.diff-test-ref'))
-      .pipe(diff.reporter({ fail: true, changedOnly: true }));
+      .pipe(diff.reporter({ fail: false }));
   });
 };

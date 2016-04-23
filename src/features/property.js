@@ -1,8 +1,6 @@
-module.exports.name = 'property';
-
 const features = require('../features.js');
 const common = require('../common.js');
-module.exports.name = 'property';
+
 function property(getter, setter, name) {
   this.pushToStack(5, getter, (getMethod) => {
     if (getMethod.cls === 'constructor') return false;
@@ -35,7 +33,7 @@ function property(getter, setter, name) {
 features.registerConfig(property);
 
 
-module.exports.renderSwig = function(decl) {
+function renderProperty(decl) {
   if (decl.cls !== 'property') return false;
   var srcGetter = decl.source('getterKey');
 
@@ -48,4 +46,6 @@ module.exports.renderSwig = function(decl) {
     name: 'properties.i',
     src: `%attribute(${args.join(', ')});`
   };
-};
+}
+
+features.registerRenderer('swig', 0, renderProperty);

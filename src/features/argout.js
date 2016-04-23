@@ -1,9 +1,8 @@
 const features = require('../features.js');
 const camelCase = require('camel-case');
-module.exports.name = 'asStatic';
 
 function argout(expr, type) {
-  if (type === undefined) throw new Error("argout type must be specified");
+  if (type === undefined) throw new Error('argout type must be specified');
   this.pushToStack(5, expr, (mem) => {
     if (mem.cls !== 'memfun') return false;
 
@@ -28,7 +27,9 @@ function argoutArray(expr) {
 function argoutObject(expr) {
   return this.argout(expr, 'Object');
 }
+
 features.registerConfig(argout, argoutArray, argoutObject);
+
 
 function swigConvert(type, arg) {
   if (type.indexOf('Standard_Real') !== -1)
@@ -54,9 +55,11 @@ function renderArrayOutmap(argouts, sigArgs) {
 
 function renderObjectOutmap(argouts, sigArgs) {
   var assignArgs = argouts
-    .map((arg, index) =>
-      `  obj->Set(SWIGV8_STRING_NEW("${camelCase(arg.name)}"), ${swigConvert(arg.type, '$' + (index + 1))});`
-    )
+    .map((arg, index) => {
+      var key = `SWIGV8_STRING_NEW("${camelCase(arg.name)}")`;
+      var value = swigConvert(arg.type, '$' + (index + 1));
+      return `  obj->Set(${key}, ${value});`;
+    })
     .join('\n');
 
   return `%typemap(argout) (${sigArgs}) {// argoutout\n
@@ -66,7 +69,7 @@ function renderObjectOutmap(argouts, sigArgs) {
   }`;
 }
 
-module.exports.renderSwig = function(decl) {
+function renderArgouts(decl) {
   if (!decl.argouts) return false;
 
   var sigArgs = decl.argouts
@@ -90,4 +93,6 @@ module.exports.renderSwig = function(decl) {
     name: 'typemaps.i',
     src: [inMap, outMap].join('\n')
   };
-};
+}
+
+features.registerRenderer('swig', 0, renderArgouts);

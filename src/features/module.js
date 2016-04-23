@@ -1,7 +1,9 @@
-var fs = require('fs');
-var path = require('path');
-var settings = require('../settings.js');
-module.exports.name = 'module';
+const fs = require('fs');
+const path = require('path');
+const settings = require('../settings.js');
+const features = require('../features');
+
+
 function renderTypedef(td) {
   return `typedef ${td.source().type} ${td.source().name};`;
 }
@@ -15,7 +17,7 @@ function renderEnum(en) {
   return `enum ${en.source().name} {\n${values}\n};`;
 }
 
-module.exports.renderJS = function(decl, parts) {
+function renderModuleJs(decl, parts) {
   if (decl.cls !== 'module')
     return false;
 
@@ -35,10 +37,10 @@ ${parts.get(decl.name + 'JS')}
 module.exports = mod;
 `
   };
-};
+}
 
 
-module.exports.renderSwig = function(decl, parts) {
+function renderModuleSwig(decl, parts) {
   if (decl.cls !== 'module')
     return false;
 
@@ -73,7 +75,6 @@ ${parts.get('moduleIncludes')}
 ${parts.get('moduleDepends')}
 
 
-
 // %include "properties.i"
 
 ${parts.get('featureIncludes')}
@@ -87,4 +88,7 @@ ${parts.get('extends')}
 ${includeIfDefined('extends.i')}
 `
   };
-};
+}
+
+features.registerRenderer('js', 100, renderModuleJs);
+features.registerRenderer('swig', 100, renderModuleSwig);

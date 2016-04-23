@@ -2,10 +2,13 @@
 var modules;
 var common = require('../common.js');
 var settings = require('../settings.js');
+const features = require('../features');
+
+
 const glob = require('glob');
 const fs = require('fs');
 const path = require('path');
-module.exports.name = 'tests';
+
 function parseTests() {
   var specs = {};
   glob.sync(`${settings.paths.definition}/spec/**/*Spec.js`)
@@ -39,11 +42,14 @@ function isOverriden(suite, spec) {
 }
 
 var specOverridePath = path.join(settings.paths.definition, 'spec', 'notWorking.js');
-var specOverride = fs.existsSync(specOverridePath) ? 
-  require(path.relative(__dirname, specOverridePath)) : 
-  { 
-    notWorking(){ return false }, 
-    returnType(){ return false } 
+var specOverride = fs.existsSync(specOverridePath) ?
+  require(path.relative(__dirname, specOverridePath)) : {
+    notWorking() {
+      return false;
+    },
+    returnType() {
+      return false;
+    }
   };
 
 var nextInt = 0;
@@ -190,7 +196,7 @@ ${testSrc}
   return src;
 }
 
-function renderModuleSuite(mod, imports) {
+function renderCommonSuite(mod, imports) {
   var functionTests = mod.declarations
     .filter(decl => decl.cls === 'staticfunc')
     .map(decl => renderFreeFunction(mod, decl));
@@ -247,10 +253,7 @@ function renderClassSuite(mod, cls, imports) {
   var constructorTests = declarations
     .filter(decl => decl.cls === 'constructor')
     .map(decl => renderConstructor(cls, decl));
-  // var functionTests = [];
-  //
-  //console.log(mod.name, cls.name, cls.declarations.filter(decl => decl.cls === 'staticfunc').map(decl => decl.name))
-  //console.log(mod.name, cls.name, "SDFDSF!", declarations.filter(decl => decl.cls === 'staticfunc').map(decl => decl.name))
+
   var staticFunctions = cls.declarations
     .filter(decl => decl.cls === 'staticfunc')
     .map(decl => renderStaticFunction(cls, decl));
@@ -275,7 +278,7 @@ ${propertyTests.join('\n')}
 }
 module.exports.renderClassSuite = renderClassSuite;
 
-module.exports.renderTest = function(decl, parts) {
+function renderModuleSuite(decl) {
   if (decl.cls !== 'module') return false;
   modules = require('../modules.js')();
 
@@ -289,5 +292,7 @@ module.exports.renderTest = function(decl, parts) {
     .map(cls =>
       ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports) })
     )
-    .concat([{ name: decl.name + 'AutoSpec.js', src: renderModuleSuite(decl, imports) }]);
-};
+    .concat([{ name: decl.name + 'AutoSpec.js', src: renderCommonSuite(decl, imports) }]);
+}
+
+features.registerRenderer('spec', 100, renderModuleSuite);

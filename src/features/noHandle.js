@@ -1,6 +1,5 @@
 const features = require('../features.js');
-var headers = require('../headers.js');
-module.exports.name = 'noHandle';
+const headers = require('../headers.js');
 
 function noHandle(expr) {
   this.find(expr).forEach(cls => {
@@ -33,7 +32,7 @@ function downCastToThis(expr) {
 
 features.registerConfig(noHandle, downCastToThis);
 
-module.exports.renderSwig = function(cls) {
+function renderHandleTypemaps(cls) {
   var name = cls.key;
   if (cls.cls !== 'class' || !cls.handle)
     return false;
@@ -61,4 +60,6 @@ module.exports.renderSwig = function(cls) {
 }`;
 
   return { name: 'typemaps.i', src: typemapsrc };
-};
+}
+
+features.registerRenderer('swig', 0, renderHandleTypemaps);

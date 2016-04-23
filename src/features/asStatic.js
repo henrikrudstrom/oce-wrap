@@ -1,11 +1,9 @@
 const extend = require('extend');
 const camelCase = require('camel-case');
+
 const features = require('../features.js');
 const common = require('../common.js');
 const headers = require('../headers.js');
-
-
-module.exports.name = 'asStatic';
 
 function includeAsStatic(expr, template, valueFunc) {
   var clsName = expr.split('(')[0];
@@ -71,11 +69,13 @@ var templates = {
   }
 };
 
-module.exports.renderSwig = function(decl) {
+function renderAsStatic(decl) {
   if (decl.cls !== 'staticfunc') return false;
   var source = decl.source();
   var args = source.arguments.map(arg => arg.decl + ' ' + arg.name).join(', ');
   var argNames = source.arguments.map(arg => arg.name).join(', ');
   var src = templates['render' + decl.template](decl, source, args, argNames);
   return { name: 'extends', src };
-};
+}
+
+features.registerRenderer('swig', 0, renderAsStatic);

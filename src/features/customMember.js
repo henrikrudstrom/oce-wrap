@@ -1,7 +1,7 @@
 const extend = require('extend');
 const features = require('../features.js');
 const headers = require('../headers.js');
-module.exports.name = 'customMember';
+
 function customMethod(decl) {
   decl = extend({}, decl);
 
@@ -12,7 +12,7 @@ function customMethod(decl) {
 
   this.add(decl);
   return this;
-};
+}
 
 function topoSubShapes(name, shapeType) {
   var src = headers.get(
@@ -27,9 +27,9 @@ function topoSubShapes(name, shapeType) {
   decl.key = this.key + '::' + decl.key;
 
   return this.customMethod(decl);
-};
+}
 
-features.registerConfig(topoSubShapes);
+features.registerConfig(customMethod, topoSubShapes);
 
 function renderTopoMaps(decl) {
   return `\

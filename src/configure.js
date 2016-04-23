@@ -1,19 +1,12 @@
-require('./features/rename.js');
-require('./features/depends.js');
-require('./features/property.js');
-require('./features/argout.js');
-require('./features/noHandle.js');
-require('./features/asStatic.js');
 const fs = require('fs');
 const mkdirp = require('mkdirp');
-const glob = require('glob');
 const path = require('path');
 const arrify = require('arrify');
-const settings = require('./settings.js');
 
-var conf = require('./conf.js');
-var createTypeDict = require('./typedict.js')
-
+const conf = require('./conf.js');
+const createTypeDict = require('./typedict.js');
+const features = require('./features.js');
+features.load();
 
 function configureModule(file) {
   file = path.relative(__dirname, file);

@@ -1,5 +1,6 @@
-module.exports.name = 'enum';
-module.exports.renderJS = function(decl) {
+const features = require('../features');
+
+function renderEnum(decl) {
   if (decl.cls !== 'enum') return false;
   var values = decl.values.map(val => `${val[0]}: ${val[1]}`).join(',\n  ');
   var jsSrc = `\
@@ -11,4 +12,6 @@ ${values}
     name: decl.parent + 'JS',
     src: jsSrc
   }];
-};
+}
+
+features.registerRenderer('js', 0, renderEnum);

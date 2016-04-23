@@ -16,11 +16,11 @@ module.exports = function(gulp) {
 
   function runSwig(moduleName, done) {
     const input = path.join(settings.paths.swig, `${moduleName}/module.i`);
-    if(!fs.existsSync(input)) 
+    if(!fs.existsSync(input))
       return done();
-    
+
     const output = path.join(settings.paths.cxx, `${moduleName}_wrap.cxx`);
-    
+
     const includes = include.join(' ');
     mkdirp.sync(path.dirname(output));
     const cmd = `${settings.swig} ${flags} ${otherFlags} ${includes} -o ${output} ${input}`;
@@ -87,7 +87,7 @@ module.exports = function(gulp) {
       .filter(mod => !fs.existsSync(`${settings.paths.definition}/modules/${mod}/module.i`))
       .map(mod => path.join(settings.paths.config, mod + '.json'));
 
-    render.write(settings.paths.swig, render('renderSwig', configuredModules));
+    render.write(settings.paths.swig, render('swig', configuredModules));
     return done();
   });
 

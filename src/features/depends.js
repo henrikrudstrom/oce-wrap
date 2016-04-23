@@ -1,5 +1,5 @@
 const features = require('../features.js');
-module.exports.name = 'depends';
+
 function depends(moduleName) {
   if (this.moduleDepends === undefined)
     this.moduleDepends = [];
@@ -8,7 +8,8 @@ function depends(moduleName) {
 
 features.registerConfig(depends);
 
-module.exports.renderSwig = function(decl) {
+
+function renderDependencies(decl) {
   if (decl.cls !== 'module' || decl.moduleDepends === undefined) return false;
 
   return [{
@@ -23,4 +24,6 @@ module.exports.renderSwig = function(decl) {
       (modName) => `%include "../${modName}/headers.i"`
     ).join('\n')
   }];
-};
+}
+
+features.registerRenderer('swig', 0, renderDependencies);

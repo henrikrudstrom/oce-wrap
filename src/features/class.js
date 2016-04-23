@@ -1,8 +1,9 @@
-module.exports.name = 'class';
+const features = require('../features.js');
 
 function renderArg(arg) {
   var res = arg.decl + ' ' + arg.name;
-  //res = res.replace('&', '') //TODO: pythonocc removes byrefs on gp module...
+  // TODO: pythonocc removes byrefs on gp module...
+  // res = res.replace('&', '')
   if (arg.default) {
     res += '=' + arg.default;
   }
@@ -20,7 +21,7 @@ function renderFunction(func) {
     ${stat}${cons}${source.returnType + ' '}${source.name}(${args});`;
 }
 
-module.exports.renderSwig = function(cls, parts) {
+function renderClass(cls, parts) {
   if (cls.cls !== 'class') return false;
   var srcCls = cls.source();
   var base = '';
@@ -52,4 +53,6 @@ class ${srcCls.name}${base} {
     name: `classes/${srcCls.name}.i`,
     src
   }];
-};
+}
+
+features.registerRenderer('swig', 50, renderClass);

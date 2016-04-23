@@ -1,8 +1,6 @@
-const conf = require('../conf.js');
 const features = require('../features.js');
 const common = require('../common.js');
 const camelCase = require('camel-case');
-module.exports.name = 'rename';
 
 function rename(expr, name) {
   var nameFunc = name;
@@ -32,14 +30,14 @@ function renameCamelCase(expr) {
 }
 
 function removePrefix(expr) {
-  return this.rename(expr, (name) => {
-    return common.removePrefix(name);
-  });
+  return this.rename(expr,
+    name => common.removePrefix(name)
+  );
 }
 
 features.registerConfig(rename, renameCamelCase, removePrefix);
 
-module.exports.renderSwig = function(decl) {
+function renderRename(decl) {
   if (decl.cls === 'module') {
     return {
       name: 'featureIncludes',
@@ -62,4 +60,6 @@ module.exports.renderSwig = function(decl) {
     };
   }
   return false;
-};
+}
+
+features.registerRenderer('swig', 0, renderRename);

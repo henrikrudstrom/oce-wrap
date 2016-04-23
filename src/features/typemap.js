@@ -1,13 +1,15 @@
-var conf = require('../conf.js');
-module.exports.name = 'typemap';
-conf.Conf.prototype.typemap = function(from, to, getter) {
+const features = require('../features');
+
+function typemap(from, to, getter) {
   if (!this.typemaps)
     this.typemaps = [];
 
   this.typemaps.push({ from, to, getter, render: getter !== undefined });
-};
+}
 
-function typemap(fromType, toType, getter) {
+features.registerConfig(typemap);
+
+function renderTypemap(fromType, toType, getter) {
   return `\
 %typemap(in) ${fromType} &{
   void *argp ;
@@ -22,10 +24,12 @@ function typemap(fromType, toType, getter) {
 }`;
 }
 
-module.exports.renderSwig = function(decl) {
+function renderTypemaps(decl) {
   if (!decl.typemaps) return false;
   var src = decl.typemaps
     .filter(tm => tm.render)
-    .map(tm => typemap(tm.from, tm.to, tm.getter)).join('\n');
+    .map(tm => renderTypemap(tm.from, tm.to, tm.getter)).join('\n');
   return { name: 'typemaps.i', src };
-};
+}
+
+features.registerRenderer('swig', 0, renderTypemaps);
