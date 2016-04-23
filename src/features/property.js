@@ -9,7 +9,6 @@ function property(getter, setter, name) {
       setter = () => setterStr;
     }
     var setMethod = this.get(setter());
-
     var propertyDecl = {
       name: name || getMethod.name.replace(/^Get/, ''),
       key: getMethod.key,
@@ -42,6 +41,7 @@ function renderProperty(decl) {
     var srcSetter = decl.source('setterKey');
     args.push(common.signature(srcSetter, true));
   }
+  console.log('render property', decl.getParent().name, decl.name, args)
   return {
     name: 'properties.i',
     src: `%attribute(${args.join(', ')});`

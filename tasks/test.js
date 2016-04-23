@@ -57,7 +57,7 @@ module.exports = function(gulp) {
     return gulp.src([
         `${settings.paths.definition}/spec/**/*.js`,
         `${settings.paths.definition}/spec/*.js`
-      ])//.pipe(rename({ dirname: '' }))
+      ]) //.pipe(rename({ dirname: '' }))
       .pipe(gulp.dest(`${settings.paths.build}/spec`));
   });
 
@@ -68,6 +68,8 @@ module.exports = function(gulp) {
       specSource += yargs.argv.spec + 'Spec.js';
     else
       specSource += '**/*Spec.js';
+
+    console.log(specSource);
     gulp.src(specSource)
       .pipe(jasmine({
         verbose: yargs.argv.verbose,
@@ -77,10 +79,10 @@ module.exports = function(gulp) {
   });
 
 
-  function diffTestSubpaths(){
+  function diffTestSubpaths() {
     var subpaths = ['swig', 'config', 'spec'];
-    if(yargs.argv.folders)
-      subpaths = yargs.argv.folders.split(',');
+    if (yargs.argv.folder)
+      subpaths = yargs.argv.folder.split(',');
     return subpaths;
   }
 
@@ -104,13 +106,13 @@ module.exports = function(gulp) {
 
 
   gulp.task('diff-test', function() {
-    var sources = diffTestSubpaths()
-      .map(folder => path.join(settings.paths.build, folder, '**/*'));
+    var refs = diffTestSubpaths()
+      .map(folder => path.join('.diff-test-ref', folder, '**/*'));
 
-    return gulp.src(sources, {
-        base: 'build/',
-      })
-      .pipe(diff('.diff-test-ref'))
-      .pipe(diff.reporter({ fail: false }));
+    return gulp.src(refs, {
+      base: '.diff-test-ref/'
+    })
+    .pipe(diff(settings.paths.build))
+    .pipe(diff.reporter({ fail: false }));
   });
 };

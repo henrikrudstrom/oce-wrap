@@ -93,11 +93,6 @@ function renderTest(cls, member, testSrc) {
   if (member.arguments)
     sig += `(${member.arguments.map(arg => arg.type).join(', ')})`;
 
-  // var key = `${cls.parent}.${cls.name}#${sig}`;
-  // if (overridenTests.hasOwnProperty(key)) {
-  //   return `// ${sig} - Redefined.`;
-  // }
-
   if (isOverriden(`${cls.parent}.${cls.name}`, sig)) {
     return `  // ${sig} - Redefined.`;
   }
@@ -105,12 +100,6 @@ function renderTest(cls, member, testSrc) {
 
   var disable = !requiredTypesWrapped(member) ?
     '' : '  // arguments or return type not wrapped\n  x';
-  // var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
-  // if (member.cls !== 'constructor')
-  //   unwrapped.push(member.returnType || member.type);
-  //
-  // if (unwrapped.some(type => type !== 'void' && !modules.get(type)))
-  //   disable = '// arguments or return type not wrapped\n  x';
 
   if (specOverride.notWorking(cls.parent + '.' + cls.name, sig)) {
     disable = '  // TODO: not working\n  x';
@@ -150,26 +139,26 @@ function memberReturnType(cls, member, suiteKey) {
   return returnType;
 }
 
-function renderMemberFunction(cls, calldef) {
-  var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
-  var testSrc = `\
-    var obj = create.${cls.parent}.${cls.name}();
-    var res = obj.${calldef.name}(${args});`;
-
-  var returnType = memberReturnType(cls, calldef, cls.parent + '.' + cls.name);
-  testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
-  return renderTest(cls, calldef, testSrc);
-}
-
-function renderStaticFunction(cls, calldef) {
-  var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
-  var testSrc = `\
-    var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
-
-  var returnType = memberReturnType(cls, calldef, cls.parent + '.' + cls.name);
-  testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
-  return renderTest(cls, calldef, testSrc);
-}
+// function renderMemberFunction(cls, calldef) {
+//   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
+//   var testSrc = `\
+//     var obj = create.${cls.parent}.${cls.name}();
+//     var res = obj.${calldef.name}(${args});`;
+//
+//   var returnType = memberReturnType(cls, calldef, cls.parent + '.' + cls.name);
+//   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
+//   return renderTest(cls, calldef, testSrc);
+// }
+//
+// function renderStaticFunction(cls, calldef) {
+//   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
+//   var testSrc = `\
+//     var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
+//
+//   var returnType = memberReturnType(cls, calldef, cls.parent + '.' + cls.name);
+//   testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
+//   return renderTest(cls, calldef, testSrc);
+// }
 
 function renderFreeFunction(mod, calldef) {
   var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
@@ -211,18 +200,6 @@ ${functionTests.join('\n')}
   return clsSrc;
 }
 
-function renderConstructor(cls, calldef) {
-  var args = calldef.arguments.map(arg => createValue(arg.type)).join(', ');
-
-  var src = `\
-    var res = new ${cls.parent}.${calldef.name}(${args});
-    var res_h = res._handle;
-    expect(typeof res).toBe('object');
-    expect(res.constructor.name.replace('_exports_', '')).toBe('${cls.name}');`;
-  return renderTest(cls, calldef, src);
-}
-
-
 function renderProperty(cls, prop) {
   var value = createValue(prop.type);
   var src = `\
@@ -247,20 +224,20 @@ function getInheritedDeclarations(cls) {
   return decls.filter((mem, index) => sigs.indexOf(common.signature(mem)) === index);
 }
 
-function renderClassSuite(mod, cls, imports) {
+function renderClassSuite(mod, cls, imports, parts) {
   var declarations = getInheritedDeclarations(cls);
-
-  var constructorTests = declarations
-    .filter(decl => decl.cls === 'constructor')
-    .map(decl => renderConstructor(cls, decl));
-
-  var staticFunctions = cls.declarations
-    .filter(decl => decl.cls === 'staticfunc')
-    .map(decl => renderStaticFunction(cls, decl));
-  var functionTests = declarations
-    .filter(decl => decl.cls === 'memfun')
-    .map(decl => renderMemberFunction(cls, decl));
-
+  //
+  // var constructorTests = declarations
+  //   .filter(decl => decl.cls === 'constructor')
+  //   .map(decl => renderConstructor(cls, decl));
+  //
+  // var staticFunctions = cls.declarations
+  //   .filter(decl => decl.cls === 'staticfunc')
+  //   .map(decl => renderStaticFunction(cls, decl));
+  // var functionTests = declarations
+  //   .filter(decl => decl.cls === 'memfun')
+  //   .map(decl => renderMemberFunction(cls, decl));
+  //
   var propertyTests = declarations
     .filter(decl => decl.cls === 'property')
     .map(decl => renderProperty(cls, decl));
@@ -268,9 +245,7 @@ function renderClassSuite(mod, cls, imports) {
 ${imports}
 var create = require('../create.js')
 describe('${cls.parent}.${cls.name}', function(){
-${constructorTests.join('\n')}
-${staticFunctions.join('\n')}
-${functionTests.join('\n')}
+${parts.get(cls.name + 'MemberFunctionSpecs')}
 ${propertyTests.join('\n')}
 });
 `;
@@ -278,7 +253,7 @@ ${propertyTests.join('\n')}
 }
 module.exports.renderClassSuite = renderClassSuite;
 
-function renderModuleSuite(decl) {
+function renderModuleSuites(decl, parts) {
   if (decl.cls !== 'module') return false;
   modules = require('../modules.js')();
 
@@ -290,9 +265,9 @@ function renderModuleSuite(decl) {
     .filter(cls => !cls.name.startsWith('Handle_'))
     .filter(cls => !cls.abstract)
     .map(cls =>
-      ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports) })
+      ({ name: `${cls.name}AutoSpec.js`, src: renderClassSuite(decl, cls, imports, parts) })
     )
     .concat([{ name: decl.name + 'AutoSpec.js', src: renderCommonSuite(decl, imports) }]);
 }
 
-features.registerRenderer('spec', 100, renderModuleSuite);
+features.registerRenderer('spec', 100, renderModuleSuites);

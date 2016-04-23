@@ -74,6 +74,9 @@ function mapSources(declaration) {
 
       return headers.get(query);
     };
+    decl.getParent = function() {
+      return declaration;
+    };
 
     if (decl.declarations)
       mapSources(decl);

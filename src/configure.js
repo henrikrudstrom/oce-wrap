@@ -38,9 +38,12 @@ function translateTypes(mods) {
   var typedict = createTypeDict(mods);
   var translateMember = memberTranslate(typedict);
   mods.forEach(mod => {
-    mod.declarations.forEach(cls =>
-      (cls.bases || []).forEach(base => (base.name = typedict(base.name)))
+    mod.declarations.forEach(cls => {
+      (cls.bases || []).forEach(base => (base.name = typedict(base.name)));
+      cls.qualifiedName = mod.name + '.' + cls.name;
+    }
     );
+
 
     mod.declarations.map(
         (decl) => (decl.declarations ? decl.declarations : [])
