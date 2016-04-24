@@ -29,7 +29,7 @@ features.registerConfig(gpTypemap);
 
 features.registerNativeConverter(function withAccessor(tm) {
   return (nativeObj, wrappedObj) =>
-  `void *argp ;
+    `void *argp ;
   int res = SWIG_ConvertPtr(${wrappedObj}, &argp, SWIGTYPE_p_${tm.wrapped},  0 );
   if (!SWIG_IsOK(res)) {
     SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument " "$argnum"" of type '" "${tm.wrapped}""'");
@@ -50,7 +50,12 @@ function renderTypemap(tm) {
   var wrapped = tm.wrapped;
   var toNative = features.getNativeConverter(tm.toNative, tm);
   var toWrapped = features.getWrappedConverter(tm.toWrapped, tm);
-
+  var arginDef = `(${native} argin)`
+  var arginInit = '&argin'
+  if (tm.initArgout) {
+    arginDef = '';
+    arginInit = tm.initArgout;
+  }
   return `\
 #include <${native}.hxx>
 
@@ -67,9 +72,9 @@ function renderTypemap(tm) {
   //typemap argoutmap
   ${toWrapped('$1', '$result')}
 }
-%typemap(in) ${native} & (${native} argin){
+%typemap(in) ${native} & ${arginDef}{
   //typemap arginmap
-  $1 = &argin;
+  $1 = ${arginInit};
 }
 `;
 }

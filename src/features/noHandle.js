@@ -9,6 +9,7 @@ function noHandle(expr) {
     if (!headers.get(handleKey)) return;
 
     this.include(handleKey);
+    console.log(cls.name)
     var handle = this.get('Handle_' + cls.name);
 
     if (handle)
