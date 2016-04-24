@@ -1,5 +1,6 @@
 const features = require('../features.js');
 const common = require('../common.js');
+const testLib = require('../testLib.js');
 
 function property(getter, setter, name) {
   this.pushToStack(5, getter, (getMethod) => {
@@ -41,7 +42,7 @@ function renderProperty(decl) {
     var srcSetter = decl.source('setterKey');
     args.push(common.signature(srcSetter, true));
   }
-  console.log('render property', decl.getParent().name, decl.name, args)
+
   return {
     name: 'properties.i',
     src: `%attribute(${args.join(', ')});`
@@ -49,3 +50,23 @@ function renderProperty(decl) {
 }
 
 features.registerRenderer('swig', 0, renderProperty);
+
+function renderPropertyTest(prop, parts) {
+  if (prop.cls !== 'property')
+    return false;
+
+  var cls = prop.getParent();
+
+  var value = testLib.createValue(prop.type);
+  var src = `\
+    var obj = create.${cls.parent}.${cls.name}();
+    obj.${prop.name} = ${value};
+    var res = obj.${prop.name};
+    expect(obj.${prop.name}).toBe(${value});`;
+  return {
+    name: cls.name + 'MemberSpecs',
+    src: testLib.renderTest(prop, src, parts)
+  };
+}
+
+features.registerRenderer('spec', 0, renderPropertyTest);

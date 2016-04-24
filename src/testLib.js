@@ -1,6 +1,5 @@
 var common = require('./common.js');
 var settings = require('./settings.js');
-const features = require('./features');
 var modules; // intialized on demand;
 
 const glob = require('glob');
@@ -39,8 +38,9 @@ function parseTests() {
 var overridenTests = parseTests();
 
 function isOverriden(suite, spec) {
-  if (suite in overridenTests)
+  if (suite in overridenTests) {
     return overridenTests[suite].indexOf(spec) !== -1;
+  }
   return false;
 }
 
@@ -79,30 +79,33 @@ function createValue(typeName) {
   if (typeName === 'Double') return double();
   if (typeName === 'Boolean') return bool();
   if (typeName === 'String') return '';
+
   return `create.${typeName}()`;
 }
 module.exports.createValue = createValue;
 
 function requiredTypesWrapped(member) {
   modules = modules || require('./modules.js')();
+
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
   if (member.cls !== 'constructor')
     unwrapped.push(member.returnType || member.type);
-  var res = unwrapped.every(type => {
-    return type === 'void' || modules.get(type)
-  });
-  // if(!res){
-  //   console.log("unwrapped not", unwrapped, member.name)
-  // }
+
+  var res = unwrapped.every(
+    type => type === 'void' || modules.get(type)
+  );
+
   return res;
 }
 
 
 function excluded(qualifiedClsName, member) {
   var signature = common.signature(member);
+
   if (isOverriden(qualifiedClsName, signature)) {
     return signature + ' Redefined.';
   }
+
   return false;
 }
 
@@ -131,12 +134,15 @@ function expectType(returnType) {
   return [];
 }
 
+
 function memberReturnType(cls, member, suiteKey) {
+  if (member.cls === 'constructor') return cls.name;
   modules = modules || require('./modules.js')();
-  var type = modules.get(member.returnType);
+  var rtype = (member.returnType || member.type);
+  var type = modules.get(rtype);
   if (type && type.cls === 'enum') return 'Integer';
-  var returnType = member.returnType.indexOf('.') !== -1 ?
-    member.returnType.split('.')[1] : member.returnType;
+  var returnType = rtype.indexOf('.') !== -1 ?
+    rtype.split('.')[1] : rtype;
   if (member.downCastToThis)
     returnType = cls.name;
 
@@ -147,11 +153,41 @@ function memberReturnType(cls, member, suiteKey) {
   return returnType;
 }
 
+function renderTest(member, testSrc, parts) {
+  var cls = member.getParent();
+  var signature = common.signature(member);
+
+  var excludedReason = excluded(cls.qualifiedName, member);
+  if (excludedReason)
+    return '  // ' + excludedReason;
+
+  var comment = '';
+
+  var pendingReason = pending(cls.qualifiedName, member);
+  if (pendingReason)
+    comment = '  // ' + pendingReason + '\n';
+
+  var disable = pendingReason ? 'x' : '';
+
+
+  if (member.cls !== 'constructor' || member.cls !== 'property') {
+    var returnType = memberReturnType(cls, member, cls.qualifiedName);
+    testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
+  }
+  testSrc += parts.get(cls.name + '.' + signature + 'Expectations');
+
+  var src = `\n${comment}
+  ${disable}it('${signature}', function(){
+${testSrc}
+  });`;
+  return src;
+}
 
 module.exports = {
   pending,
   excluded,
   memberReturnType,
   expectType,
-  createValue
+  createValue,
+  renderTest
 };

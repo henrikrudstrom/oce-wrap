@@ -90,5 +90,28 @@ ${includeIfDefined('extends.i')}
   };
 }
 
+function renderModuleSpec(mod, parts) {
+  if (mod.cls !== 'module')
+    return false;
+
+  var imports = [mod.name].concat(mod.moduleDepends || [])
+    .map(m => (`var ${m} = require('../../lib/${m}.js');`))
+    .join('\n');
+
+  var src = `\
+${imports}
+var create = require('../create.js')
+describe('${mod.name}', function(){
+${parts.get(mod.name + 'ModuleSpecs')}
+});
+`;
+  return {
+    name: mod.name + 'AutoSpec.js',
+    src
+  };
+}
+
+
 features.registerRenderer('js', 100, renderModuleJs);
 features.registerRenderer('swig', 100, renderModuleSwig);
+features.registerRenderer('spec', 100, renderModuleSpec);

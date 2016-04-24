@@ -40,29 +40,7 @@ features.registerRenderer('swig', 40, renderMemberFunction);
 // test rendering
 //
 
-
-function renderTest(member, testSrc) {
-  var cls = member.getParent();
-  var signature = common.signature(member);
-
-  var excluded = testLib.excluded(cls.qualifiedName, member);
-  if (excluded)
-    return '  // ' + excluded;
-
-  var comment = '';
-  var pending = testLib.pending(cls.qualifiedName, member);
-  if (pending)
-    comment = '  // ' + pending + '\n';
-
-  var disable = pending ? 'x' : '';
-  var src = `\n${comment}
-  ${disable}it('${signature}', function(){
-${testSrc}
-  });`;
-  return src;
-}
-
-function renderMemberFunctionTest(calldef) {
+function renderMemberFunctionTest(calldef, parts) {
   if (calldef.cls !== 'memfun')
     return false;
 
@@ -72,16 +50,13 @@ function renderMemberFunctionTest(calldef) {
     var obj = create.${cls.parent}.${cls.name}();
     var res = obj.${calldef.name}(${args});`;
 
-  var returnType = testLib.memberReturnType(cls, calldef, cls.parent + '.' + cls.name);
-  testSrc += testLib.expectType(returnType).map(l => '\n    ' + l).join('');
-
   return {
-    name: cls.name + 'MemberFunctionSpecs',
-    src: renderTest(calldef, testSrc)
+    name: cls.name + 'MemberSpecs',
+    src: testLib.renderTest(calldef, testSrc, parts)
   };
 }
 
-function renderConstructorTest(calldef) {
+function renderConstructorTest(calldef, parts) {
   if (calldef.cls !== 'constructor')
     return false;
   var cls = calldef.getParent();
@@ -89,16 +64,15 @@ function renderConstructorTest(calldef) {
 
   var src = `\
     var res = new ${cls.parent}.${calldef.name}(${args});
-    var res_h = res._handle;
     expect(typeof res).toBe('object');
     expect(res.constructor.name.replace('_exports_', '')).toBe('${cls.name}');`;
   return {
-    name: cls.name + 'MemberFunctionSpecs',
-    src: renderTest(calldef, src)
+    name: cls.name + 'MemberSpecs',
+    src: testLib.renderTest(calldef, src, parts)
   };
 }
 
-function renderStaticFunctionTest(calldef) {
+function renderStaticFunctionTest(calldef, parts) {
   if (calldef.cls !== 'staticfunc' || calldef.getParent().cls !== 'class')
     return false;
 
@@ -107,71 +81,26 @@ function renderStaticFunctionTest(calldef) {
   var testSrc = `\
     var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
 
-  var returnType = testLib.memberReturnType(cls, calldef, cls.qualifiedName);
-  testSrc += testLib.expectType(returnType).map(l => '\n    ' + l).join('');
-
   return {
-    name: cls.name + 'MemberFunctionSpecs',
-    src: renderTest(calldef, testSrc)
+    name: cls.name + 'MemberSpecs',
+    src: testLib.renderTest(calldef, testSrc, parts)
   };
 }
 
-function renderFreeFunctionTest(calldef) {
+function renderFreeFunctionTest(calldef, parts) {
   if (calldef.cls !== 'staticfunc' || calldef.getParent().cls !== 'module')
     return false;
 
   var mod = calldef.getParent();
+
   var args = calldef.arguments.map(arg => testLib.createValue(arg.type)).join(', ');
   var testSrc = `\
     var res = ${mod.name}.${calldef.name}(${args});`;
-  var sig = common.signature(calldef);
-
-  var excluded = testLib.excluded(mod.name, calldef);
-  if (excluded)
-    return '  // ' + excluded;
-
-  var comment = '';
-  var pending = testLib.pending(mod.name, calldef);
-  if (pending)
-    comment = '  // ' + pending + '\n';
-
-  var returnType = testLib.memberReturnType(mod, calldef, mod.name);
-  testSrc += testLib.expectType(returnType).map(l => '\n    ' + l).join('');
-  var disable = pending ? 'x' : '';
-  var src = `\n${comment}
-  ${disable}it('${sig}', function(){
-${testSrc}
-  });`;
   return {
-    name: mod.name + 'FunctionSpecs',
-    src
+    name: mod.name + 'ModuleSpecs',
+    src: testLib.renderTest(calldef, testSrc, parts)
   };
 }
-
-// function renderMemberTest(decl) {
-//   if (decl.cls !== 'memfun' && decl.cls !== 'staticfunc' && decl.cls !== 'constructor')
-//     return false;
-//
-//   var parent = decl.getParent();
-//
-//   if (parent.cls === 'module')
-//     return {
-//       name: parent.name + 'ModuleFunctionSpecs',
-//       src: renderFreeFunctionTest(decl)
-//     };
-//
-//   var src;
-//   if (decl.static === '1')
-//     src = renderStaticFunctionTest(decl);
-//   else
-//     src = renderMemberFunctionTest(decl);
-//
-//
-//   return {
-//     name: parent.name + 'MemberFunctionSpecs',
-//     src
-//   };
-// }
 
 features.registerRenderer('spec', 50, renderMemberFunctionTest);
 features.registerRenderer('spec', 50, renderStaticFunctionTest);

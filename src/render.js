@@ -35,7 +35,7 @@ Parts.prototype = {
     var parts = this.parts[partName];
     if (parts !== undefined)
       return parts.join('\n');
-    return '// ' + partName + ' is not defined';
+    return '';
   },
   files() {
     return Object.keys(this.parts)

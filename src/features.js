@@ -34,7 +34,6 @@ function registerRenderer(type, order, fn) {
 function getRenderers(type) {
   var res = (renderers[type] || []);
   res = res.sort((a, b) => a.order - b.order);
-  console.log("RENDERERS", type, '===t', res);
   var result = res.map(obj => obj.fn);
   return result;
 }
