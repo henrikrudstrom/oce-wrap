@@ -29,31 +29,20 @@ features.registerConfig(gpTypemap);
 
 features.registerNativeConverter(function withAccessor(tm) {
   return (nativeObj, wrappedObj) =>
-    `${nativeObj} = (${tm.native} *)&((const ${tm.wrapped} *)(${wrappedObj}))->${tm.getter};`;
+  `void *argp ;
+  int res = SWIG_ConvertPtr(${wrappedObj}, &argp, SWIGTYPE_p_${tm.wrapped},  0 );
+  if (!SWIG_IsOK(res)) {
+    SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument " "$argnum"" of type '" "${tm.wrapped}""'");
+  }
+  ${nativeObj} = (${tm.native} *)&((const ${tm.wrapped} *)(argp))->${tm.getter};`;
 });
 
 features.registerWrappedConverter(function withConstructor(tm) {
   return (nativeObj, wrappedObj) =>
     `${wrappedObj} = SWIG_NewPointerObj(
-    (new ${tm.wrapped}((const ${tm.native}&)${wrappedObj})), SWIGTYPE_p_${tm.wrapped}, SWIG_POINTER_OWN |  0
+    (new ${tm.wrapped}((const ${tm.native} &)${wrappedObj})), SWIGTYPE_p_${tm.wrapped}, SWIG_POINTER_OWN |  0
   );`;
 });
-
-
-
-features.registerNativeConverter(function ArrayToIndexedMap(tm) {
-
-});
-features.registerNativeConverter(function IndexedMapToArray(tm) {
-
-});
-
-
-
-
-
-
-
 
 
 function renderTypemap(tm) {
@@ -63,19 +52,26 @@ function renderTypemap(tm) {
   var toWrapped = features.getWrappedConverter(tm.toWrapped, tm);
 
   return `\
-%typemap(in) ${native} &{
-  void *argp ;
-  int res = SWIG_ConvertPtr($input, &argp, SWIGTYPE_p_${wrapped},  0 );
-  if (!SWIG_IsOK(res)) {
-    SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument " "$argnum"" of type '" "${wrapped}""'");
-  }
-  ${toNative('$1', 'argp')}
-  //$1 = (${native} *)&((const ${wrapped} *)(argp))->${tm.getter};
+#include <${native}.hxx>
+
+%typemap(in) const ${native} &{
+  // typemap inmap
+  ${toNative('$1', '$input')}
 }
 %typemap(out) ${native} {
+  //typemap outmap
   ${toWrapped('$1', '$result')}
-  //$result = SWIG_NewPointerObj((new ${wrapped}((const ${native}&)$1)), SWIGTYPE_p_${wrapped}, SWIG_POINTER_OWN |  0 );
-}`;
+}
+
+%typemap(argout) ${native} & {
+  //typemap argoutmap
+  ${toWrapped('$1', '$result')}
+}
+%typemap(in) ${native} & (${native} argin){
+  //typemap arginmap
+  $1 = &argin;
+}
+`;
 }
 
 function renderTypemaps(decl) {

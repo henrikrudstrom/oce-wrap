@@ -24,7 +24,7 @@ function topoSubShapes(name, shapeType) {
     'TopExp::MapShapes(TopoDS_Shape, TopAbs_ShapeEnum, TopTools_IndexedMapOfShape)'
   );
 
-  var decl = extend({}, src);
+  var decl = extend(true, {}, src);
 
   decl.arguments = [extend({}, decl.arguments[0])];
   decl.name = name;
@@ -44,10 +44,8 @@ features.registerConfig(customMethod, topoSubShapes);
 function renderTopoMaps(decl) {
   return `\
 %extend ${decl.source().parent} {
-  static TopTools_IndexedMapOfShape ${decl.name}(const TopoDS_Shape &shape){
-    TopTools_IndexedMapOfShape *map;
+  static void ${decl.name}(const TopoDS_Shape &shape, TopTools_IndexedMapOfShape& map){
     TopExp::MapShapes(shape, TopAbs_${decl.shapeType}, map);
-    return map;
   }
 }`;
 }

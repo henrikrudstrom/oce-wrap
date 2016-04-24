@@ -55,23 +55,27 @@ var specOverride = fs.existsSync(specOverridePath) ?
     }
   };
 
-var nextInt = 0;
-var nextDouble = 0.0;
-var nextBool = false;
+
+
+var next = 0;
 
 function int() {
-  nextInt += 1;
-  return 1; // nextInt.toString();
+  next += 1;
+  return Math.round(next); // nextInt.toString();
 }
 
 function double() {
-  nextDouble += 0.5;
-  return nextDouble.toString();
+  next += 0.5;
+  return next;
 }
 
 function bool() {
-  nextBool = !nextBool;
-  return nextBool.toString();
+  next += 1;
+  return !Math.round(next) % 2
+}
+
+function resetNumbers() {
+  next = 0;
 }
 
 function createValue(typeName) {
@@ -180,6 +184,9 @@ function renderTest(member, testSrc, parts) {
   ${disable}it('${signature}', function(){
 ${testSrc}
   });`;
+
+  resetNumbers();
+
   return src;
 }
 
@@ -189,5 +196,6 @@ module.exports = {
   memberReturnType,
   expectType,
   createValue,
-  renderTest
+  renderTest,
+  resetNumbers
 };
