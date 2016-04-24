@@ -24,7 +24,7 @@ function moduleQuery(mods) {
   });
   var cache = {};
   function find(expr) {
-    if(cache.hasOwnProperty(expr))
+    if (cache.hasOwnProperty(expr))
       return cache[expr];
     var mod;
     if (expr.indexOf('.') !== -1) {
@@ -61,4 +61,5 @@ function moduleQuery(mods) {
     getModule
   };
 }
+
 module.exports = moduleQuery;

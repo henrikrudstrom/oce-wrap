@@ -31,6 +31,7 @@ function Conf(decl, parent) {
     this.cls = 'module';
   }
   this.declarations = [];
+  this.typemaps = [];
   // include nothing by default
 
   this.stacks = [];
@@ -123,10 +124,14 @@ Conf.prototype = {
     return this;
   },
 
-  pushToStack(i, expr, fn) {
+  pushQuery(i, expr, fn) {
+    this.pushMethod(i, () => this.find(expr).forEach(fn));
+  },
+
+  pushMethod(i, fn){
     if (!this.stacks[i])
       this.stacks[i] = [];
-    this.stacks[i].push(() => this.find(expr).forEach(fn))
+    this.stacks[i].push(fn);
   },
 
   process() {

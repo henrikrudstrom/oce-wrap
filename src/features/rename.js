@@ -7,7 +7,7 @@ function rename(expr, name) {
   if (typeof nameFunc !== 'function')
     nameFunc = () => name;
 
-  this.pushToStack(5, expr, (obj) => {
+  this.pushQuery(5, expr, (obj) => {
     if (obj.cls === 'constructor') return;
 
     obj.rename = true;
@@ -62,4 +62,4 @@ function renderRename(decl) {
   return false;
 }
 
-features.registerRenderer('swig', 0, renderRename);
+features.registerRenderer('swig', 50, renderRename);

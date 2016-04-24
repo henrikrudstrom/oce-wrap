@@ -9,6 +9,7 @@ module.exports = function typedict(mods) {
   mods = [builtins()].concat(mods);
 
   var dict = {};
+
   mods.forEach((mod) => {
     mod.declarations.forEach((decl) => {
       if (mod.name === 'builtins')
@@ -20,7 +21,7 @@ module.exports = function typedict(mods) {
 
   mods.filter(mod => mod.typemaps)
     .forEach(mod => mod.typemaps.forEach(tm => {
-      dict[tm.from] = dict[tm.to];
+      dict[tm.from] = dict.hasOwnProperty(tm.to) ? dict[tm.to] : tm.to;
     }));
 
   return (name) => {

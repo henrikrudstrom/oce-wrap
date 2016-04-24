@@ -14,7 +14,7 @@ function noHandle(expr) {
     if (handle)
       handle.include('Handle_' + cls.name + '(*)');
   });
-  this.pushToStack(5, expr, (obj) => {
+  this.pushQuery(5, expr, (obj) => {
     if (obj.key.startsWith('Handle_')) return;
 
     this.typemap('Handle_' + obj.key, obj.key);
@@ -63,3 +63,11 @@ function renderHandleTypemaps(cls) {
 }
 
 features.registerRenderer('swig', 0, renderHandleTypemaps);
+
+
+// function renderHandleExpectation(decl) {
+//   if (decl.cls !== constructor)
+//     return part
+// }
+//
+// cls.name + '.' + signature + 'Expectations'

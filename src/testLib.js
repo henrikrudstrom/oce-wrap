@@ -92,7 +92,7 @@ function requiredTypesWrapped(member) {
     unwrapped.push(member.returnType || member.type);
 
   var res = unwrapped.every(
-    type => type === 'void' || modules.get(type)
+    type => type === 'void' || type === 'Array' || type === 'Object' || modules.get(type)
   );
 
   return res;

@@ -3,7 +3,7 @@ const camelCase = require('camel-case');
 
 function argout(expr, type) {
   if (type === undefined) throw new Error('argout type must be specified');
-  this.pushToStack(5, expr, (mem) => {
+  this.pushQuery(5, expr, (mem) => {
     if (mem.cls !== 'memfun') return false;
 
     var outArgIndexes = mem.arguments

@@ -1,5 +1,9 @@
 const features = require('../features');
 
+// 'hides' a type that can be directly mapped to a similar type, only implemented for types
+// that have an accessor function to the 'hidden' type. i.e gp_Vec->XYZ() etc.
+// TODO: should get a better name
+
 function typemap(from, to, getter) {
   if (!this.typemaps)
     this.typemaps = [];

@@ -3,7 +3,7 @@ const common = require('../common.js');
 const testLib = require('../testLib.js');
 
 function property(getter, setter, name) {
-  this.pushToStack(5, getter, (getMethod) => {
+  this.pushQuery(5, getter, (getMethod) => {
     if (getMethod.cls === 'constructor') return false;
     if (typeof setter === 'string') {
       var setterStr = setter;

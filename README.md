@@ -1,3 +1,4 @@
+[![Code Climate](https://codeclimate.com/github/henrikrudstrom/oce-wrap/badges/gpa.svg)](https://codeclimate.com/github/henrikrudstrom/oce-wrap)
 #Open Cascade wrap generator for node.js
 work in progress:
 
@@ -11,14 +12,14 @@ work in progress:
 
 ##installation
 1. install dependencies
-2. 
+2.
 ```
 npm install -g gulp
 npm install
 ```
 
 3. Edit settings.js and example/settings.js
-Set paths to OCE headers and 
+Set paths to OCE headers and
 If you have castxml (ubuntu 15.0) use these settings:
 ```
   "xmlGenerator":  "castxml",

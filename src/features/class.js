@@ -31,7 +31,7 @@ function renderClassSuite(cls, parts) {
   if (cls.cls !== 'class' || cls.abstract || cls.name.startsWith('Handle_'))
     return false;
 
-  var imports = [cls.name].concat(cls.moduleDepends || [])
+  var imports = [cls.parent].concat(cls.moduleDepends || [])
     .map(mod => (`var ${mod} = require('../../lib/${mod}.js');`))
     .join('\n');
 

@@ -1,7 +1,5 @@
 const features = require('../features.js');
 const testLib = require('../testLib.js');
-const common = require('../common.js');
-var modules;
 
 //
 // swig rendering
@@ -18,7 +16,7 @@ function renderArg(arg) {
 }
 
 function renderMemberFunction(decl) {
-  if (decl.cls !== 'constructor' && decl.cls !== 'memfun')
+  if (decl.cls !== 'constructor' && decl.cls !== 'memfun' || decl.custom)
     return false;
 
   var source = decl.source();
@@ -40,12 +38,16 @@ features.registerRenderer('swig', 40, renderMemberFunction);
 // test rendering
 //
 
+function argValues(args) {
+  return args.map(arg => testLib.createValue(arg.type)).join(', ');
+}
+
 function renderMemberFunctionTest(calldef, parts) {
   if (calldef.cls !== 'memfun')
     return false;
 
   var cls = calldef.getParent();
-  var args = calldef.arguments.map(arg => testLib.createValue(arg.type)).join(', ');
+  var args = argValues(calldef.arguments);
   var testSrc = `\
     var obj = create.${cls.parent}.${cls.name}();
     var res = obj.${calldef.name}(${args});`;
@@ -59,13 +61,15 @@ function renderMemberFunctionTest(calldef, parts) {
 function renderConstructorTest(calldef, parts) {
   if (calldef.cls !== 'constructor')
     return false;
+
   var cls = calldef.getParent();
-  var args = calldef.arguments.map(arg => testLib.createValue(arg.type)).join(', ');
+  var args = argValues(calldef.arguments);
 
   var src = `\
     var res = new ${cls.parent}.${calldef.name}(${args});
     expect(typeof res).toBe('object');
     expect(res.constructor.name.replace('_exports_', '')).toBe('${cls.name}');`;
+
   return {
     name: cls.name + 'MemberSpecs',
     src: testLib.renderTest(calldef, src, parts)
@@ -77,7 +81,8 @@ function renderStaticFunctionTest(calldef, parts) {
     return false;
 
   var cls = calldef.getParent();
-  var args = calldef.arguments.map(arg => testLib.createValue(arg.type)).join(', ');
+  var args = argValues(calldef.arguments);
+
   var testSrc = `\
     var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
 
@@ -92,8 +97,8 @@ function renderFreeFunctionTest(calldef, parts) {
     return false;
 
   var mod = calldef.getParent();
+  var args = argValues(calldef.arguments);
 
-  var args = calldef.arguments.map(arg => testLib.createValue(arg.type)).join(', ');
   var testSrc = `\
     var res = ${mod.name}.${calldef.name}(${args});`;
   return {
