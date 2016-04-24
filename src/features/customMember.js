@@ -10,7 +10,7 @@ function customMethod(decl) {
   decl.throws = true;
   decl.custom = true;
   console.log(decl)
-  this.getParent().typemaps.push({ from: 'TopTools_IndexedMapOfShape', to: 'Array' });
+
   this.add(decl);
   return this;
 }
@@ -29,7 +29,7 @@ function topoSubShapes(name, shapeType) {
     decl.shapeType = shapeType;
     decl.key = this.key + '::' + decl.key;
     delete decl.static;
-
+    this.getParent().typemaps.push({ from: 'TopTools_IndexedMapOfShape', to: 'Array' });
     return this.customMethod(decl);
   });
 }
@@ -39,7 +39,7 @@ features.registerConfig(customMethod, topoSubShapes);
 function renderTopoMaps(decl) {
   return `\
 %extend ${decl.source().parent} {
-  static void ${decl.name}(const TopoDS_Shape &shape, const TopTools_IndexedMapOfShape &map){
+  static void ${decl.name}(const TopoDS_Shape &shape, TopTools_IndexedMapOfShape &map){
     TopExp::MapShapes(shape, TopAbs_${decl.shapeType}, map);
   }
 }`;

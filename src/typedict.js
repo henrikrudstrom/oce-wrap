@@ -21,7 +21,7 @@ module.exports = function typedict(mods) {
 
   mods.filter(mod => mod.typemaps)
     .forEach(mod => mod.typemaps.forEach(tm => {
-      dict[tm.from] = dict.hasOwnProperty(tm.to) ? dict[tm.to] : tm.to;
+      dict[tm.native] = dict.hasOwnProperty(tm.wrapped) ? dict[tm.wrapped] : tm.wrapped;
     }));
 
   return (name) => {

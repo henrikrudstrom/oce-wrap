@@ -38,6 +38,28 @@ function getRenderers(type) {
   return result;
 }
 
+//
+// typemaps
+//
+const convertToNative = {};
+const convertToWrapped = {};
+
+function registerNativeConverter(fn) {
+  convertToNative[fn.name] = fn;
+}
+
+function registerWrappedConverter(fn) {
+  convertToWrapped[fn.name] = fn;
+}
+
+function getNativeConverter(name, typemap) {
+  return convertToNative[name](typemap);
+}
+
+function getWrappedConverter(name, typemap) {
+  return convertToWrapped[name](typemap);
+}
+
 function load() {
   var files = [
     glob.sync(path.join(__dirname, 'features', '*.js')),
@@ -57,5 +79,9 @@ module.exports = {
   registerConfig,
   registerRenderer,
   getRenderers,
+  registerNativeConverter,
+  registerWrappedConverter,
+  getNativeConverter,
+  getWrappedConverter,
   load
 };
