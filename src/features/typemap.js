@@ -27,45 +27,34 @@ function gpTypemap(native, wrapped, getter) {
 features.registerConfig(typemap);
 features.registerConfig(gpTypemap);
 
-
-
-// function convertionFunctionName(fromType, toType) {
-//   return `Convert_${fromType}_To_${toType}`;
-// }
-//
-// function renderConvertToNative(nativeType, wrappedType, convert) {
-//   var src = `\
-// %wrapper %{
-//   #include <${nativeType}.hxx>
-//   ${nativeType} * ${convertionFunctionName(wrappedType, nativeType)}(v8::Handle<v8::Value> value, ${nativeType} &result){
-//     ${wrappedType} *argp ;
-//     int res = SWIG_ConvertPtr(value, &argp, SWIGTYPE_p_${wrappedType},  0 );
-//     if (!SWIG_IsOK(res)) {
-//       return res;
-//       SWIGV8_THROW_EXCEPTION(v8::Exception::Error(SWIGV8_STRING_NEW("Invalid argument, expected gp_Vec")));
-//       //SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument " "$argnum"" of type '" "${wrappedType}""'");
-//     }
-//     // ${nativeType} * result;
-//     ${convert}
-//     return res;
-//     // return result;
-//   }
-// %}`
-//   return src;
-// }
-
 features.registerNativeConverter(function withAccessor(tm) {
-  console.log(tm, "TMTMTM")
   return (nativeObj, wrappedObj) =>
     `${nativeObj} = (${tm.native} *)&((const ${tm.wrapped} *)(${wrappedObj}))->${tm.getter};`;
 });
 
-features.registerWrappedConverter(function withConstructor(tm){
+features.registerWrappedConverter(function withConstructor(tm) {
   return (nativeObj, wrappedObj) =>
     `${wrappedObj} = SWIG_NewPointerObj(
     (new ${tm.wrapped}((const ${tm.native}&)${wrappedObj})), SWIGTYPE_p_${tm.wrapped}, SWIG_POINTER_OWN |  0
   );`;
 });
+
+
+
+features.registerNativeConverter(function ArrayToIndexedMap(tm) {
+
+});
+features.registerNativeConverter(function IndexedMapToArray(tm) {
+
+});
+
+
+
+
+
+
+
+
 
 function renderTypemap(tm) {
   var native = tm.native;

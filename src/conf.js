@@ -35,10 +35,6 @@ function Conf(decl, parent) {
   // include nothing by default
 
   this.stacks = [];
-  // this.stacks = {
-  //   include: [],
-  //   transform: []
-  // };
 }
 
 function processInclude(decl, parent) {
@@ -55,6 +51,7 @@ function processInclude(decl, parent) {
     if (newDecl.cls === 'memfun' || newDecl.cls === 'constructor')
       newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
   }
+  newDecl.getParent = () => parent;
   return newDecl;
 }
 
@@ -128,27 +125,59 @@ Conf.prototype = {
     this.pushMethod(i, () => this.find(expr).forEach(fn));
   },
 
-  pushMethod(i, fn){
+  pushMethod(i, fn) {
+    if (i !== 5) {
+      console.log("not 5!!!!!!!!!!!!!!!!!!!!!!!")
+    }
     if (!this.stacks[i])
       this.stacks[i] = [];
     this.stacks[i].push(fn);
-  },
-
-  process() {
-    this.stacks.forEach(stack => {
-      if (stack)
-        stack.forEach((fn) => fn());
-    })
-    this.init(); // TODO: should get a better home
-    if (this.declarations) {
-      this.declarations
-        .filter(decl => decl.declarations)
-        .forEach(decl => decl.process());
+    if (i !== 5) {
+      console.log(this.name, this.stacks);
     }
   },
 
+  // process(stack) {
+  //   this.stacks.forEach(stack => {
+  //     if (stack)
+  //       stack.forEach((fn) => fn());
+  //   })
+  //   this.init(); // TODO: should get a better home
+  //   if (this.declarations) {
+  //     this.declarations
+  //       .filter(decl => decl.declarations)
+  //       .forEach(decl => decl.process());
+  //   }
+  // },
+  //
+  // init() {
+  //   mapSources(this);
+  // }
+
+  processStack(index) {
+    var stack = this.stacks[index];
+    if (stack !== undefined)
+      stack.forEach((fn) => fn());
+    if (this.declarations) {
+      this.declarations
+        .filter(decl => decl.processStack)
+        .forEach(decl => decl.processStack(index));
+    }
+  },
+  process() {
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(index => this.processStack(index));
+    // for (var i = 0; i <= 10; i++) {
+    //   var index = i;
+    //   console.log(index);
+    //   this.processStack(index);
+    // }
+  },
+
+  initialized: false,
   init() {
-    mapSources(this);
+    if (!this.initialized)
+      mapSources(this);
+    this.initialized = true;
   }
 };
 

@@ -19,7 +19,8 @@ module.exports = function typedict(mods) {
     });
   });
 
-  mods.filter(mod => mod.typemaps)
+  mods.concat(mods.map(mod => mod.declarations))
+    .filter(mod => mod.typemaps)
     .forEach(mod => mod.typemaps.forEach(tm => {
       dict[tm.native] = dict.hasOwnProperty(tm.wrapped) ? dict[tm.wrapped] : tm.wrapped;
     }));
