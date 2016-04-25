@@ -1,12 +1,9 @@
 const features = require('../features.js');
 const camelCase = require('camel-case');
 
-function argout(expr, type) {
-  if (type === undefined) throw new Error('argout type must be specified');
-  this.pushQuery(5, expr, (mem) => {
-    if (mem.cls !== 'memfun') return false;
 
-    var outArgIndexes = mem.arguments
+function defineArgout(mem, type){
+      var outArgIndexes = mem.arguments
       .map((arg, index) => index)
       .filter(index => mem.arguments[index].decl.indexOf('&') !== -1);
     if (outArgIndexes.length < 1) return false;
@@ -14,7 +11,19 @@ function argout(expr, type) {
     // out arguments to argouts property
     mem.argouts = outArgIndexes.map(index => mem.arguments[index]);
     mem.arguments = mem.arguments.filter((arg, index) => outArgIndexes.indexOf(index) === -1);
-    mem.returnType = type;
+    if(mem.argouts.length > 1)
+      mem.returnType = type;
+    else 
+      mem.returnType = mem.argouts[0].type;
+}
+
+
+function argout(expr, type) {
+  if (type === undefined) throw new Error('argout type must be specified');
+  this.pushQuery(5, expr, (mem) => {
+    if (mem.cls !== 'memfun') return false;
+    defineArgout(mem, type);
+
 
     return true;
   });
@@ -28,16 +37,29 @@ function argoutObject(expr) {
   return this.argout(expr, 'Object');
 }
 
-features.registerConfig(argout, argoutArray, argoutObject);
+function defaultArgouts(){
+  this.pushMethod(4, () => {
+    this.declarations.map(decl => {
+      var src = decl; //TODO: should be decl.source();
+      var outarg = src.arguments.some(arg => 
+        arg.decl.indexOf('&') !== -1 && arg.decl.indexOf('const') === -1
+      );
+      if(!outarg) return;
+      defineArgout(decl, 'Object');
+    });
+  });
+}
+
+features.registerConfig(argout, defaultArgouts, argoutArray, argoutObject);
 
 
 function swigConvert(type, arg) {
   if (type.indexOf('Standard_Real') !== -1)
-    return `SWIG_From_double(*${arg})`;
+    return `SWIGV8_NUMBER_NEW(*${arg})`;
   if (type.indexOf('Standard_Boolean') !== -1)
-    return `SWIG_From_bool(*${arg})`;
+    return `SWIGV8_BOOLEAN_NEW(*${arg})`;
   if (type.indexOf('Standard_Integer') !== -1)
-    return `SWIG_From_int(*${arg})`; // TODO: not sure this one exists
+    return `SWIGV8_INTEGER_NEW(*${arg})`; // TODO: not sure this one exists
   return `SWIG_NewPointerObj((new ${type}((const ${type})*${arg})), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
 }
 
@@ -69,6 +91,15 @@ function renderObjectOutmap(argouts, sigArgs) {
   }`;
 }
 
+function renderSingleValueOutmap(args, sigArgs) {
+    var arg = args[0];
+    if(args.length > 1) 
+      throw new Error('single value outmap can only be used with single arg');
+    return `%typemap(argout) (${sigArgs}) {// argoutout\n
+   $result = ${swigConvert(arg.type, '$1')};
+  }`;
+}
+
 function renderArgouts(decl) {
   if (!decl.argouts) return false;
 
@@ -85,13 +116,19 @@ function renderArgouts(decl) {
     .join('\n');
 
   var inMap = `%typemap(in, numinputs=0) (${sigArgs}) (${defArgs}) {\n// argoutin\n ${tmpArgs}\n}`;
-  var outMap = decl.returnType === 'Array' ?
-    renderArrayOutmap(decl.argouts, sigArgs) :
-    renderObjectOutmap(decl.argouts, sigArgs);
-
+  
+  var outMap;
+  if(decl.argouts.length === 1)
+    outMap = renderSingleValueOutmap(decl.argouts, sigArgs)
+  else if(decl.returnType === 'Array')
+    outMap = renderArrayOutmap(decl.argouts, sigArgs)
+  else
+    outMap = renderObjectOutmap(decl.argouts, sigArgs);
+  
+  var comment = `// typemap for ${decl.name}` 
   return {
     name: 'typemaps.i',
-    src: [inMap, outMap].join('\n')
+    src: [comment, inMap, outMap].join('\n')
   };
 }
 

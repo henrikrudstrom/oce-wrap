@@ -56,6 +56,9 @@ function renderTypemap(tm) {
     arginDef = '';
     arginInit = tm.initArgout;
   }
+  var freearg = tm.freearg ? `%typemap(freearg) ${native} & {
+  ${tm.freearg}; 
+}` : '';
   return `\
 #include <${native}.hxx>
 
@@ -76,6 +79,7 @@ function renderTypemap(tm) {
   //typemap arginmap
   $1 = ${arginInit};
 }
+${freearg}
 `;
 }
 
