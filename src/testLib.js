@@ -71,7 +71,7 @@ function double() {
 
 function bool() {
   next += 1;
-  return !Math.round(next) % 2
+  return !Math.round(next) % 2;
 }
 
 function resetNumbers() {

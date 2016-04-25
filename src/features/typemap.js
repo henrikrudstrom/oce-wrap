@@ -13,6 +13,7 @@ function typemap(native, wrapped, options) {
   extend(map, options);
 
   this.typemaps.push(map);
+  features.registerTypemap(map);
 }
 
 function gpTypemap(native, wrapped, getter) {
@@ -27,7 +28,8 @@ function gpTypemap(native, wrapped, getter) {
 features.registerConfig(typemap);
 features.registerConfig(gpTypemap);
 
-features.registerNativeConverter(function withAccessor(tm) {
+
+function withAccessor(tm) {
   return (nativeObj, wrappedObj) =>
     `void *argp ;
   int res = SWIG_ConvertPtr(${wrappedObj}, &argp, SWIGTYPE_p_${tm.wrapped},  0 );
@@ -35,21 +37,23 @@ features.registerNativeConverter(function withAccessor(tm) {
     SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument " "$argnum"" of type '" "${tm.wrapped}""'");
   }
   ${nativeObj} = (${tm.native} *)&((const ${tm.wrapped} *)(argp))->${tm.getter};`;
-});
+}
 
-features.registerWrappedConverter(function withConstructor(tm) {
+function withConstructor(tm) {
+  //throw new Error()
   return (nativeObj, wrappedObj) =>
-    `${wrappedObj} = SWIG_NewPointerObj(
-    (new ${tm.wrapped}((const ${tm.native} &)${wrappedObj})), SWIGTYPE_p_${tm.wrapped}, SWIG_POINTER_OWN |  0
-  );`;
-});
+    `${wrappedObj} = SWIG_NewPointerObj((new ${tm.wrapped}((const ${tm.native} &)${nativeObj})), SWIGTYPE_p_${tm.wrapped}, SWIG_POINTER_OWN |  0);`;
+}
 
+features.registerNativeConverter(withAccessor);
+features.registerWrappedConverter(withConstructor);
 
 function renderTypemap(tm) {
   var native = tm.native;
   var wrapped = tm.wrapped;
-  var toNative = features.getNativeConverter(tm.toNative, tm);
-  var toWrapped = features.getWrappedConverter(tm.toWrapped, tm);
+  var convert = features.getTypemapConverter(tm.native);
+  // var toNative = features.getNativeConverter(tm.toNative, tm);
+  // var toWrapped = features.getWrappedConverter(tm.toWrapped, tm);
   var arginDef = `(${native} argin)`
   var arginInit = '&argin'
   if (tm.initArgout) {
@@ -64,16 +68,16 @@ function renderTypemap(tm) {
 
 %typemap(in) const ${native} &{
   // typemap inmap
-  ${toNative('$1', '$input')}
+  ${convert.toNative('$1', '$input')}
 }
 %typemap(out) ${native} {
   //typemap outmap
-  ${toWrapped('$1', '$result')}
+  ${convert.toWrapped('$1', '$result')}
 }
 
 %typemap(argout) ${native} & {
   //typemap argoutmap
-  ${toWrapped('$1', '$result')}
+  ${convert.toWrapped('$1', '$result')}
 }
 %typemap(in) ${native} & ${arginDef}{
   //typemap arginmap

@@ -31,9 +31,9 @@ function argout(expr, type) {
   });
 }
 
-function argoutArray(expr) {
-  return this.argout(expr, 'Array');
-}
+// function argoutArray(expr) {
+//   return this.argout(expr, 'Array');
+// }
 
 function argoutObject(expr) {
   return this.argout(expr, 'Object');
@@ -53,38 +53,56 @@ function defaultArgouts(){
   });
 }
 
-features.registerConfig(argout, defaultArgouts, argoutArray, argoutObject);
+features.registerConfig(argout, defaultArgouts, /*argoutArray,*/ argoutObject);
 
 
 function swigConvert(type, arg) {
+  var decl = type;
   var type = common.stripTypeQualifiers(type);
+  
   if (type.indexOf('Standard_Real') !== -1)
-    return `SWIGV8_NUMBER_NEW(*${arg})`;
+    return {expr: `SWIGV8_NUMBER_NEW(*${arg})`};
   if (type.indexOf('Standard_Boolean') !== -1)
-    return `SWIGV8_BOOLEAN_NEW(*${arg})`;
+    return {expr: `SWIGV8_BOOLEAN_NEW(*${arg})`};
   if (type.indexOf('Standard_Integer') !== -1)
-    return `SWIGV8_INTEGER_NEW(*${arg})`; // TODO: not sure this one exists
-  return `SWIG_NewPointerObj((new ${type}((const ${type})*${arg})), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
+    return {expr: `SWIGV8_INTEGER_NEW(*${arg})`};
+  
+  var typemap = features.getTypemapConverter(type);
+  if(typemap === null)
+    return { 
+      expr: `SWIG_NewPointerObj((new ${type}((const ${type})*${arg})), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`
+    };
+  
+  return {
+    expr: 'value',
+    statements: 'v8::Handle<v8::Value> ' + typemap.toWrapped(arg, 'value', '$1')
+  };
 }
 
-function renderArrayOutmap(argouts, sigArgs) {
-  var assignArgs = argouts
-    .map((arg, index) => `  array->Set(${index}, ${swigConvert(arg.decl, '$' + (index + 1))});`)
-    .join('\n');
+// function renderArrayOutmap(argouts, sigArgs) {
+//   var assignArgs = argouts
+//     .map((arg, index) => `  array->Set(${index}, ${swigConvert(arg.decl, '$' + (index + 1))});`)
+//     .join('\n');
 
-  return `%typemap(argout) (${sigArgs}) {// argoutout\n
-    v8::Handle<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 4);
-  ${assignArgs}
-    $result = array;
-  }`;
-}
+//   return `%typemap(argout) (${sigArgs}) {// argoutout\n
+//     v8::Handle<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 4);
+//   ${assignArgs}
+//     $result = array;
+//   }`;
+// }
 
 function renderObjectOutmap(argouts, sigArgs) {
   var assignArgs = argouts
     .map((arg, index) => {
       var key = `SWIGV8_STRING_NEW("${camelCase(arg.name)}")`;
       var value = swigConvert(arg.decl, '$' + (index + 1));
-      return `  obj->Set(${key}, ${value});`;
+      
+      var res = `obj->Set(${key}, ${value.expr});`;
+      
+      if (!value.statements)
+        return res;
+        
+      return `{\n${value.statements}\n${res}\n}`; 
     })
     .join('\n');
 
@@ -97,10 +115,12 @@ function renderObjectOutmap(argouts, sigArgs) {
 
 function renderSingleValueOutmap(args, sigArgs) {
     var arg = args[0];
+    var value = swigConvert(arg.decl, '$1');
     if(args.length > 1) 
       throw new Error('single value outmap can only be used with single arg');
     return `%typemap(argout) (${sigArgs}) {// argoutout\n
-   $result = ${swigConvert(arg.decl, '$1')};
+${value.statements || '\n'}\
+   $result = ${value.expr};
   }`;
 }
 

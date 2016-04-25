@@ -105,12 +105,24 @@ function renderFreeFunctionTest(calldef, parts) {
   };
 }
 
+
+
+
 function renderTypeExpectations(decl){
   if(decl.cls !== 'module') return false;
   return {
     name: 'testHelpers.js',
     src: `\
 module.exports.expectType = function(res, type){
+  if (type === 'Integer' || type === 'Double')
+    return expect(typeof res).toBe('number');
+  
+  if (type === 'Boolean')
+    return expect(typeof res).toBe('boolean');
+  
+  if(type.indexOf('.') !== -1)
+    type = type.split('.')[1];
+  
   expect(typeof res).toBe('object');
   expect(res.constructor.name.replace('_exports_', '')).toBe(type);
 }

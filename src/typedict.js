@@ -10,6 +10,7 @@ module.exports = function typedict(mods) {
 
   var dict = {};
 
+  // process renames
   mods.forEach((mod) => {
     mod.declarations.forEach((decl) => {
       if (mod.name === 'builtins')
@@ -18,7 +19,8 @@ module.exports = function typedict(mods) {
         dict[decl.key] = `${mod.name}.${decl.name}`;
     });
   });
-
+  
+  // process typemaps
   mods.concat(mods.map(mod => mod.declarations))
     .filter(mod => mod.typemaps)
     .forEach(mod => mod.typemaps.forEach(tm => {

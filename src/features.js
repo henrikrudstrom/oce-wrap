@@ -43,6 +43,7 @@ function getRenderers(type) {
 //
 const convertToNative = {};
 const convertToWrapped = {};
+const typemaps = {}
 
 function registerNativeConverter(fn) {
   convertToNative[fn.name] = fn;
@@ -50,6 +51,19 @@ function registerNativeConverter(fn) {
 
 function registerWrappedConverter(fn) {
   convertToWrapped[fn.name] = fn;
+}
+function registerTypemap(typemap){
+  typemaps[typemap.native] = typemap;
+}
+
+function getTypemapConverter(native){
+  var typemap = typemaps[native];
+  if(!typemap) return null;
+  return {
+    toNative:  convertToNative[typemap.toNative](typemap),
+    toWrapped:  convertToWrapped[typemap.toWrapped](typemap)
+  }
+  
 }
 
 function getNativeConverter(name, typemap) {
@@ -83,5 +97,7 @@ module.exports = {
   registerWrappedConverter,
   getNativeConverter,
   getWrappedConverter,
+  getTypemapConverter,
+  registerTypemap,
   load
 };
