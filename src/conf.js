@@ -2,6 +2,7 @@ const extend = require('extend');
 const arrify = require('arrify');
 const headers = require('./headers.js');
 const common = require('./common.js');
+const debug = require('debug')('oce-wrap:conf');
 
 function MultiConf() {}
 MultiConf.prototype = [];
@@ -17,6 +18,10 @@ MultiConf.prototype.include = function include(expr) {
 };
 MultiConf.prototype.exclude = function exclude(expr) {
   this.map(decl => (decl.exclude ? decl.exclude(expr) : decl));
+  return this;
+};
+MultiConf.prototype.extend = function exclude(props) {
+  this.map(decl => (decl.extend ? decl.extend(props) : decl));
   return this;
 };
 
@@ -37,6 +42,20 @@ function Conf(decl, parent) {
   this.stacks = [];
 }
 
+
+function getSource(decl, declaration) {
+  return function(keyProp) {
+    keyProp = keyProp || 'key';
+    // TODO: this is getting ugly
+    if (decl.cls === 'class' || decl.cls === 'typedef' || decl.cls === 'enum')
+      return headers.get(this[keyProp]);
+    var parentKey = decl.parentKey || declaration.key;
+    var query = parentKey + '::' + decl[keyProp];
+
+    return headers.get(query);
+  };
+}
+
 function processInclude(decl, parent) {
   var newDecl;
   if (decl.declarations) {
@@ -45,33 +64,27 @@ function processInclude(decl, parent) {
   } else {
     newDecl = extend(true, {}, decl);
 
-    if (decl.key) return newDecl;
-
-    newDecl.key = decl.name;
-    if (newDecl.cls === 'memfun' || newDecl.cls === 'constructor')
-      newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
+    if (!decl.key) {
+      newDecl.key = decl.name;
+      if (newDecl.cls === 'memfun' || newDecl.cls === 'constructor')
+        newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
+    }
   }
   newDecl.getParent = () => parent;
+  newDecl.source = getSource(decl, parent);
+
   return newDecl;
 }
 
+
 // adds .source() function to declarations, maps wrapped definition
 // to the original from the headers.
-function mapSources(declaration) {
+function mapSources(declaration, parent) {
   if (!declaration.declarations)
     return declaration;
   declaration.declarations.forEach((d) => {
     var decl = d;
-    decl.source = function(keyProp) {
-      keyProp = keyProp || 'key';
-      // TODO: this is getting ugly
-      if (decl.cls === 'class' || decl.cls === 'typedef' || decl.cls === 'enum')
-        return headers.get(this[keyProp]);
-      var parentKey = decl.parentKey || declaration.key;
-      var query = parentKey + '::' + decl[keyProp];
-
-      return headers.get(query);
-    };
+    decl.source = getSource(decl, declaration);
     decl.getParent = function() {
       return declaration;
     };
@@ -84,7 +97,8 @@ function mapSources(declaration) {
 
 Conf.prototype = {
   find(expr) {
-    var res = createMultiConf(common.find(this, expr)); // TODO. search by key not name
+    var res = createMultiConf(common.find(this, expr));
+
     return res;
   },
 
@@ -95,7 +109,7 @@ Conf.prototype = {
     decls = arrify(decls);
     this.declarations = this.declarations.concat(decls
       .map(decl => processInclude(decl, this))
-      //.filter((decl) => !this.declarations.some((d) => d.key === decl.key))
+      // .filter((decl) => !this.declarations.some((d) => d.key === decl.key))
     );
   },
   include(expr) {
@@ -120,39 +134,19 @@ Conf.prototype = {
     this.declarations = this.declarations.filter(fn);
     return this;
   },
+  extend(props) {
+    return extend(true, this, props);
+  },
 
   pushQuery(i, expr, fn) {
     this.pushMethod(i, () => this.find(expr).forEach(fn));
   },
 
   pushMethod(i, fn) {
-    if (i !== 5) {
-      console.log("not 5!!!!!!!!!!!!!!!!!!!!!!!")
-    }
     if (!this.stacks[i])
       this.stacks[i] = [];
     this.stacks[i].push(fn);
-    if (i !== 5) {
-      console.log(this.name, this.stacks);
-    }
   },
-
-  // process(stack) {
-  //   this.stacks.forEach(stack => {
-  //     if (stack)
-  //       stack.forEach((fn) => fn());
-  //   })
-  //   this.init(); // TODO: should get a better home
-  //   if (this.declarations) {
-  //     this.declarations
-  //       .filter(decl => decl.declarations)
-  //       .forEach(decl => decl.process());
-  //   }
-  // },
-  //
-  // init() {
-  //   mapSources(this);
-  // }
 
   processStack(index) {
     var stack = this.stacks[index];
@@ -165,19 +159,8 @@ Conf.prototype = {
     }
   },
   process() {
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(index => this.processStack(index));
-    // for (var i = 0; i <= 10; i++) {
-    //   var index = i;
-    //   console.log(index);
-    //   this.processStack(index);
-    // }
-  },
-
-  initialized: false,
-  init() {
-    if (!this.initialized)
-      mapSources(this);
-    this.initialized = true;
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      .forEach(index => this.processStack(index));
   }
 };
 

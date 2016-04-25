@@ -77,10 +77,11 @@ describe('module object', function() {
   it('wrap defintions are mapped to the source', function() {
     var mod = new conf.Conf();
     mod.include('gp_Pnt');
-    mod.rename('gp_Pnt', 'Point');
+    //mod.rename('gp_Pnt', 'Point');
     var pnt = mod.get('gp_Pnt');
     pnt.include('SetX');
-    mod.process();
+    //mod.process();
+    //pnt = mod.get('gp_Pnt');
     expect(pnt.source().name).toBe('gp_Pnt');
     expect(pnt.get('SetX').source().name).toBe('SetX');
   });
@@ -288,13 +289,13 @@ describe('module object', function() {
     mod.include('Geom_ElementarySurface');
     mod.include('Geom_SphericalSurface');
     mod.find('*').include('*');
-    mod.find('*').argoutArray('Bounds');
+    mod.find('*').argoutObject('Bounds');
     mod.process();
 
     var method = mod.get('Geom_SphericalSurface').get('Bounds');
     expect(method.argouts.length).toBe(4);
     expect(method.arguments.length).toBe(0);
-    expect(method.returnType).toBe('Array');
+    expect(method.returnType).toBe('Object');
   });
   it('can hide handles', function() {
     var mod = new conf.Conf();
