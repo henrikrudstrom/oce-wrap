@@ -69,15 +69,15 @@ function arrayToSettable(tm) {
     `\
     v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(${wrappedObj});
     int length = array->Get(SWIGV8_SYMBOL_NEW("length"))->ToObject()->Uint32Value();
-    ${tm.native} * list(1, length + 1);
+    ${tm.native} list(1, length + 1);
 
     void *argpointer;
     for(int i = 1; i <= length; i++){
       SWIG_ConvertPtr(array->Get(i-1), &argpointer, SWIGTYPE_p_${tm.elemType}, 0);
-      list->${tm.setElem}(i, (const ${tm.elemType} &)argpointer);
+      list.${tm.setElem}(i, (const ${tm.elemType} &)argpointer);
     }
 
-    ${nativeObj} = list;
+    ${nativeObj} = &list;
 `;
 }
 
