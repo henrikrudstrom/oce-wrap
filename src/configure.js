@@ -24,11 +24,18 @@ function memberTranslate(typedict) {
   return mem => {
     if (mem.returnType)
       mem.returnType = typedict(mem.returnType);
+    
     if (mem.type)
       mem.type = typedict(mem.type);
+    
     if (mem.arguments)
       mem.arguments.forEach((arg) => {
         delete arg.decl;
+        arg.type = typedict(arg.type);
+      });
+    
+    if (mem.argouts)
+      mem.argouts.forEach((arg) => {
         arg.type = typedict(arg.type);
       });
   };

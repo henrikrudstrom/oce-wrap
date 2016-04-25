@@ -132,8 +132,7 @@ function expectType(returnType) {
     return ['expect(typeof res).toBe(\'boolean\');'];
   else if (returnType !== 'void')
     return [
-      'expect(typeof res).toBe(\'object\');',
-      `expect(res.constructor.name.replace('_exports_', '')).toBe('${returnType}');`
+      `helpers.expectType(res, '${returnType}');`
     ];
   return [];
 }

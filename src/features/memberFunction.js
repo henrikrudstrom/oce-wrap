@@ -66,9 +66,7 @@ function renderConstructorTest(calldef, parts) {
   var args = argValues(calldef.arguments);
 
   var src = `\
-    var res = new ${cls.parent}.${calldef.name}(${args});
-    expect(typeof res).toBe('object');
-    expect(res.constructor.name.replace('_exports_', '')).toBe('${cls.name}');`;
+    var res = new ${cls.parent}.${calldef.name}(${args});`;
 
   return {
     name: cls.name + 'MemberSpecs',
@@ -107,7 +105,21 @@ function renderFreeFunctionTest(calldef, parts) {
   };
 }
 
+function renderTypeExpectations(decl){
+  if(decl.cls !== 'module') return false;
+  return {
+    name: 'testHelpers.js',
+    src: `\
+module.exports.expectType = function(res, type){
+  expect(typeof res).toBe('object');
+  expect(res.constructor.name.replace('_exports_', '')).toBe(type);
+}
+`
+  }
+}
+
 features.registerRenderer('spec', 50, renderMemberFunctionTest);
 features.registerRenderer('spec', 50, renderStaticFunctionTest);
 features.registerRenderer('spec', 50, renderFreeFunctionTest);
 features.registerRenderer('spec', 50, renderConstructorTest);
+features.registerRenderer('spec', 50, renderTypeExpectations);

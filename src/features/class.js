@@ -27,6 +27,7 @@ class ${srcCls.name}${base} {
 features.registerRenderer('swig', 50, renderClass);
 
 
+
 function renderClassSuite(cls, parts) {
   if (cls.cls !== 'class' || cls.abstract || cls.name.startsWith('Handle_'))
     return false;
@@ -37,7 +38,8 @@ function renderClassSuite(cls, parts) {
 
   var src = `\
 ${imports}
-var create = require('../create.js')
+var create = require('../create.js');
+var helpers = require('./testHelpers.js');
 describe('${cls.parent}.${cls.name}', function(){
 ${parts.get(cls.name + 'MemberSpecs')}
 });

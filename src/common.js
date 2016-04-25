@@ -69,17 +69,27 @@ function removePrefix(name) {
   if (!m[3]) return name;
   return m[1] + m[3];
 }
+
 function signature(member, full) {
   var sig = `${member.name}`;
   if (member.arguments)
     sig += `(${member.arguments.map(arg => (full ? arg.decl : arg.type)).join(', ')})`;
   return sig;
 }
+
+function stripTypeQualifiers(typeDecl){
+  typeDecl = replaceAll(typeDecl, '&', '');
+  typeDecl = replaceAll(typeDecl, '*', '');
+  typeDecl = replaceAll(typeDecl, 'const', '');
+  return replaceAll(typeDecl, ' ', '')
+}
+
 module.exports = {
   match,
   find,
   get: getDecl,
   matcher: keyMatcher,
   removePrefix,
-  signature
+  signature,
+  stripTypeQualifiers
 };
