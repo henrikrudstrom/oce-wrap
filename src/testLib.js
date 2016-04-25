@@ -182,6 +182,7 @@ function renderTest(member, testSrc, parts) {
 
   var src = `\n${comment}
   ${disable}it('${signature}', function(){
+  console.log('${signature}')
 ${testSrc}
   });`;
 
