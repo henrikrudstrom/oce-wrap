@@ -34,7 +34,13 @@ function keyMatcher(exp, matchValue, wrapped) {
 
 function find(data, expr, wrapped) {
   var member = undefined;
+
   if (expr !== 'function') {
+    if (expr.indexOf('|') !== -1)
+      return expr.split('|')
+        .map(e => find(data, e, wrapped))
+        .concat((a, b) => a.concat(b));
+
     var type = expr;
     var splitter = '::';
     if (wrapped)
@@ -77,7 +83,7 @@ function signature(member, full) {
   return sig;
 }
 
-function stripTypeQualifiers(typeDecl){
+function stripTypeQualifiers(typeDecl) {
   typeDecl = replaceAll(typeDecl, '&', '');
   typeDecl = replaceAll(typeDecl, '*', '');
   typeDecl = replaceAll(typeDecl, 'const', '');

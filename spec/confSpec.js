@@ -379,7 +379,12 @@ describe('module object', function() {
 
     pnt.find('*').extend({ foo: 'bar' });
     expect(pnt.get('SetX').foo).toBe('bar');
+  });
 
+  it('can query multiple expressions', function() {
+    var mod = new conf.Conf();
+    mod.include('gp_Pnt|gp_Vec*|gp_Trsf');
+    expect(mod.declarations.length).toBe(4);
   });
 });
 
