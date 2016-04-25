@@ -72,7 +72,9 @@ function processInclude(decl, parent) {
   }
   newDecl.getParent = () => parent;
   newDecl.source = getSource(decl, parent);
-
+  newDecl.extend = function(props) {
+    return extend(true, this, props);
+  };
   return newDecl;
 }
 
@@ -133,9 +135,6 @@ Conf.prototype = {
     }
     this.declarations = this.declarations.filter(fn);
     return this;
-  },
-  extend(props) {
-    return extend(true, this, props);
   },
 
   pushQuery(i, expr, fn) {

@@ -360,6 +360,27 @@ describe('module object', function() {
     // expect(statics[0].source().name).toBe('GC_MakeCircle');
     // expect(statics.every(s => s.returnType === 'Geom.Circle')).toBe(true);
   });
+
+  it('can extend objects', function() {
+    var mod = new conf.Conf();
+    mod.include('gp_Pnt');
+    mod.include('gp_Vec');
+    mod.include('gp_Vec2d');
+    mod.find('*').include('SetX');
+    mod.find('*').include('SetY');
+    var pnt = mod.get('gp_Pnt').extend({ foo: 'bar' })
+    expect(pnt.foo).toBe('bar');
+    mod.find('gp_*').extend({ bar: 'foo' });
+    expect(pnt.bar).toBe('foo');
+    expect(pnt.bar).toBe('foo');
+
+    pnt.get('SetX').extend({ bar: 'foo' });
+    expect(pnt.get('SetX').bar).toBe('foo');
+
+    pnt.find('*').extend({ foo: 'bar' });
+    expect(pnt.get('SetX').foo).toBe('bar');
+
+  });
 });
 
 
