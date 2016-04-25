@@ -9,4 +9,4 @@ ref/
 coverage/
 settings.json
 .coverrun
-.pyc
+*.pyc
