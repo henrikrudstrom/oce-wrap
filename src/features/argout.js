@@ -84,7 +84,7 @@ function swigConvert(type, arg) {
   }
   return {
     expr: 'value',
-    statements: 'v8::Handle<v8::Value> ' + typemap.toWrapped(arg, 'value', '$1')
+    statements: 'v8::Handle<v8::Value> value;\n  ' + typemap.toWrapped(arg, 'value', '$1') + '\n'
   };
 }
 
@@ -115,7 +115,7 @@ function renderObjectOutmap(argouts, sigArgs) {
     })
     .join('\n');
 
-  return `%typemap(argout) (${sigArgs}) {// argoutout\n
+  return `%typemap(argout) (${sigArgs}) {// renderObjectOutmap\n
     v8::Local<v8::Object> obj = SWIGV8_OBJECT_NEW();
   ${assignArgs}
     $result = obj;
@@ -127,10 +127,14 @@ function renderSingleValueOutmap(args, sigArgs) {
   var value = swigConvert(arg.decl, '$1');
   if (args.length > 1)
     throw new Error('single value outmap can only be used with single arg');
-  return `%typemap(argout) (${sigArgs}) {// argoutout\n
+  return `%typemap(argout) (${sigArgs}) {// renderSingleValueOutmap\n
 ${value.statements || '\n'}\
    $result = ${value.expr};
   }`;
+}
+
+function renderArgoutInit(decl, sigArgs){
+
 }
 
 function renderArgouts(decl) {
@@ -148,7 +152,7 @@ function renderArgouts(decl) {
     .map((arg, index) => `  $${index + 1} = &argout${index + 1};`)
     .join('\n');
 
-  var inMap = `%typemap(in, numinputs=0) (${sigArgs}) (${defArgs}) {\n// argoutin\n ${tmpArgs}\n}`;
+  var inMap = ''; // `%typemap(in, numinputs=0) (${sigArgs})  {\n// argoutin\n ${tmpArgs}\n}`;
 
   var outMap;
   if (decl.argouts.length === 1)

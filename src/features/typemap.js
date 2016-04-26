@@ -45,8 +45,11 @@ function withAccessor(tm) {
 }
 
 function withConstructor(tm) {
+  var deref = '*'
+  if(tm.native === 'gp_XYZ')
+    deref = '*';
   return (nativeObj, wrappedObj) => {
-    var arg = `(new ${tm.wrapped}((const ${tm.native} &)${nativeObj}))`;
+    var arg = `(new ${tm.wrapped}((const ${tm.native} &) ${nativeObj}))`;
     var obj = `SWIG_NewPointerObj(${arg}, SWIGTYPE_p_${tm.wrapped}, SWIG_POINTER_OWN |  0);`;
     return `${wrappedObj} = ${obj}`;
   };
@@ -91,8 +94,8 @@ function renderTypemap(tm) {
   ${convert.toWrapped('$1', '$result')}
 }
 %typemap(in) ${native} & ${arginDef}{
-  //typemap arginmap
-  $1 = ${arginInit};
+   //typemap arginmap
+   $1 = ${arginInit};
 }
 ${freearg}
 `;

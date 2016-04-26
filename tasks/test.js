@@ -6,6 +6,7 @@ const fs = require('fs');
 const del = require('del');
 const exec = require('child_process').exec;
 const diff = require('gulp-diff');
+const arrify = require('arrify');
 
 
 var Reporter = require('jasmine-terminal-reporter');
@@ -79,8 +80,8 @@ module.exports = function(gulp) {
   });
 
 
-  function diffTestSubpaths() {
-    var subpaths = ['swig', 'config', 'spec'];
+  function diffTestSubpaths(more) {
+    var subpaths = ['swig', 'config', 'spec'].concat(arrify(more));
     if (yargs.argv.folder)
       subpaths = yargs.argv.folder.split(',');
     return subpaths;
@@ -95,7 +96,7 @@ module.exports = function(gulp) {
   })
 
   gulp.task('diff-test-init', ['diff-test-clean'], function() {
-    var sources = diffTestSubpaths()
+    var sources = diffTestSubpaths('src')
       .map(folder => path.join(settings.paths.build, folder, '**/*'));
 
     return gulp.src(sources, {
