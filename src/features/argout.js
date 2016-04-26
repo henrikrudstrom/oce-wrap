@@ -1,3 +1,4 @@
+const extend = require('extend');
 const camelCase = require('camel-case');
 const features = require('../features.js');
 const common = require('../common.js');
@@ -15,7 +16,10 @@ function defineArgout(mem, type) {
   if (outArgIndexes.length < 1) return false;
 
   // out arguments to argouts property
-  mem.argouts = outArgIndexes.map(index => mem.arguments[index]);
+  mem.argouts = outArgIndexes.map(
+    index => extend({index}, mem.arguments[index])
+  );
+  //mem.argouts.forEach((arg, i) => arg.index = )
   mem.arguments = mem.arguments.filter((arg, index) => outArgIndexes.indexOf(index) === -1);
 
   if (mem.argouts.length > 1)
@@ -48,7 +52,9 @@ function argoutObject(expr) {
 function defaultArgouts() {
   this.pushMethod(6, () => {
     this.declarations.forEach(decl => {
+      console.log("DEF", decl.name)
       var src = decl; // TODO: should be decl.source();
+      if(!src.arguments) return;
       var outarg = src.arguments.some(arg =>
         arg.decl.indexOf('&') !== -1 && arg.decl.indexOf('const') === -1
       );
@@ -100,8 +106,8 @@ function swigConvert(type, arg) {
 //   }`;
 // }
 
-function renderObjectOutmap(argouts, sigArgs) {
-  var assignArgs = argouts
+function renderObjectOutmap(decl, fullSig) {
+  var assignArgs = decl.argouts
     .map((arg, index) => {
       var key = `SWIGV8_STRING_NEW("${camelCase(arg.name)}")`;
       var value = swigConvert(arg.decl, '$' + (index + 1));
@@ -115,57 +121,84 @@ function renderObjectOutmap(argouts, sigArgs) {
     })
     .join('\n');
 
-  return `%typemap(argout) (${sigArgs}) {// renderObjectOutmap\n
+  return `%typemap(argout) ${fullSig} {// renderObjectOutmap for ${decl.name}\n
     v8::Local<v8::Object> obj = SWIGV8_OBJECT_NEW();
   ${assignArgs}
     $result = obj;
   }`;
 }
 
-function renderSingleValueOutmap(args, sigArgs) {
-  var arg = args[0];
+function renderSingleValueOutmap(decl, fullSig) {
+  var arg = decl.argouts[0];
   var value = swigConvert(arg.decl, '$1');
-  if (args.length > 1)
+  if (decl.argouts.length > 1)
     throw new Error('single value outmap can only be used with single arg');
-  return `%typemap(argout) (${sigArgs}) {// renderSingleValueOutmap\n
+  return `%typemap(argout) ${fullSig} {// renderSingleValueOutmap for ${decl.name}\n
 ${value.statements || '\n'}\
    $result = ${value.expr};
   }`;
 }
 
-function renderArgoutInit(decl, sigArgs){
-
+function renderArgoutInit(decl, fullSig){
+  var argDef = [];
+  var argInit = [];
+  
+  decl.argouts.forEach((arg, index) => {
+    var nativeType = common.stripTypeQualifiers(arg.decl);
+    var tm = features.getTypemap(nativeType);
+    if(tm && tm.initArgout ){
+      argInit.push(`$${index + 1} = ${tm.initArgout(decl)}`)
+    } else {
+      argDef.push(nativeType + ' argout' + (index + 1));
+      argInit.push(`$${index + 1} = &argout${index + 1};`);
+    }
+  });
+  
+  argDef = argDef.length > 0 ? `(${argDef.join(', ')})` : '';
+  console.log("argDef", argDef)
+  argInit = argInit.join('\n  ');
+  
+  return `%typemap(in, numinputs=0) ${fullSig} ${argDef} {
+  // renderArgoutInit for ${decl.name} 
+  ${argInit}
+}`;
 }
 
 function renderArgouts(decl) {
   if (!decl.argouts) return false;
 
   var sigArgs = decl.argouts
-    .map(arg => `${arg.decl}${arg.name}`)
+    .map(arg => `${arg.decl}${arg.name}_out`)
     .join(', ');
-
+  var source = decl.source()
+  var fullSignature = `${source.returnType} ${source.parent}::${source.name}(${sigArgs})`;
+  fullSignature = `(${sigArgs})`;
+  
   var defArgs = decl.argouts
-    .map((arg, index) => `${common.stripTypeQualifiers(arg.decl)} argout${index + 1}`)
+    .map((arg, index) => 
+      `${common.stripTypeQualifiers(arg.decl)} argout${index + 1}`
+    )
     .join(', ');
 
   var tmpArgs = decl.argouts
     .map((arg, index) => `  $${index + 1} = &argout${index + 1};`)
     .join('\n');
 
-  var inMap = ''; // `%typemap(in, numinputs=0) (${sigArgs})  {\n// argoutin\n ${tmpArgs}\n}`;
+  //var inMap = `%typemap(in, numinputs=0) (${sigArgs})  {\n// argoutin\n ${tmpArgs}\n}`;
 
   var outMap;
   if (decl.argouts.length === 1)
-    outMap = renderSingleValueOutmap(decl.argouts, sigArgs);
+    outMap = renderSingleValueOutmap(decl, fullSignature);
   else if (decl.returnType === 'Array')
-    outMap = renderArrayOutmap(decl.argouts, sigArgs);
+    outMap = renderArrayOutmap(decl, fullSignature);
   else
-    outMap = renderObjectOutmap(decl.argouts, sigArgs);
+    outMap = renderObjectOutmap(decl, fullSignature);
 
-  var comment = `// typemap for ${decl.name}`;
+  //var comment = `// typemap for ${decl.name}`;
+  var inMap = renderArgoutInit(decl, fullSignature);
   return {
     name: 'typemaps.i',
-    src: [comment, inMap, outMap].join('\n')
+    src: [inMap, outMap].join('\n')
   };
 }
 
@@ -183,7 +216,7 @@ function renderArgoutExpectations(decl) {
   var name = decl.parent + '.' + common.signature(decl) + 'Expectations';
 
   var src = decl.argouts
-    .map(arg => `\n    helpers.expectType(res.${arg.name}, '${arg.type}');`)
+    .map(arg => `\n    helpers.expectType(res.${camelCase(arg.name)}, '${arg.type}');`)
     .join('');
 
   return { name, src };

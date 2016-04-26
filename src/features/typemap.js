@@ -89,18 +89,18 @@ function renderTypemap(tm) {
   //typemap outmap
   ${convert.toWrapped('$1', '$result')}
 }
-%typemap(argout) ${native} & {
-  //typemap argoutmap
-  ${convert.toWrapped('$1', '$result')}
-}
-%typemap(in) ${native} & ${arginDef}{
-   //typemap arginmap
-   $1 = ${arginInit};
-}
+
 ${freearg}
 `;
 }
-
+// %typemap(argout) ${native} & {
+//   //typemap argoutmap
+//   ${convert.toWrapped('$1', '$result')}
+// }
+// %typemap(in) ${native} & ${arginDef}{
+//   //typemap arginmap
+//   $1 = ${arginInit};
+// }
 function renderTypemaps(decl) {
   if (!decl.typemaps) return false;
 

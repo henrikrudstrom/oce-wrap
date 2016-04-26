@@ -36,7 +36,7 @@ function typemapArray1Of(native, wrapped, elemType) {
     getSize: 'Length',
     getElem: 'Value',
     setElem: 'SetValue',
-    initArgout: `new ${native}(1,2);`,
+    initArgout: decl => `new ${native}(1,2);`,
     //sizeProperty: this.sizeProperty
     //freearg: '$1->Destroy()'
   });
@@ -73,7 +73,7 @@ function nativeValue(type, arg) {
 
 
 
-function indexableToArray(tm) {
+function indexableToArray(tm, decl) {
   return (nativeObj, wrappedObj) =>
     `\
   v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
@@ -84,7 +84,7 @@ function indexableToArray(tm) {
   ${wrappedObj} = array;`;
 }
 
-function arrayToAppendable(tm) {
+function arrayToAppendable(tm, decl) {
   // TODO: not tested
   var deref = '*';
   if (tm.elemType === 'Standard_Real' ||
@@ -109,7 +109,7 @@ function arrayToAppendable(tm) {
 `;
 }
 
-function arrayToSettable(tm) {
+function arrayToSettable(tm, decl) {
   var deref = '*';
   if (tm.elemType === 'Standard_Real' ||
     tm.elemType === 'Standard_Integer' ||
@@ -133,9 +133,10 @@ function arrayToSettable(tm) {
 `;
 }
 
-function iterableToArray(tm) {
+function iterableToArray(tm, decl) {
   var name = tm.native.split('_')[1];
   var mod = tm.native.split('_')[0];
+  
   return (nativeObj, wrappedObj) =>
     `
   v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
@@ -149,6 +150,9 @@ function iterableToArray(tm) {
 
   ${wrappedObj} = array;`;
 }
+
+
+
 features.registerWrappedConverter(indexableToArray);
 features.registerWrappedConverter(iterableToArray);
 features.registerNativeConverter(arrayToAppendable);
