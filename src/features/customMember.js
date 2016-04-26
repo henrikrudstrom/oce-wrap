@@ -19,7 +19,6 @@ function customMethod(decl) {
 
 function topoSubShapes(name, shapeType) {
   // makes sure this executes after renames (5)
-  //this.pushMethod(0, () => {
   var src = headers.get(
     'TopExp::MapShapes(TopoDS_Shape, TopAbs_ShapeEnum, TopTools_IndexedMapOfShape)'
   );
@@ -33,8 +32,6 @@ function topoSubShapes(name, shapeType) {
   decl.key = this.key + '::' + decl.key;
   decl.returnType = 'TopTools_IndexedMapOfShape';
   delete decl.static;
-  //this.getParent().typemap('TopTools_IndexedMapOfShape', 'Array');
-  //this.getParent().typemaps.push({ native: 'TopTools_IndexedMapOfShape', wrapped: 'Array' });
   return this.customMethod(decl);
 
 }
@@ -52,7 +49,6 @@ function renderTopoMaps(decl) {
 
 
 function renderCustomMemberFunction(decl) {
-  // if (decl.cls !== 'memfun' || !decl.custom) return false;
   if (!decl.custom) return false;
 
   return {

@@ -8,7 +8,6 @@ const testLib = require('../testLib.js');
 function renderArg(arg, index, indexes) {
   var res = arg.decl + ' ' + arg.name;
   if(indexes.indexOf(index) !== -1){
-    console.log(index, indexes)
     res += '_out';
   }
   // TODO: pythonocc removes byrefs on gp module...
@@ -25,8 +24,7 @@ function renderMemberFunction(decl) {
   
   var indexes = decl.argouts ? decl.argouts.map(argout => argout.index) : [];
   var source = decl.source();
-  //
-  //console.log("arguments", decl.name)
+
   var args = source.arguments.map((arg, index) => renderArg(arg, index, indexes))
     .join(', ');
   

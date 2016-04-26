@@ -62,8 +62,7 @@ features.registerWrappedConverter(withConstructor);
 function renderTypemap(tm) {
   var native = tm.native;
   var convert = features.getTypemapConverter(tm.native);
-  // var toNative = features.getNativeConverter(tm.toNative, tm);
-  // var toWrapped = features.getWrappedConverter(tm.toWrapped, tm);
+  
   var arginDef = `(${native} argin)`;
   var arginInit = '&argin';
 
@@ -93,14 +92,8 @@ function renderTypemap(tm) {
 ${freearg}
 `;
 }
-// %typemap(argout) ${native} & {
-//   //typemap argoutmap
-//   ${convert.toWrapped('$1', '$result')}
-// }
-// %typemap(in) ${native} & ${arginDef}{
-//   //typemap arginmap
-//   $1 = ${arginInit};
-// }
+
+
 function renderTypemaps(decl) {
   if (!decl.typemaps) return false;
 

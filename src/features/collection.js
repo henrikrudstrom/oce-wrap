@@ -24,10 +24,6 @@ function typemapListOf(native, wrapped, elemType) {
 }
 
 function typemapArray1Of(native, wrapped, elemType) {
-  // if (!this.sizeProperty) {
-  //   throw console.log('Warning: typemapArray1: declaration ' + this.name + '`sizeProperty`');
-  //   return;
-  // }
   return this.typemap(native, wrapped, {
     render: true,
     toNative: 'arrayToSettable',
@@ -36,9 +32,7 @@ function typemapArray1Of(native, wrapped, elemType) {
     getSize: 'Length',
     getElem: 'Value',
     setElem: 'SetValue',
-    initArgout: decl => `new ${native}(1,2);`,
-    //sizeProperty: this.sizeProperty
-    //freearg: '$1->Destroy()'
+    initArgout: decl => `new ${native}(1,arg1->${decl.getParent().lengthProperty});`,
   });
 }
 
