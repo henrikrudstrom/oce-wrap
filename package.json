@@ -49,6 +49,7 @@
     "require-dir": "^0.3.0",
     "run-sequence": "^1.1.5",
     "through": "^2.3.8",
+    "winston": "^2.2.0",
     "yargs": "^4.3.2"
   }
 }
