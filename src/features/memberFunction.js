@@ -7,11 +7,11 @@ const testLib = require('../testLib.js');
 
 function renderArg(arg, index, indexes) {
   var res = arg.decl + ' ' + arg.name;
-  if(indexes.indexOf(index) !== -1){
+ 
+  if (indexes.indexOf(index) !== -1) {
     res += '_out';
   }
-  // TODO: pythonocc removes byrefs on gp module...
-  // res = res.replace('&', '')
+
   if (arg.default) {
     res += '=' + arg.default;
   }
@@ -112,11 +112,10 @@ function renderFreeFunctionTest(calldef, parts) {
   };
 }
 
-
-
-
-function renderTypeExpectations(decl){
-  if(decl.cls !== 'module') return false;
+function renderTypeExpectations(decl) {
+  if (decl.cls !== 'module')
+    return false;
+  
   return {
     name: 'testHelpers.js',
     src: `\
@@ -134,7 +133,7 @@ module.exports.expectType = function(res, type){
   expect(res.constructor.name.replace('_exports_', '')).toBe(type);
 }
 `
-  }
+  };
 }
 
 features.registerRenderer('spec', 50, renderMemberFunctionTest);

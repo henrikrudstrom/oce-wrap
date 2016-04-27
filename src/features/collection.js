@@ -32,7 +32,7 @@ function typemapArray1Of(native, wrapped, elemType) {
     getSize: 'Length',
     getElem: 'Value',
     setElem: 'SetValue',
-    initArgout: decl => `new ${native}(1,arg1->${decl.getParent().lengthProperty});`,
+    initArgout: decl => `new ${native}(1,arg1->${decl.getParent().lengthProperty});`
   });
 }
 
@@ -60,14 +60,13 @@ function nativeValue(type, arg) {
   if (type.indexOf('Standard_Boolean') !== -1)
     return `SWIG_AsVal(bool)(${arg}, &argpointer)`;
   if (type.indexOf('Standard_Integer') !== -1)
-    return `SWIG_AsVal(int)(${arg}, &argpointer)`; // TODO: not sure this one exists
+    return `SWIG_AsVal(int)(${arg}, &argpointer)`; // not sure if SWIG_AsVal is always in the swig file
   return `SWIG_ConvertPtr(${arg}, (void **)&argpointer, SWIGTYPE_p_${type}, 0)`;
-
 }
 
 
 
-function indexableToArray(tm, decl) {
+function indexableToArray(tm) {
   return (nativeObj, wrappedObj) =>
     `\
   v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
@@ -78,12 +77,16 @@ function indexableToArray(tm, decl) {
   ${wrappedObj} = array;`;
 }
 
-function arrayToAppendable(tm, decl) {
+function isPrimitive(elemType){
+  return elemType === 'Standard_Real' ||
+    elemType === 'Standard_Integer' ||
+    elemType === 'Standard_Boolean';
+}
+
+function arrayToAppendable(tm) {
   // TODO: not tested
   var deref = '*';
-  if (tm.elemType === 'Standard_Real' ||
-    tm.elemType === 'Standard_Integer' ||
-    tm.elemType === 'Standard_Boolean')
+  if (isPrimitive(tm.elemType))
     deref = '';
 
   return (nativeObj, wrappedObj) =>
@@ -103,11 +106,9 @@ function arrayToAppendable(tm, decl) {
 `;
 }
 
-function arrayToSettable(tm, decl) {
+function arrayToSettable(tm) {
   var deref = '*';
-  if (tm.elemType === 'Standard_Real' ||
-    tm.elemType === 'Standard_Integer' ||
-    tm.elemType === 'Standard_Boolean')
+  if (isPrimitive(tm.elemType))
     deref = '';
 
   return (nativeObj, wrappedObj) =>
@@ -127,7 +128,7 @@ function arrayToSettable(tm, decl) {
 `;
 }
 
-function iterableToArray(tm, decl) {
+function iterableToArray(tm) {
   var name = tm.native.split('_')[1];
   var mod = tm.native.split('_')[0];
   

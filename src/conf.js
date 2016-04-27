@@ -2,7 +2,8 @@ const extend = require('extend');
 const arrify = require('arrify');
 const headers = require('./headers.js');
 const common = require('./common.js');
-const debug = require('debug')('oce-wrap:conf');
+const logger = require('winston');
+
 
 function MultiConf() {}
 MultiConf.prototype = [];
@@ -11,6 +12,7 @@ function createMultiConf(decls) {
   decls.__proto__ = new MultiConf();
   return decls;
 }
+
 
 MultiConf.prototype.include = function include(expr) {
   this.map(decl => (decl.include ? decl.include(expr) : decl));
@@ -46,7 +48,7 @@ function Conf(decl, parent) {
 function getSource(decl, declaration) {
   return function(keyProp) {
     keyProp = keyProp || 'key';
-    // TODO: this is getting ugly
+
     if (decl.cls === 'class' || decl.cls === 'typedef' || decl.cls === 'enum')
       return headers.get(this[keyProp]);
     var parentKey = decl.parentKey || declaration.key;
@@ -81,7 +83,7 @@ function processInclude(decl, parent) {
 
 // adds .source() function to declarations, maps wrapped definition
 // to the original from the headers.
-function mapSources(declaration, parent) {
+function mapSources(declaration) {
   if (!declaration.declarations)
     return declaration;
   declaration.declarations.forEach((d) => {
@@ -121,7 +123,7 @@ Conf.prototype = {
         expr = `${this.key}::${expr}`;
       // query parsed headers for declaration
     var res = headers.find(expr);
-    if (res.length < 1) console.log('warning, expression ' + expr + ' returned no results.');
+    if (res.length < 1) logger.warn('Expression ' + expr + ' returned no results.');
 
     this.add(res);
     return this;
