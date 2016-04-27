@@ -3,7 +3,7 @@ const common = require('../common.js');
 const testLib = require('../testLib.js');
 
 function property(getter, setter, name) {
-  this.pushQuery(5, getter, (getMethod) => {
+  this.pushQuery(4, getter, (getMethod) => {
     if (getMethod.cls === 'constructor') return false;
     if (typeof setter === 'string') {
       var setterStr = setter;
@@ -15,11 +15,16 @@ function property(getter, setter, name) {
       key: getMethod.key,
       cls: 'property',
       type: getMethod.returnType,
+      originalType: getMethod.returnType,
       typeDecl: getMethod.returnTypeDecl,
       getter: getMethod.name,
       getterKey: getMethod.key,
       setter: setMethod ? setMethod.name : undefined,
-      setterKey: setMethod ? setMethod.key : undefined
+      setterKey: setMethod ? setMethod.key : undefined,
+      getterSignature: common.signature(getMethod, true),
+      setterSignature: common.signature(setMethod, true),
+      parent: this.name, 
+      originalParent: this.name
     };
     this.exclude(getMethod.key);
     if (setMethod) this.exclude(setMethod.key);
@@ -35,12 +40,10 @@ features.registerConfig(property);
 
 function renderProperty(decl) {
   if (decl.cls !== 'property') return false;
-  var srcGetter = decl.source('getterKey');
 
-  var args = [srcGetter.parent, srcGetter.returnType, decl.name, common.signature(srcGetter, true)];
+  var args = [decl.originalParent, decl.originalType, decl.name, decl.getterSignature];
   if (decl.setterKey) {
-    var srcSetter = decl.source('setterKey');
-    args.push(common.signature(srcSetter, true));
+    args.push(decl.setterSignature);
   }
 
   return {

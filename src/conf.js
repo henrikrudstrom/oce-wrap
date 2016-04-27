@@ -45,24 +45,12 @@ function Conf(decl, parent) {
 }
 
 
-function getSource(decl, declaration) {
-  return function(keyProp) {
-    keyProp = keyProp || 'key';
-
-    if (decl.cls === 'class' || decl.cls === 'typedef' || decl.cls === 'enum')
-      return headers.get(this[keyProp]);
-    var parentKey = decl.parentKey || declaration.key;
-    var query = parentKey + '::' + decl[keyProp];
-
-    return headers.get(query);
-  };
-}
-
 function processInclude(decl, parent) {
   var newDecl;
   if (decl.declarations) {
     newDecl = new Conf(decl, parent.name);
-    newDecl.key = decl.name;
+    newDecl.key = decl.name; //TODO: get rid of this
+    
   } else {
     newDecl = extend(true, {}, decl);
 
@@ -72,8 +60,25 @@ function processInclude(decl, parent) {
         newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
     }
   }
+  
+  newDecl.originalName = decl.name;
+  
+  if(newDecl.returnType !== undefined)
+    newDecl.originalReturnType = decl.returnType;
+  
+  if(newDecl.type !== undefined)
+    newDecl.originalType = decl.type;
+    
+  if(newDecl.arguments !== undefined){
+    newDecl.originalArguments = extend(true, [], newDecl.arguments);
+  }
+  
+  if(newDecl.bases !== undefined)
+    newDecl.bases.forEach(base => base.originalName = base.name);
+  
+  
   newDecl.getParent = () => parent;
-  newDecl.source = getSource(decl, parent);
+
   newDecl.extend = function(props) {
     return extend(true, this, props);
   };
@@ -81,14 +86,11 @@ function processInclude(decl, parent) {
 }
 
 
-// adds .source() function to declarations, maps wrapped definition
-// to the original from the headers.
+// adds .getParent() function to declarations
 function mapSources(declaration) {
   if (!declaration.declarations)
     return declaration;
-  declaration.declarations.forEach((d) => {
-    var decl = d;
-    decl.source = getSource(decl, declaration);
+  declaration.declarations.forEach(decl => {
     decl.getParent = function() {
       return declaration;
     };

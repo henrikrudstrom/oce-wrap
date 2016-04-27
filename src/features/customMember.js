@@ -40,7 +40,7 @@ features.registerConfig(customMethod, topoSubShapes);
 
 function renderTopoMaps(decl) {
   return `\
-%extend ${decl.source().parent} {
+%extend ${decl.getParent().originalName} {
   static void ${decl.name}(const TopoDS_Shape &shape, TopTools_IndexedMapOfShape& map){
     TopExp::MapShapes(shape, TopAbs_${decl.shapeType}, map);
   }

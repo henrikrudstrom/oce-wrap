@@ -23,9 +23,8 @@ function renderMemberFunction(decl) {
     return false;
   
   var indexes = decl.argouts ? decl.argouts.map(argout => argout.index) : [];
-  var source = decl.source();
 
-  var args = source.arguments.map((arg, index) => renderArg(arg, index, indexes))
+  var args = decl.originalArguments.map((arg, index) => renderArg(arg, index, indexes))
     .join(', ');
   
   var stat = decl.static ? 'static ' : '';
@@ -34,8 +33,8 @@ function renderMemberFunction(decl) {
   return {
     name: decl.parent + 'MemberFunctions',
     src: `
-    %feature("compactdefaultargs") ${source.name};
-    ${stat}${cons}${source.returnType + ' '}${source.name}(${args});`
+    %feature("compactdefaultargs") ${decl.originalName};
+    ${stat}${cons}${decl.originalReturnType + ' '}${decl.originalName}(${args});`
   };
 }
 
@@ -54,7 +53,7 @@ function renderMemberFunctionTest(calldef, parts) {
     return false;
 
   var cls = calldef.getParent();
-  var args = argValues(calldef.arguments);
+  var args = argValues(calldef.arguments.filter(arg => !arg.outArg));
   var testSrc = `\
     var obj = create.${cls.parent}.${cls.name}();
     var res = obj.${calldef.name}(${args});`;
@@ -70,7 +69,7 @@ function renderConstructorTest(calldef, parts) {
     return false;
 
   var cls = calldef.getParent();
-  var args = argValues(calldef.arguments);
+  var args = argValues(calldef.arguments.filter(arg => !arg.outArg));
 
   var src = `\
     var res = new ${cls.parent}.${calldef.name}(${args});`;
@@ -86,7 +85,7 @@ function renderStaticFunctionTest(calldef, parts) {
     return false;
 
   var cls = calldef.getParent();
-  var args = argValues(calldef.arguments);
+  var args = argValues(calldef.arguments.filter(arg => !arg.outArg));
 
   var testSrc = `\
     var res = ${cls.parent}.${cls.name}.${calldef.name}(${args});`;
@@ -102,7 +101,7 @@ function renderFreeFunctionTest(calldef, parts) {
     return false;
 
   var mod = calldef.getParent();
-  var args = argValues(calldef.arguments);
+  var args = argValues(calldef.arguments.filter(arg => !arg.outArg));
 
   var testSrc = `\
     var res = ${mod.name}.${calldef.name}(${args});`;

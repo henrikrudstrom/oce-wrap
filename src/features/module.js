@@ -3,20 +3,6 @@ const path = require('path');
 const settings = require('../settings.js');
 const features = require('../features');
 
-
-function renderTypedef(td) {
-  return `typedef ${td.source().type} ${td.source().name};`;
-}
-
-module.exports.name = 'module';
-
-function renderEnum(en) {
-  var values = en.source().values.map(function(v) {
-    return `  ${v[0]} = ${v[1]}`;
-  }).join(',\n');
-  return `enum ${en.source().name} {\n${values}\n};`;
-}
-
 function renderModuleJs(decl, parts) {
   if (decl.cls !== 'module')
     return false;
@@ -43,14 +29,6 @@ module.exports = mod;
 function renderModuleSwig(decl, parts) {
   if (decl.cls !== 'module')
     return false;
-
-  var typedefs = decl.declarations
-    .filter((d) => d.cls === 'typedef')
-    .map(renderTypedef);
-
-  var enums = decl.declarations
-    .filter((d) => d.cls === 'enum')
-    .map(renderEnum);
 
   function includeIfExists(name) {
     var file = path.join(settings.paths.definition, 'modules', decl.name, name);
@@ -80,8 +58,8 @@ ${parts.get('moduleDepends')}
 ${parts.get('featureIncludes')}
 ${includeIfExists('extra.i')}
 ${typemaps}
-${typedefs.join('\n')}
-${enums.join('\n')}
+
+
 ${parts.get('handles')}
 ${parts.get('classIncludes')}
 ${parts.get('extends')}

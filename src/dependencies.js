@@ -1,5 +1,4 @@
 const settings = require('./settings.js');
-const loadModules = require('./modules.js');
 
 
 function unique(t, index, array) {
@@ -17,8 +16,6 @@ function dependencyReader(mods) {
 
   // return the type names that class member depends on
   function memberDepends(mem, source) {
-    if (source)
-      mem = mem.source();
     return [mem.returnType]
       .concat(mem.depends || [])
       .concat(mem.arguments ? mem.arguments.map((a) => a.type) : [])
@@ -78,7 +75,7 @@ function dependencyReader(mods) {
   function toolkitDepends(mod) {
     var deps = mod.declarations
       .map((d) => classDepends(d, false))
-      .concat(mod.declarations.map(cls => cls.source().name))
+      .concat(mod.declarations.map(cls => cls.originalName))
       .reduce((a, b) => a.concat(b), [])
       .map(cls => modName(cls))
       .filter((d, index, array) => array.indexOf(d) === index);

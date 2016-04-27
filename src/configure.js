@@ -30,7 +30,7 @@ function memberTranslate(typedict) {
     
     if (mem.arguments)
       mem.arguments.forEach((arg) => {
-        delete arg.decl;
+        //delete arg.decl;
         arg.type = typedict(arg.type);
       });
     
@@ -76,6 +76,7 @@ function configure(configurationFiles, outputPath) {
   mods.forEach((mod) => {
     delete mod.stacks;
     mod.declarations.forEach((decl) => delete decl.stacks);
+    
     var destFile = `${outputPath}/${mod.name}.json`;
     mkdirp.sync(path.dirname(destFile));
     fs.writeFileSync(destFile, JSON.stringify(mod, null, 2));

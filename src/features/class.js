@@ -2,24 +2,24 @@ const features = require('../features.js');
 
 function renderClass(cls, parts) {
   if (cls.cls !== 'class') return false;
-  var srcCls = cls.source();
+
   var base = '';
-  if (srcCls.bases.length > 0) {
-    base = ' : ' + srcCls.bases[0].access + ' ' + srcCls.bases[0].name;
+  if (cls.bases.length > 0) {
+    base = ' : ' + cls.bases[0].access + ' ' + cls.bases[0].originalName;
   }
 
   const src = `\
-%nodefaultctor ${srcCls.name};
-class ${srcCls.name}${base} {
+%nodefaultctor ${cls.originalName};
+class ${cls.originalName}${base} {
 	public:
     ${parts.get(cls.name + 'MemberFunctions')}
     ${parts.get(cls.name + 'Properties')}
 };`;
   return [{
     name: 'classIncludes',
-    src: `%include classes/${srcCls.name}.i`
+    src: `%include classes/${cls.originalName}.i`
   }, {
-    name: `classes/${srcCls.name}.i`,
+    name: `classes/${cls.originalName}.i`,
     src
   }];
 }

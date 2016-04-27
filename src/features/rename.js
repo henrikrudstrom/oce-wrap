@@ -52,11 +52,10 @@ function renderRename(decl) {
       src: `%rename("${decl.name}") ${decl.key};`
     };
   else if (decl.cls === 'memfun' || decl.cls === 'variable') {
-    var srcDecl = decl.source();
-    var args = srcDecl.arguments.map(arg => arg.decl).join(', ');
+    var args = decl.originalArguments.map(arg => arg.decl).join(', ');
     return {
       name: 'renames.i',
-      src: `%rename("${decl.name}") ${srcDecl.parent}::${srcDecl.name}(${args});`
+      src: `%rename("${decl.name}") ${decl.getParent().originalName}::${decl.originalName}(${args});`
     };
   }
   return false;

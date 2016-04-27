@@ -62,14 +62,6 @@ features.registerWrappedConverter(withConstructor);
 function renderTypemap(tm) {
   var native = tm.native;
   var convert = features.getTypemapConverter(tm.native);
-  
-  var arginDef = `(${native} argin)`;
-  var arginInit = '&argin';
-
-  if (tm.initArgout) {
-    arginDef = '';
-    arginInit = tm.initArgout;
-  }
 
   var freearg = '';
   if (tm.freearg) {

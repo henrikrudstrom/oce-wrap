@@ -95,6 +95,8 @@ function load() {
       relativePath = './' + relativePath;
     return require(relativePath);
   });
+  
+  //TODO render typemaps
 }
 
 

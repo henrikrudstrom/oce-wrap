@@ -8,24 +8,30 @@ const common = require('../common.js');
 // Config
 // ----------------------------------------------------------------------------
 
+function isOutArg(arg){
+  return arg.decl.indexOf('&') !== -1 &&
+    arg.decl.indexOf('const') === -1;
+}
+
 function defineArgout(mem, type) {
-  var outArgIndexes = mem.arguments
-    .map((arg, index) => index)
-    .filter(index => mem.arguments[index].decl.indexOf('&') !== -1);
 
-  if (outArgIndexes.length < 1) return false;
+  
+  var argoutIndices = mem.originalArguments.map((a, index) => index)
+    .filter(index => isOutArg(mem.originalArguments[index]));
 
-  // out arguments to argouts property
-  mem.argouts = outArgIndexes.map(
-    index => extend({index}, mem.arguments[index])
-  );
-  //mem.argouts.forEach((arg, i) => arg.index = )
-  mem.arguments = mem.arguments.filter((arg, index) => outArgIndexes.indexOf(index) === -1);
+  if (argoutIndices.length < 1) return false;
 
-  if (mem.argouts.length > 1)
+  argoutIndices
+    .forEach(index => {
+      mem.originalArguments[index].name = mem.originalArguments[index].name + '_out'
+      mem.originalArguments[index].outArg = true;
+      mem.arguments[index].outArg = true;
+    });
+
+  if (argoutIndices.length > 1)
     mem.returnType = type;
   else
-    mem.returnType = mem.argouts[0].type;
+    mem.returnType = mem.arguments[argoutIndices[0]].type;
 
   return true;
 }
@@ -52,13 +58,12 @@ function argoutObject(expr) {
 function defaultArgouts() {
   this.pushMethod(6, () => {
     this.declarations.forEach(decl => {
-      console.log("DEF", decl.name)
-      var src = decl; // TODO: should be decl.source();
-      if(!src.arguments) return;
-      var outarg = src.arguments.some(arg =>
-        arg.decl.indexOf('&') !== -1 && arg.decl.indexOf('const') === -1
-      );
+      if (!decl.arguments) return;
+      
+      var outarg = decl.arguments.some(isOutArg);
+      
       if (!outarg) return;
+      
       defineArgout(decl, 'Object');
     });
   });
@@ -106,10 +111,20 @@ function swigConvert(type, arg) {
 //   }`;
 // }
 
+
+function processOutArgName(name){
+  name = name.replace('_out', '');
+  
+  if(name.indexOf('the') !== -1 && name.length > 3)
+    name = name.replace('the', '');
+  
+  return camelCase(name);
+}
+
 function renderObjectOutmap(decl, fullSig) {
-  var assignArgs = decl.argouts
+  var assignArgs = decl.originalArguments.filter(arg => arg.outArg)
     .map((arg, index) => {
-      var key = `SWIGV8_STRING_NEW("${camelCase(arg.name)}")`;
+      var key = `SWIGV8_STRING_NEW("${processOutArgName(arg.name)}")`;
       var value = swigConvert(arg.decl, '$' + (index + 1));
 
       var res = `obj->Set(${key}, ${value.expr});`;
@@ -129,10 +144,13 @@ function renderObjectOutmap(decl, fullSig) {
 }
 
 function renderSingleValueOutmap(decl, fullSig) {
-  var arg = decl.argouts[0];
-  var value = swigConvert(arg.decl, '$1');
-  if (decl.argouts.length > 1)
+  var argouts = decl.originalArguments.filter(arg => arg.outArg);
+  
+  if (argouts.length > 1)
     throw new Error('single value outmap can only be used with single arg');
+  
+  var value = swigConvert(argouts[0].decl, '$1');
+  
   return `%typemap(argout) ${fullSig} {// renderSingleValueOutmap for ${decl.name}\n
 ${value.statements || '\n'}\
    $result = ${value.expr};
@@ -142,8 +160,9 @@ ${value.statements || '\n'}\
 function renderArgoutInit(decl, fullSig){
   var argDef = [];
   var argInit = [];
+  var argouts = decl.originalArguments.filter(arg => arg.outArg);
   
-  decl.argouts.forEach((arg, index) => {
+  argouts.forEach((arg, index) => {
     var nativeType = common.stripTypeQualifiers(arg.decl);
     var tm = features.getTypemap(nativeType);
     if(tm && tm.initArgout ){
@@ -165,32 +184,25 @@ function renderArgoutInit(decl, fullSig){
 }
 
 function renderArgouts(decl) {
-  if (!decl.argouts) return false;
+  if (!decl.arguments) 
+    return false;
 
-  var sigArgs = decl.argouts
-    .map(arg => `${arg.decl}${arg.name}_out`)
+  var argouts = decl.originalArguments.filter(arg => arg.outArg);
+  if (argouts.length < 1)
+    return false;
+
+  var sigArgs = argouts
+    .map(arg => `${arg.decl}${arg.name}`)
     .join(', ');
-  var source = decl.source()
-  var fullSignature = `${source.returnType} ${source.parent}::${source.name}(${sigArgs})`;
-  fullSignature = `(${sigArgs})`;
   
-  var defArgs = decl.argouts
-    .map((arg, index) => 
-      `${common.stripTypeQualifiers(arg.decl)} argout${index + 1}`
-    )
-    .join(', ');
-
-  var tmpArgs = decl.argouts
-    .map((arg, index) => `  $${index + 1} = &argout${index + 1};`)
-    .join('\n');
-
-  //var inMap = `%typemap(in, numinputs=0) (${sigArgs})  {\n// argoutin\n ${tmpArgs}\n}`;
+  var fullSignature = `${decl.originalReturnType} ${decl.getParent().originalName}::${decl.originalName}(${sigArgs})`;
+  fullSignature = `(${sigArgs})`;
 
   var outMap;
-  if (decl.argouts.length === 1)
+  if (argouts.length === 1)
     outMap = renderSingleValueOutmap(decl, fullSignature);
-  else if (decl.returnType === 'Array')
-    outMap = renderArrayOutmap(decl, fullSignature);
+  // else if (decl.returnType === 'Array')
+  //   outMap = renderArrayOutmap(decl, fullSignature);
   else
     outMap = renderObjectOutmap(decl, fullSignature);
 
@@ -210,12 +222,18 @@ features.registerRenderer('swig', 0, renderArgouts);
 // ----------------------------------------------------------------------------
 
 function renderArgoutExpectations(decl) {
-  if (!decl.argouts || decl.argouts.length < 2)
+  if(!decl.arguments)
     return false;
-
+  
+  var argouts = decl.arguments.filter(arg => arg.outArg);
+  
+  // only add to tests with multiple argouts
+  if(argouts.length < 2)
+    return false;
+  
   var name = decl.parent + '.' + common.signature(decl) + 'Expectations';
 
-  var src = decl.argouts
+  var src = argouts
     .map(arg => `\n    helpers.expectType(res.${camelCase(arg.name)}, '${arg.type}');`)
     .join('');
 

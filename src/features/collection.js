@@ -65,7 +65,6 @@ function nativeValue(type, arg) {
 }
 
 
-
 function indexableToArray(tm) {
   return (nativeObj, wrappedObj) =>
     `\
@@ -145,7 +144,6 @@ function iterableToArray(tm) {
 
   ${wrappedObj} = array;`;
 }
-
 
 
 features.registerWrappedConverter(indexableToArray);

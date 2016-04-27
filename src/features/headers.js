@@ -9,9 +9,9 @@ function renderHeaders(decl) {
 
   var depends = decl.declarations
     .map((d) => reader.classDepends(d, { recursive: false }))
-    .concat(decl.declarations.map(d => d.source().name))
+    .concat(decl.declarations.map(d => d.originalName))
     .concat(decl.declarations
-      .map(d => (d.bases ? d.source().bases.map(b => b.name) : []))
+      .map(d => (d.bases ? d.bases.map(b => b.originalName) : []))
       .reduce((a, b) => a.concat(b), [])
     )
     .reduce((a, b) => a.concat(b), [])

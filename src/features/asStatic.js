@@ -25,9 +25,11 @@ function includeAsStatic(expr, template, valueFunc) {
         sourceParent: this.name,
         parentKey: cls.name,
         originCls: cls.name,
+        originalName: cls.name,
         returnType,
         sourceReturnType: returnType,
         arguments: args,
+        originalArguments: args,
         depends: cls.name,
         template,
         valueFunc
@@ -49,18 +51,18 @@ features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder);
 
 
 var templates = {
-  renderGCMake(decl, source, args, argNames) {
+  renderGCMake(decl, args, argNames) {
     return `%extend ${decl.sourceParent} {
   static const ${decl.sourceReturnType} ${decl.name}(${args}){
-    ${source.parent}* obj = new ${source.parent}(${argNames});
+    ${decl.originCls}* obj = new ${decl.originCls}(${argNames});
     return obj->${decl.valueFunc}();
   }
 }`;
   },
-  renderBRepBuilder(decl, source, args, argNames) {
+  renderBRepBuilder(decl, args, argNames) {
     return `%inline {
   static const ${decl.sourceReturnType} ${decl.name}(${args}){
-    ${source.parent}* obj = new ${source.parent}(${argNames});
+    ${decl.originCls}* obj = new ${decl.originCls}(${argNames});
     if(!obj->IsDone())
       SWIG_V8_Raise("could not make edge"); // TODO check error
     return obj->${decl.valueFunc}();
@@ -71,10 +73,11 @@ var templates = {
 
 function renderAsStatic(decl) {
   if (decl.cls !== 'staticfunc') return false;
-  var source = decl.source();
-  var args = source.arguments.map(arg => arg.decl + ' ' + arg.name).join(', ');
-  var argNames = source.arguments.map(arg => arg.name).join(', ');
-  var src = templates['render' + decl.template](decl, source, args, argNames);
+  
+  var args = decl.arguments.map(arg => arg.decl + ' ' + arg.name).join(', ');
+  var argNames = decl.arguments.map(arg => arg.name).join(', ');
+  
+  var src = templates['render' + decl.template](decl, args, argNames);
   return { name: 'extends', src };
 }
 
