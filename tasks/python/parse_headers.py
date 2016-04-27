@@ -1,16 +1,58 @@
 import os
 import json
 from glob import glob
-import parse
+
 import re
 import sys
+from pygccxml import utils
 from pygccxml import declarations
+from pygccxml import parser
 from collections import OrderedDict
 
-#oce_include = "/home/henrik/OCE/include/oce"
-
 from collections import OrderedDict
-import json
+
+
+settings_path = 'settings.json'
+xml_generator_path=None
+xml_generator=None
+if os.path.exists(settings_path):
+    with open(settings_path, 'r') as f:
+        settings = json.loads(f.read())
+        xml_generator = settings.get('xmlGenerator')
+        xml_generator_path = settings.get('xmlGeneratorPath')
+
+
+def parse_files(path, files):
+    # Find the location of the xml generator (castxml or gccxml)
+    #generator_path, generator_name = utils.find_xml_generator()
+    #print("GENER " + generator_path)
+    # Configure the xml generator
+
+    args = {
+        'include_paths':[path],
+        'keep_xml': True
+        }
+    if(xml_generator != None):
+        args['xml_generator'] =xml_generator
+    if(xml_generator_path != None):
+        args['xml_generator_path'] =xml_generator_path
+
+    xml_generator_config = parser.xml_generator_configuration_t(**args)
+
+    def cache_file(filename):
+        return parser.file_configuration_t(
+            data=filename,
+            content_type=parser.CONTENT_TYPE.CACHED_SOURCE_FILE,
+            cached_source_file=filename.replace(path, "tmp/xml")+".xml")
+    cached_files = [cache_file(f) for f in files]
+
+
+    project_reader = parser.project_reader_t(xml_generator_config)
+    decls = project_reader.read_files(
+        cached_files,
+        compilation_mode=parser.COMPILATION_MODE.ALL_AT_ONCE)
+
+    return declarations.get_global_namespace(decls)
 
 
 
@@ -39,10 +81,10 @@ class Module:
         self.files = glob(oce_include + "/" + name + "*.hxx")
         self.files = filter(lambda h: not ignore(h), self.files)
 
-        self.ns = parse.parse_files(oce_include, self.files)
+        self.ns = parse_files(oce_include, self.files)
         #print "===================loaded"
 
-#json.dumps(classes[1], cls=ComplexEncoder)
+#json.dumps(classes[1], declType=ComplexEncoder)
 
 
 
@@ -103,7 +145,7 @@ def w_member_function(cd, parent):
         name=clean_name(cd.name),
         key=cd.name + "(" + ", ".join([a['type'] for a in args]) + ")",
         parent=parent.name,
-        cls="memfun",
+        declType="memfun",
         arguments=args,
         returnType=str(cd.return_type) if cd.return_type else ""
 
@@ -127,12 +169,12 @@ def w_constructor(cc, parent):
 def w_enum(e):
     return Dict(
         name=clean_name(e.name),
-        cls="enum",
+        declType="enum",
         key=clean_name(e.name),
         values=e.values)
 
 def w_typedef(td):
-    return Dict(name=clean_name(td.name), type=str(td.type), key=clean_name(td.name), cls="typedef")
+    return Dict(name=clean_name(td.name), type=str(td.type), key=clean_name(td.name), declType="typedef")
 
 
 
@@ -159,29 +201,33 @@ def w_base(info):
 
 
 def w_class(cls):
+    constructors=iter(cls.constructors(include_member, allow_empty=True), with_parent(cls, w_constructor))
+    members=iter(cls.member_functions(include_member, allow_empty=True), with_parent(cls, w_member_function))
     return Dict(name=cls.name,
         bases=[w_base(b) for b in cls.bases],
         abstract=cls.is_abstract,
         artificial=cls.is_artificial,
         location=cls.location.as_tuple(),
-        cls="class",
+        declType="class",
         key=cls.name,
+        declarations=constructors + members
         #operators=iter(cls.operators(), w_operator),
         # enums=iter(cls.enums(), w_enum),
         # #typedefs=iter(cls.typedefs(), w_typedef),
         #
-        constructors=iter(cls.constructors(include_member, allow_empty=True), with_parent(cls, w_constructor)),
-        members=iter(cls.member_functions(include_member, allow_empty=True), with_parent(cls, w_member_function)),
+
 
         #variables=iter(cls.variables(), w_variable)
         )
 
 def w_module(ns, name):
+    classes = map(w_class, ns.classes(s_class(name), allow_empty=True))
+    typedefs = iter(ns.typedefs(s_typedef(name), allow_empty=True), w_typedef)
+    enums = iter(ns.enums(s_enum(name), allow_empty=True), w_enum)
+    
     return Dict(
         name=name,
-        classes=map(w_class, ns.classes(s_class(name), allow_empty=True)),
-        typedefs=iter(ns.typedefs(s_typedef(name), allow_empty=True), w_typedef),
-        enums=iter(ns.enums(s_enum(name), allow_empty=True), w_enum),
+        declarations= classes + typedefs + enums,
         headers=get_headers(name)
     )
 
