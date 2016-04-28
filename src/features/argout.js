@@ -7,14 +7,12 @@ const common = require('../common.js');
 // Config
 // ----------------------------------------------------------------------------
 
-function isOutArg(arg){
+function isOutArg(arg) {
   return arg.decl.indexOf('&') !== -1 &&
     arg.decl.indexOf('const') === -1;
 }
 
 function defineArgout(mem, type) {
-
-  
   var argoutIndices = mem.origArguments.map((a, index) => index)
     .filter(index => isOutArg(mem.origArguments[index]));
 
@@ -58,11 +56,11 @@ function defaultArgouts() {
   this.pushMethod(9, () => {
     this.declarations.forEach(decl => {
       if (!decl.arguments) return;
-      
+
       var outarg = decl.arguments.some(isOutArg);
-      
+
       if (!outarg) return;
-      
+
       defineArgout(decl, 'Object');
     });
   });
@@ -84,6 +82,13 @@ function swigConvert(type, arg) {
     return { expr: `SWIGV8_BOOLEAN_NEW(*${arg})` };
   if (type.indexOf('Standard_Integer') !== -1)
     return { expr: `SWIGV8_INTEGER_NEW(*${arg})` };
+  // if (type.indexOf('Standard_OStream') !== -1) {
+  //   return {
+  //     statements: `std::ostringstream *output = static_cast<std::ostringstream *> (${arg});`,
+  //     expr: 'SWIGV8_STRING_NEW(output->str().c_str());'
+  //   };
+  // }
+
 
   var typemap = features.getTypemapConverter(type);
   if (typemap === null) {
@@ -111,12 +116,12 @@ function swigConvert(type, arg) {
 // }
 
 
-function processOutArgName(name){
+function processOutArgName(name) {
   name = name.replace('_out', '');
-  
-  if(name.indexOf('the') !== -1 && name.length > 3)
+
+  if (name.indexOf('the') !== -1 && name.length > 3)
     name = name.replace('the', '');
-  
+
   return camelCase(name);
 }
 
@@ -144,46 +149,51 @@ function renderObjectOutmap(decl, fullSig) {
 
 function renderSingleValueOutmap(decl, fullSig) {
   var argouts = decl.origArguments.filter(arg => arg.outArg);
-  
+
   if (argouts.length > 1)
     throw new Error('single value outmap can only be used with single arg');
-  
+
   var value = swigConvert(argouts[0].decl, '$1');
-  
+
   return `%typemap(argout) ${fullSig} {// renderSingleValueOutmap for ${decl.name}\n
 ${value.statements || '\n'}\
    $result = ${value.expr};
   }`;
 }
 
-function renderArgoutInit(decl, fullSig){
+function renderArgoutInit(decl, fullSig) {
   var argDef = [];
   var argInit = [];
   var argouts = decl.origArguments.filter(arg => arg.outArg);
-  
+
   argouts.forEach((arg, index) => {
     var nativeType = common.stripTypeQualifiers(arg.decl);
     var tm = features.getTypemap(nativeType);
-    if(tm && tm.initArgout ){
+    if (tm && tm.initArgout) {
       argInit.push(`$${index + 1} = ${tm.initArgout(decl)}`);
+    // } else if (nativeType === 'Standard_OStream') {
+    //   //argDef.push('std')
+    //   //argInit.push('std::ostringstream strout();');
+    //   argInit.push('std::ostringstream strout();');
+    //   argInit.push(`$${index + 1} = cast<std::ostream&strout;`);
     } else {
       argDef.push(nativeType + ' argout' + (index + 1));
       argInit.push(`$${index + 1} = &argout${index + 1};`);
     }
   });
-  
+
   argDef = argDef.length > 0 ? `(${argDef.join(', ')})` : '';
 
   argInit = argInit.join('\n  ');
-  
+
   return `%typemap(in, numinputs=0) ${fullSig} ${argDef} {
-  // renderArgoutInit for ${decl.name} 
+  // renderArgoutInit for ${decl.name}
   ${argInit}
 }`;
 }
 
 function renderArgouts(decl) {
-  if (!decl.arguments) 
+  if (!decl.arguments)
     return false;
 
   var argouts = decl.origArguments.filter(arg => arg.outArg);
@@ -193,7 +203,7 @@ function renderArgouts(decl) {
   var sigArgs = argouts
     .map(arg => `${arg.decl}${arg.name}`)
     .join(', ');
-  
+
   var fullSignature = `${decl.origReturnType} ${decl.getParent().origName}::${decl.origName}(${sigArgs})`;
   fullSignature = `(${sigArgs})`;
 
@@ -220,15 +230,15 @@ features.registerRenderer('swig', 0, renderArgouts);
 // ----------------------------------------------------------------------------
 
 function renderArgoutExpectations(decl) {
-  if(!decl.arguments)
+  if (!decl.arguments)
     return false;
-  
+
   var argouts = decl.arguments.filter(arg => arg.outArg);
-  
+
   // only add to tests with multiple argouts
-  if(argouts.length < 2)
+  if (argouts.length < 2)
     return false;
-  
+
   var name = decl.parent + '.' + common.signature(decl) + 'Expectations';
 
   var src = argouts

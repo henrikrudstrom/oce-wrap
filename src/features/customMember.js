@@ -2,6 +2,8 @@ const extend = require('extend');
 const features = require('../features.js');
 const headers = require('../headers.js');
 
+// Not working, should probably be implemented in js instead of native
+
 function customMethod(decl) {
   this.pushMethod(8, () => {
     decl = extend({}, decl);

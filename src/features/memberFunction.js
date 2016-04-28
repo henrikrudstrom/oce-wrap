@@ -7,7 +7,7 @@ const testLib = require('../testLib.js');
 
 function renderArg(arg, index, indexes) {
   var res = arg.decl + ' ' + arg.name;
- 
+
   if (indexes.indexOf(index) !== -1) {
     res += '_out';
   }
@@ -21,12 +21,12 @@ function renderArg(arg, index, indexes) {
 function renderMemberFunction(decl) {
   if (decl.declType !== 'constructor' && decl.declType !== 'memfun' || decl.custom)
     return false;
-  
+
   var indexes = decl.argouts ? decl.argouts.map(argout => argout.index) : [];
 
   var args = decl.origArguments.map((arg, index) => renderArg(arg, index, indexes))
     .join(', ');
-  
+
   var stat = decl.static ? 'static ' : '';
   var cons = decl.const ? 'const ' : '';
 
@@ -49,7 +49,7 @@ function argValues(args) {
 }
 
 function renderMemberFunctionTest(calldef, parts) {
-  if (calldef.declType !== 'memfun')
+  if (calldef.declType !== 'memfun' || calldef.static === '1')
     return false;
 
   var cls = calldef.getParent();
@@ -81,7 +81,8 @@ function renderConstructorTest(calldef, parts) {
 }
 
 function renderStaticFunctionTest(calldef, parts) {
-  if (calldef.declType !== 'staticfunc' || calldef.getParent().declType !== 'class')
+  if ((calldef.declType !== 'staticfunc' && calldef.static !== '1') ||
+    calldef.getParent().declType !== 'class')
     return false;
 
   var cls = calldef.getParent();
@@ -114,20 +115,20 @@ function renderFreeFunctionTest(calldef, parts) {
 function renderTypeExpectations(decl) {
   if (decl.declType !== 'module')
     return false;
-  
+
   return {
     name: 'testHelpers.js',
     src: `\
 module.exports.expectType = function(res, type){
   if (type === 'Integer' || type === 'Double')
     return expect(typeof res).toBe('number');
-  
+
   if (type === 'Boolean')
     return expect(typeof res).toBe('boolean');
-  
+
   if(type.indexOf('.') !== -1)
     type = type.split('.')[1];
-  
+
   expect(typeof res).toBe('object');
   expect(res.constructor.name.replace('_exports_', '')).toBe(type);
 }

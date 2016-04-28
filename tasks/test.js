@@ -15,10 +15,9 @@ var oldSpecDone = reporter.specDone;
 
 reporter.specDone = function(result) {
   oldSpecDone(result);
-  
   for (var i = 0; i < result.failedExpectations.length; i++) {
     if (result.failedExpectations[i].stack === undefined) return;
-    
+
     gutil.log('\n' + result.failedExpectations[i].stack
       .split('\n')
       .filter((l) => !l.includes('node_modules'))
@@ -52,10 +51,10 @@ module.exports = function(gulp) {
 
   gulp.task('copy-spec', function() {
     return gulp.src([
-        `${settings.paths.definition}/spec/**/*.js`,
-        `${settings.paths.definition}/spec/*.js`
-      ])
-      .pipe(gulp.dest(`${settings.paths.build}/spec`));
+      `${settings.paths.definition}/spec/**/*.js`,
+      `${settings.paths.definition}/spec/*.js`
+    ])
+    .pipe(gulp.dest(`${settings.paths.build}/spec`));
   });
 
   gulp.task('just-test', ['copy-spec'], function() {
@@ -74,6 +73,13 @@ module.exports = function(gulp) {
       }));
   });
 
+// ----------------------------------------------------------------------------
+// Diff testing
+// run `gulp diff-test-init` to make a copy of the current output before you
+// make a change and render the output.
+// Afterwards run `gulp diff-test` to output the changes to
+// the config/swig/spec or cxx files
+// ----------------------------------------------------------------------------
 
   function diffTestSubpaths(more) {
     var subpaths = ['swig', 'config', 'spec'].concat(arrify(more));
@@ -88,7 +94,7 @@ module.exports = function(gulp) {
     del.sync('.diff-test-ref/**');
 
     return done();
-  })
+  });
 
   gulp.task('diff-test-init', ['diff-test-clean'], function() {
     var sources = diffTestSubpaths('src')
