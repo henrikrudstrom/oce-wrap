@@ -59,16 +59,17 @@ function processInclude(decl, parent) {
         newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
     }
   }
+
+  if(newDecl.origName === undefined)
+    newDecl.origName = decl.name;
   
-  newDecl.origName = decl.name;
-  
-  if(newDecl.returnType !== undefined)
+  if(newDecl.returnType !== undefined && newDecl.origReturnType === undefined)
     newDecl.origReturnType = decl.returnType;
   
-  if(newDecl.type !== undefined)
+  if(newDecl.type !== undefined && newDecl.origType === undefined)
     newDecl.origType = decl.type;
     
-  if(newDecl.arguments !== undefined){
+  if(newDecl.arguments !== undefined && newDecl.origArguments === undefined){
     newDecl.origArguments = extend(true, [], newDecl.arguments);
   }
   

@@ -23,8 +23,8 @@ function topoSubShapes(name, shapeType) {
   );
 
   var decl = extend(true, {}, src);
-
-  decl.arguments = [extend({}, decl.arguments[0])];
+  decl.origArguments = extend([], decl.arguments);
+  decl.arguments = [extend({}, decl.arguments[0]), extend({}, decl.arguments[2])];
   decl.name = name;
   decl.shapeType = shapeType;
   decl.key = this.key + '::' + decl.key;

@@ -25,7 +25,7 @@ function property(getter, setter, name) {
       getterSignature: common.signature(getMethod, true),
       setterSignature: common.signature(setMethod, true),
       parent: this.name, 
-      originalParent: this.name
+      origParent: this.name
     };
     this.exclude(getMethod.key);
     if (setMethod) this.exclude(setMethod.key);

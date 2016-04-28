@@ -108,6 +108,6 @@ module.exports = function(gulp) {
       base: '.diff-test-ref/'
     })
     .pipe(diff(settings.paths.build))
-    .pipe(diff.reporter({ fail: false }));
+    .pipe(diff.reporter({ fail: false, compact: true }));
   });
 };
