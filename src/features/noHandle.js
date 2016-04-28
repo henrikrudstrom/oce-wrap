@@ -1,6 +1,9 @@
 const features = require('../features.js');
 const headers = require('../headers.js');
 
+// Attaches handle to javascript proxy to prevent garbage collection
+// Typemaps all functions to accept/return the handled type instead of the handle.
+
 function noHandle(expr) {
   this.find(expr).forEach(cls => {
     if (cls.key.startsWith('Handle_')) return;
@@ -9,12 +12,13 @@ function noHandle(expr) {
     if (!headers.get(handleKey)) return;
 
     this.include(handleKey);
-    console.log(cls.name)
+
     var handle = this.get('Handle_' + cls.name);
 
     if (handle)
       handle.include('Handle_' + cls.name + '(*)');
   });
+  
   this.pushQuery(5, expr, (obj) => {
     if (obj.key.startsWith('Handle_')) return;
 
@@ -33,9 +37,10 @@ function downCastToThis(expr) {
 
 features.registerConfig(noHandle, downCastToThis);
 
+
 function renderHandleTypemaps(cls) {
   var name = cls.key;
-  if (cls.cls !== 'class' || !cls.handle)
+  if (cls.declType !== 'class' || !cls.handle)
     return false;
 
   var typemapsrc = `
@@ -55,6 +60,7 @@ function renderHandleTypemaps(cls) {
   const std::string lookup_typename = name + " *";
   swig_type_info * const outtype = SWIG_TypeQuery(lookup_typename.c_str());
   $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), outtype, $owner);
+  
   // attach handle
   Handle_${name} *handle = (Handle_${name} *)new Handle_${name}($1);
   $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_Standard_Transient));
@@ -64,11 +70,3 @@ function renderHandleTypemaps(cls) {
 }
 
 features.registerRenderer('swig', 0, renderHandleTypemaps);
-
-
-// function renderHandleExpectation(decl) {
-//   if (decl.cls !== constructor)
-//     return part
-// }
-//
-// cls.name + '.' + signature + 'Expectations'

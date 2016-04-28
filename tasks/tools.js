@@ -26,14 +26,13 @@ function classDepends(cls, type, uses) {
 }
 
 
-
 function findUsage(type){
   var uses = [];
   headers.listModules().forEach(modName => {
 
     var mod = headers.getModule(modName);
     mod.declarations
-      .filter(decl => decl.cls === 'class')
+      .filter(decl => decl.declType === 'class')
       .forEach(cls => {
         //console.log(cls.name)
         cls.declarations.forEach(d => memberDepends(d, type, uses))

@@ -10,7 +10,7 @@ features.registerConfig(depends);
 
 
 function renderDependencies(decl) {
-  if (decl.cls !== 'module' || decl.moduleDepends === undefined) return false;
+  if (decl.declType !== 'module' || decl.moduleDepends === undefined) return false;
 
   return [{
     name: 'moduleDepends',

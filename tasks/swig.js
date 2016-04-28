@@ -20,11 +20,11 @@ module.exports = function(gulp) {
       return done();
 
     const output = path.join(settings.paths.cxx, `${moduleName}_wrap.cxx`);
-
     const includes = include.join(' ');
+    
     mkdirp.sync(path.dirname(output));
+    
     const cmd = `${settings.swig} ${flags} ${otherFlags} ${includes} -o ${output} ${input}`;
-    console.log(cmd);
     exec(cmd, done);
   }
 

@@ -92,7 +92,7 @@ function requiredTypesWrapped(member) {
   modules = modules || require('./modules.js')();
 
   var unwrapped = member.arguments ? member.arguments.map(arg => arg.type) : [];
-  if (member.cls !== 'constructor')
+  if (member.declType !== 'constructor')
     unwrapped.push(member.returnType || member.type);
 
   var res = unwrapped.every(
@@ -139,11 +139,11 @@ function expectType(returnType) {
 
 
 function memberReturnType(cls, member, suiteKey) {
-  if (member.cls === 'constructor') return cls.name;
+  if (member.declType === 'constructor') return cls.name;
   modules = modules || require('./modules.js')();
   var rtype = (member.returnType || member.type);
   var type = modules.get(rtype);
-  if (type && type.cls === 'enum') return 'Integer';
+  if (type && type.declType === 'enum') return 'Integer';
   var returnType = rtype.indexOf('.') !== -1 ?
     rtype.split('.')[1] : rtype;
   if (member.downCastToThis)
@@ -173,7 +173,7 @@ function renderTest(member, testSrc, parts) {
   var disable = pendingReason ? 'x' : '';
 
 
-  if (member.cls !== 'constructor' || member.cls !== 'property') {
+  if (member.declType !== 'constructor' || member.declType !== 'property') {
     var returnType = memberReturnType(cls, member, cls.qualifiedName);
     testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   }

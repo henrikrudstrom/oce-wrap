@@ -11,16 +11,11 @@ function cleanTypeName(ret) {
 }
 
 function processType(type) {
-  // TODO: should be implemented in header_parser.py
-  type.declarations = [];
-  if (type.cls !== 'class') return type;
-
-  type.declarations = type.constructors.concat(type.members);
-  delete type.constructors;
-  delete type.members;
+  if (type.declType !== 'class') return type;
 
   type.declarations.forEach((d) => {
     if (d.returnType) {
+      // TODO: this is a hack
       d.returnTypeDecl = d.returnType;
       d.returnType = cleanTypeName(d.returnType);
     }
@@ -34,14 +29,8 @@ function loadModule(mod) {
   if (!fs.existsSync(file)) return null;
 
   var data = JSON.parse(fs.readFileSync(file));
-  data.declarations = data.typedefs
-    .concat(data.enums)
-    .concat(data.classes)
-    .map(processType);
-
-  delete data.typedefs; // TODO: should be implemented in header_parser.py
-  delete data.enums;
-  delete data.classes;
+   data.declarations
+     .map(processType);
 
   return data;
 }

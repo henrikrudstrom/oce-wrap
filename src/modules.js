@@ -5,6 +5,7 @@ const fs = require('fs');
 const glob = require('glob');
 const builtins = require('./builtinModule.js');
 
+
 function moduleQuery(mods) {
   if (typeof mods === 'string') {
     mods = glob.sync(`${mods}/*.json`).map(file =>

@@ -2,9 +2,10 @@ const features = require('../features.js');
 const common = require('../common.js');
 const testLib = require('../testLib.js');
 
+
 function property(getter, setter, name) {
   this.pushQuery(4, getter, (getMethod) => {
-    if (getMethod.cls === 'constructor') return false;
+    if (getMethod.declType === 'constructor') return false;
     if (typeof setter === 'string') {
       var setterStr = setter;
       setter = () => setterStr;
@@ -13,9 +14,9 @@ function property(getter, setter, name) {
     var propertyDecl = {
       name: name || getMethod.name.replace(/^Get/, ''),
       key: getMethod.key,
-      cls: 'property',
+      declType: 'property',
       type: getMethod.returnType,
-      originalType: getMethod.returnType,
+      origType: getMethod.returnType,
       typeDecl: getMethod.returnTypeDecl,
       getter: getMethod.name,
       getterKey: getMethod.key,
@@ -39,9 +40,9 @@ features.registerConfig(property);
 
 
 function renderProperty(decl) {
-  if (decl.cls !== 'property') return false;
+  if (decl.declType !== 'property') return false;
 
-  var args = [decl.originalParent, decl.originalType, decl.name, decl.getterSignature];
+  var args = [decl.originalParent, decl.origType, decl.name, decl.getterSignature];
   if (decl.setterKey) {
     args.push(decl.setterSignature);
   }
@@ -54,8 +55,9 @@ function renderProperty(decl) {
 
 features.registerRenderer('swig', 0, renderProperty);
 
+
 function renderPropertyTest(prop, parts) {
-  if (prop.cls !== 'property')
+  if (prop.declType !== 'property')
     return false;
 
   var cls = prop.getParent();

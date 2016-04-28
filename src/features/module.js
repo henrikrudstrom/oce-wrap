@@ -3,8 +3,9 @@ const path = require('path');
 const settings = require('../settings.js');
 const features = require('../features');
 
+
 function renderModuleJs(decl, parts) {
-  if (decl.cls !== 'module')
+  if (decl.declType !== 'module')
     return false;
 
   var reqs = '';
@@ -27,7 +28,7 @@ module.exports = mod;
 
 
 function renderModuleSwig(decl, parts) {
-  if (decl.cls !== 'module')
+  if (decl.declType !== 'module')
     return false;
 
   function includeIfExists(name) {
@@ -38,6 +39,7 @@ function renderModuleSwig(decl, parts) {
   function includeIfDefined(partName) {
     return parts.contains(partName) ? `%include "${partName}"` : '';
   }
+  
   var typemaps = decl.typemaps ? '%include "typemaps.i"' : '// no typemaps';
 
   return {
@@ -69,7 +71,7 @@ ${includeIfDefined('extends.i')}
 }
 
 function renderModuleSpec(mod, parts) {
-  if (mod.cls !== 'module')
+  if (mod.declType !== 'module')
     return false;
 
   var imports = [mod.name].concat(mod.moduleDepends || [])
@@ -85,6 +87,7 @@ describe('${mod.name}', function(){
 ${parts.get(mod.name + 'ModuleSpecs')}
 });
 `;
+  
   return {
     name: mod.name + 'AutoSpec.js',
     src

@@ -5,13 +5,13 @@ function renderHeaders(decl) {
   const modules = require('../modules.js')();
   var reader = require('../dependencies.js')(modules);
 
-  if (decl.cls !== 'module') return false;
+  if (decl.declType !== 'module') return false;
 
   var depends = decl.declarations
     .map((d) => reader.classDepends(d, { recursive: false }))
-    .concat(decl.declarations.map(d => d.originalName))
+    .concat(decl.declarations.map(d => d.origName))
     .concat(decl.declarations
-      .map(d => (d.bases ? d.bases.map(b => b.originalName) : []))
+      .map(d => (d.bases ? d.bases.map(b => b.origName) : []))
       .reduce((a, b) => a.concat(b), [])
     )
     .reduce((a, b) => a.concat(b), [])

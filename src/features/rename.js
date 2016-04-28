@@ -2,13 +2,14 @@ const features = require('../features.js');
 const common = require('../common.js');
 const camelCase = require('camel-case');
 
+
 function rename(expr, name) {
   var nameFunc = name;
   if (typeof nameFunc !== 'function')
     nameFunc = () => name;
 
   this.pushQuery(5, expr, (obj) => {
-    if (obj.cls === 'constructor') return;
+    if (obj.declType === 'constructor') return;
 
     obj.rename = true;
     obj.name = nameFunc(obj.name, obj);
@@ -18,7 +19,7 @@ function rename(expr, name) {
     if (!obj.declarations) return;
     obj.declarations.forEach((decl) => {
       decl.parent = obj.name;
-      if (decl.cls === 'constructor')
+      if (decl.declType === 'constructor')
         decl.name = obj.name;
     });
   });
@@ -37,8 +38,9 @@ function removePrefix(expr) {
 
 features.registerConfig(rename, renameCamelCase, removePrefix);
 
+
 function renderRename(decl) {
-  if (decl.cls === 'module') {
+  if (decl.declType === 'module') {
     return {
       name: 'featureIncludes',
       src: '%include "renames.i";'
@@ -46,16 +48,16 @@ function renderRename(decl) {
   }
   if (!decl.rename) return false;
 
-  if (decl.cls === 'class' || decl.cls === 'enum' || decl.cls === 'typedef')
+  if (decl.declType === 'class' || decl.declType === 'enum' || decl.declType === 'typedef')
     return {
       name: 'renames.i',
       src: `%rename("${decl.name}") ${decl.key};`
     };
-  else if (decl.cls === 'memfun' || decl.cls === 'variable') {
-    var args = decl.originalArguments.map(arg => arg.decl).join(', ');
+  else if (decl.declType === 'memfun' || decl.declType === 'variable') {
+    var args = decl.origArguments.map(arg => arg.decl).join(', ');
     return {
       name: 'renames.i',
-      src: `%rename("${decl.name}") ${decl.getParent().originalName}::${decl.originalName}(${args});`
+      src: `%rename("${decl.name}") ${decl.getParent().origName}::${decl.origName}(${args});`
     };
   }
   return false;

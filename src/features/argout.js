@@ -1,4 +1,3 @@
-const extend = require('extend');
 const camelCase = require('camel-case');
 const features = require('../features.js');
 const common = require('../common.js');
@@ -16,15 +15,15 @@ function isOutArg(arg){
 function defineArgout(mem, type) {
 
   
-  var argoutIndices = mem.originalArguments.map((a, index) => index)
-    .filter(index => isOutArg(mem.originalArguments[index]));
+  var argoutIndices = mem.origArguments.map((a, index) => index)
+    .filter(index => isOutArg(mem.origArguments[index]));
 
   if (argoutIndices.length < 1) return false;
 
   argoutIndices
     .forEach(index => {
-      mem.originalArguments[index].name = mem.originalArguments[index].name + '_out'
-      mem.originalArguments[index].outArg = true;
+      mem.origArguments[index].name = mem.origArguments[index].name + '_out';
+      mem.origArguments[index].outArg = true;
       mem.arguments[index].outArg = true;
     });
 
@@ -41,7 +40,7 @@ function argout(expr, type) {
     throw new Error('argout type must be specified');
 
   this.pushQuery(6, expr, (mem) => {
-    if (mem.cls !== 'memfun') return false;
+    if (mem.declType !== 'memfun') return false;
     defineArgout(mem, type);
     return true;
   });
@@ -122,7 +121,7 @@ function processOutArgName(name){
 }
 
 function renderObjectOutmap(decl, fullSig) {
-  var assignArgs = decl.originalArguments.filter(arg => arg.outArg)
+  var assignArgs = decl.origArguments.filter(arg => arg.outArg)
     .map((arg, index) => {
       var key = `SWIGV8_STRING_NEW("${processOutArgName(arg.name)}")`;
       var value = swigConvert(arg.decl, '$' + (index + 1));
@@ -144,7 +143,7 @@ function renderObjectOutmap(decl, fullSig) {
 }
 
 function renderSingleValueOutmap(decl, fullSig) {
-  var argouts = decl.originalArguments.filter(arg => arg.outArg);
+  var argouts = decl.origArguments.filter(arg => arg.outArg);
   
   if (argouts.length > 1)
     throw new Error('single value outmap can only be used with single arg');
@@ -160,13 +159,13 @@ ${value.statements || '\n'}\
 function renderArgoutInit(decl, fullSig){
   var argDef = [];
   var argInit = [];
-  var argouts = decl.originalArguments.filter(arg => arg.outArg);
+  var argouts = decl.origArguments.filter(arg => arg.outArg);
   
   argouts.forEach((arg, index) => {
     var nativeType = common.stripTypeQualifiers(arg.decl);
     var tm = features.getTypemap(nativeType);
     if(tm && tm.initArgout ){
-      argInit.push(`$${index + 1} = ${tm.initArgout(decl)}`)
+      argInit.push(`$${index + 1} = ${tm.initArgout(decl)}`);
     } else {
       argDef.push(nativeType + ' argout' + (index + 1));
       argInit.push(`$${index + 1} = &argout${index + 1};`);
@@ -174,7 +173,7 @@ function renderArgoutInit(decl, fullSig){
   });
   
   argDef = argDef.length > 0 ? `(${argDef.join(', ')})` : '';
-  console.log("argDef", argDef)
+
   argInit = argInit.join('\n  ');
   
   return `%typemap(in, numinputs=0) ${fullSig} ${argDef} {
@@ -187,7 +186,7 @@ function renderArgouts(decl) {
   if (!decl.arguments) 
     return false;
 
-  var argouts = decl.originalArguments.filter(arg => arg.outArg);
+  var argouts = decl.origArguments.filter(arg => arg.outArg);
   if (argouts.length < 1)
     return false;
 
@@ -195,7 +194,7 @@ function renderArgouts(decl) {
     .map(arg => `${arg.decl}${arg.name}`)
     .join(', ');
   
-  var fullSignature = `${decl.originalReturnType} ${decl.getParent().originalName}::${decl.originalName}(${sigArgs})`;
+  var fullSignature = `${decl.origReturnType} ${decl.getParent().origName}::${decl.origName}(${sigArgs})`;
   fullSignature = `(${sigArgs})`;
 
   var outMap;
@@ -206,7 +205,6 @@ function renderArgouts(decl) {
   else
     outMap = renderObjectOutmap(decl, fullSignature);
 
-  //var comment = `// typemap for ${decl.name}`;
   var inMap = renderArgoutInit(decl, fullSignature);
   return {
     name: 'typemaps.i',

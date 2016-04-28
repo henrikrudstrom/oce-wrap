@@ -66,7 +66,7 @@ function getDecl(data, name, matcher) {
   var res = find(data, name, matcher);
   if (res.length === 0) return null;
   if (res.length === 1) return res[0];
-  console.log("RES", res)
+
   throw new Error('headers.get expected one result, got multiple');
 }
 

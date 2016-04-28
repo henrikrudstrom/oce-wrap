@@ -4,11 +4,10 @@ const headers = require('../headers.js');
 
 function customMethod(decl) {
   this.pushMethod(8, () => {
-    console.log("CUSTOMMETHOD", decl, "CUSTOMMETHOD")
     decl = extend({}, decl);
 
     decl.parent = this.name;
-    //decl.cls = 'memfun';
+    decl.declType = 'memfun';
     decl.throws = true;
     decl.custom = true;
 
@@ -27,7 +26,6 @@ function topoSubShapes(name, shapeType) {
 
   decl.arguments = [extend({}, decl.arguments[0])];
   decl.name = name;
-  decl.cls = 'memfun';
   decl.shapeType = shapeType;
   decl.key = this.key + '::' + decl.key;
   decl.returnType = 'TopTools_IndexedMapOfShape';
@@ -40,7 +38,7 @@ features.registerConfig(customMethod, topoSubShapes);
 
 function renderTopoMaps(decl) {
   return `\
-%extend ${decl.getParent().originalName} {
+%extend ${decl.getParent().origName} {
   static void ${decl.name}(const TopoDS_Shape &shape, TopTools_IndexedMapOfShape& map){
     TopExp::MapShapes(shape, TopAbs_${decl.shapeType}, map);
   }

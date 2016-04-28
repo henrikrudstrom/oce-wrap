@@ -12,7 +12,7 @@ function includeAsStatic(expr, template, valueFunc) {
 
   var name = camelCase(common.removePrefix(cls.name));
   var res = cls.declarations
-    .filter(decl => decl.cls === 'constructor')
+    .filter(decl => decl.declType === 'constructor')
     .filter(decl => !decl.copyConstructor)
     .filter(decl => common.match(expr, decl.key))
     .map(cons => {
@@ -20,16 +20,16 @@ function includeAsStatic(expr, template, valueFunc) {
       return {
         name,
         key: cons.key,
-        cls: 'staticfunc',
+        declType: 'staticfunc',
         parent: this.name,
         sourceParent: this.name,
         parentKey: cls.name,
-        originCls: cls.name,
-        originalName: cls.name,
+        originDeclType: cls.name,
+        origName: cls.name,
         returnType,
         sourceReturnType: returnType,
         arguments: args,
-        originalArguments: args,
+        origArguments: args,
         depends: cls.name,
         template,
         valueFunc
@@ -54,7 +54,7 @@ var templates = {
   renderGCMake(decl, args, argNames) {
     return `%extend ${decl.sourceParent} {
   static const ${decl.sourceReturnType} ${decl.name}(${args}){
-    ${decl.originCls}* obj = new ${decl.originCls}(${argNames});
+    ${decl.origName}* obj = new ${decl.origName}(${argNames});
     return obj->${decl.valueFunc}();
   }
 }`;
@@ -62,7 +62,7 @@ var templates = {
   renderBRepBuilder(decl, args, argNames) {
     return `%inline {
   static const ${decl.sourceReturnType} ${decl.name}(${args}){
-    ${decl.originCls}* obj = new ${decl.originCls}(${argNames});
+    ${decl.origName}* obj = new ${decl.origName}(${argNames});
     if(!obj->IsDone())
       SWIG_V8_Raise("could not make edge"); // TODO check error
     return obj->${decl.valueFunc}();
@@ -72,7 +72,7 @@ var templates = {
 };
 
 function renderAsStatic(decl) {
-  if (decl.cls !== 'staticfunc') return false;
+  if (decl.declType !== 'staticfunc') return false;
   
   var args = decl.arguments.map(arg => arg.decl + ' ' + arg.name).join(', ');
   var argNames = decl.arguments.map(arg => arg.name).join(', ');

@@ -2,7 +2,6 @@ const fs = require('fs');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const arrify = require('arrify');
-
 const conf = require('./conf.js');
 const createTypeDict = require('./typedict.js');
 const features = require('./features.js');
@@ -55,7 +54,7 @@ function translateTypes(mods) {
 
     mod.declarations.map(
         (decl) => (decl.declarations ? decl.declarations : [])
-      ).concat(mod.declarations.filter(d => d.cls === 'staticfunc'))
+      ).concat(mod.declarations.filter(d => d.declType === 'staticfunc'))
       .reduce((a, b) => a.concat(b), [])
       .forEach(translateMember);
   });

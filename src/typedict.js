@@ -1,6 +1,6 @@
 const settings = require('./settings.js');
-const extend = require('extend');
 const builtins = require('./builtinModule.js');
+
 
 module.exports = function typedict(mods) {
   if (mods === undefined)

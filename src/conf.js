@@ -35,12 +35,11 @@ function Conf(decl, parent) {
     if (parent)
       this.parent = parent;
   } else {
-    this.cls = 'module';
+    this.declType = 'module';
   }
+  
   this.declarations = [];
   this.typemaps = [];
-  // include nothing by default
-
   this.stacks = [];
 }
 
@@ -49,32 +48,32 @@ function processInclude(decl, parent) {
   var newDecl;
   if (decl.declarations) {
     newDecl = new Conf(decl, parent.name);
-    newDecl.key = decl.name; //TODO: get rid of this
+    newDecl.key = decl.name; //TODO: get rid of .key
     
   } else {
     newDecl = extend(true, {}, decl);
 
     if (!decl.key) {
       newDecl.key = decl.name;
-      if (newDecl.cls === 'memfun' || newDecl.cls === 'constructor')
+      if (newDecl.declType === 'memfun' || newDecl.declType === 'constructor')
         newDecl.key = `${decl.name}(${decl.arguments.map((arg) => arg.type).join(', ')})`;
     }
   }
   
-  newDecl.originalName = decl.name;
+  newDecl.origName = decl.name;
   
   if(newDecl.returnType !== undefined)
-    newDecl.originalReturnType = decl.returnType;
+    newDecl.origReturnType = decl.returnType;
   
   if(newDecl.type !== undefined)
-    newDecl.originalType = decl.type;
+    newDecl.origType = decl.type;
     
   if(newDecl.arguments !== undefined){
-    newDecl.originalArguments = extend(true, [], newDecl.arguments);
+    newDecl.origArguments = extend(true, [], newDecl.arguments);
   }
   
   if(newDecl.bases !== undefined)
-    newDecl.bases.forEach(base => base.originalName = base.name);
+    newDecl.bases.forEach(base => base.origName = base.name);
   
   
   newDecl.getParent = () => parent;
@@ -122,7 +121,7 @@ Conf.prototype = {
     if (Array.isArray(expr)) expr.map(this.include.bind(this));
     
     if (typeof expr !== 'function')
-      if (this.cls && (this.cls === 'class' || this.cls === 'enum' || this.cls === 'typedef'))
+      if (this.declType && (this.declType === 'class' || this.declType === 'enum' || this.declType === 'typedef'))
         expr = `${this.key}::${expr}`;
     
     // query parsed headers for declaration

@@ -116,6 +116,7 @@
     "ShapeCustom_ConvertToRevolution",
     "ShapeCustom_SweptToElementary",
     "ShapeFix_WireSegment",
+    "Standard_Size",
     "Standard_AncestorIterator",
     "Standard_CLocaleSentry",
     "Standard_Failure",

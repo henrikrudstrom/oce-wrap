@@ -6,11 +6,10 @@ module.exports = function(gulp) {
   const runSequence = require('run-sequence').use(gulp);
   const run = require('gulp-run');
   const gutil = require('gulp-util');
-  console.log(__dirname)
   const settings = require('../src/settings.js');
-  const common = require('./lib/common.js');
+  //const common = require('./lib/common.js');
 
-  const parseScript = path.join(__dirname, 'python/parse_headers.py');
+  const parseScript = path.join(__dirname, 'parse_headers.py');
 
   function cacheFile(moduleName) {
     return `${settings.paths.headerCache}/${moduleName}.json`;
@@ -18,7 +17,7 @@ module.exports = function(gulp) {
 
   // Parse header for module
   settings.oce.modules.forEach(function(moduleName) {
-    gulp.task(common.moduleTask('parse-headers', moduleName), function(done) {
+    gulp.task('parse-headers:' + moduleName, function(done) {
       mkdirp.sync(settings.paths.headerCache);
       var args = [
         moduleName,
@@ -34,11 +33,11 @@ module.exports = function(gulp) {
   });
 
   function limitExecution(task, modules, done) {
+    // split module names into chunks of size n
     function split(array, n) {
       var spl = [];
       for (var i = 0; i < n; i++) {
-        var ii = i;
-        // TODO: declared function inside loop...
+        var ii = i; //bind i to this scope.
         spl.push(array.filter((e, index) => index % n === ii));
       }
 
@@ -53,7 +52,7 @@ module.exports = function(gulp) {
     }
 
     split(modules, n).forEach((mod) => {
-      runSequence.apply(this, common.moduleTask(task, mod).concat([cb]));
+      runSequence.apply(this, mod.map(m => task + ':' + m).concat([cb]));
     });
   };
 

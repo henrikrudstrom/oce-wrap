@@ -1,9 +1,6 @@
 const extend = require('extend');
 const features = require('../features');
 
-// 'hides' a type that can be directly mapped to a similar type, only implemented for types
-// that have an accessor function to the 'hidden' type. i.e gp_Vec->XYZ() etc.
-// TODO: should get a better name
 
 function typemap(native, wrapped, options) {
   if (!this.typemaps)
@@ -45,9 +42,6 @@ function withAccessor(tm) {
 }
 
 function withConstructor(tm) {
-  var deref = '*'
-  if(tm.native === 'gp_XYZ')
-    deref = '*';
   return (nativeObj, wrappedObj) => {
     var arg = `(new ${tm.wrapped}((const ${tm.native} &) ${nativeObj}))`;
     var obj = `SWIG_NewPointerObj(${arg}, SWIGTYPE_p_${tm.wrapped}, SWIG_POINTER_OWN |  0);`;

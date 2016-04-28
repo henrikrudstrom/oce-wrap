@@ -65,6 +65,7 @@ module.exports = function(gulp) {
     ].concat(mod.extraIncludes || []);
 
     var shadow = mod.shadowed ? '_' : '';
+
     return {
       target_name: shadow + mod.name,
       sources,

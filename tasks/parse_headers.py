@@ -38,14 +38,14 @@ def parse_files(path, files):
         args['xml_generator_path'] =xml_generator_path
 
     xml_generator_config = parser.xml_generator_configuration_t(**args)
-
+    
+    # not sure this actually does anything when compilation_mode is set to "ALL_AT_ONCE"
     def cache_file(filename):
         return parser.file_configuration_t(
             data=filename,
             content_type=parser.CONTENT_TYPE.CACHED_SOURCE_FILE,
             cached_source_file=filename.replace(path, "tmp/xml")+".xml")
     cached_files = [cache_file(f) for f in files]
-
 
     project_reader = parser.project_reader_t(xml_generator_config)
     decls = project_reader.read_files(
@@ -161,7 +161,7 @@ def w_member_function(cd, parent):
 
 def w_constructor(cc, parent):
     member = w_member_function(cc, parent)
-    member['cls']="constructor"
+    member['declType']="constructor"
     add_if(member, cc.is_copy_constructor, "copyConstructor")
     #member["trivialConstructor"] = cc.is_trivial_constructor
     return member

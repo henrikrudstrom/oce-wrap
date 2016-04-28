@@ -19,12 +19,12 @@ function renderArg(arg, index, indexes) {
 }
 
 function renderMemberFunction(decl) {
-  if (decl.cls !== 'constructor' && decl.cls !== 'memfun' || decl.custom)
+  if (decl.declType !== 'constructor' && decl.declType !== 'memfun' || decl.custom)
     return false;
   
   var indexes = decl.argouts ? decl.argouts.map(argout => argout.index) : [];
 
-  var args = decl.originalArguments.map((arg, index) => renderArg(arg, index, indexes))
+  var args = decl.origArguments.map((arg, index) => renderArg(arg, index, indexes))
     .join(', ');
   
   var stat = decl.static ? 'static ' : '';
@@ -33,8 +33,8 @@ function renderMemberFunction(decl) {
   return {
     name: decl.parent + 'MemberFunctions',
     src: `
-    %feature("compactdefaultargs") ${decl.originalName};
-    ${stat}${cons}${decl.originalReturnType + ' '}${decl.originalName}(${args});`
+    %feature("compactdefaultargs") ${decl.origName};
+    ${stat}${cons}${decl.origReturnType + ' '}${decl.origName}(${args});`
   };
 }
 
@@ -49,7 +49,7 @@ function argValues(args) {
 }
 
 function renderMemberFunctionTest(calldef, parts) {
-  if (calldef.cls !== 'memfun')
+  if (calldef.declType !== 'memfun')
     return false;
 
   var cls = calldef.getParent();
@@ -65,7 +65,7 @@ function renderMemberFunctionTest(calldef, parts) {
 }
 
 function renderConstructorTest(calldef, parts) {
-  if (calldef.cls !== 'constructor')
+  if (calldef.declType !== 'constructor')
     return false;
 
   var cls = calldef.getParent();
@@ -81,7 +81,7 @@ function renderConstructorTest(calldef, parts) {
 }
 
 function renderStaticFunctionTest(calldef, parts) {
-  if (calldef.cls !== 'staticfunc' || calldef.getParent().cls !== 'class')
+  if (calldef.declType !== 'staticfunc' || calldef.getParent().declType !== 'class')
     return false;
 
   var cls = calldef.getParent();
@@ -97,7 +97,7 @@ function renderStaticFunctionTest(calldef, parts) {
 }
 
 function renderFreeFunctionTest(calldef, parts) {
-  if (calldef.cls !== 'staticfunc' || calldef.getParent().cls !== 'module')
+  if (calldef.declType !== 'staticfunc' || calldef.getParent().declType !== 'module')
     return false;
 
   var mod = calldef.getParent();
@@ -112,7 +112,7 @@ function renderFreeFunctionTest(calldef, parts) {
 }
 
 function renderTypeExpectations(decl) {
-  if (decl.cls !== 'module')
+  if (decl.declType !== 'module')
     return false;
   
   return {
