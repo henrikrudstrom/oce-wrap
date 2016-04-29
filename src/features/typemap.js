@@ -59,13 +59,6 @@ function renderTypemap(tm) {
   var native = tm.native;
   var convert = features.getTypemapConverter(tm.native);
 
-  var freearg = '';
-  if (tm.freearg) {
-    freearg = `%typemap(freearg) ${native} & {
-      ${tm.freearg};
-  }`;
-  }
-
   return `
 #include <${native}.hxx>
 %typemap(in) const ${native} &{
@@ -76,8 +69,6 @@ function renderTypemap(tm) {
   //typemap outmap
   ${convert.toWrapped('$1', '$result')}
 }
-
-${freearg}
 `;
 }
 

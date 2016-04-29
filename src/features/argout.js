@@ -81,8 +81,6 @@ features.registerConfig(argout, defaultArgouts, /* argoutArray,*/ argoutObject);
 // ----------------------------------------------------------------------------
 
 function swigConvert(type, arg) {
-  type = common.stripTypeQualifiers(type);
-
   if (type.indexOf('Standard_Real') !== -1)
     return { expr: `SWIGV8_NUMBER_NEW(*${arg})` };
   if (type.indexOf('Standard_Boolean') !== -1)
@@ -125,9 +123,6 @@ function swigConvert(type, arg) {
 
 function processOutArgName(name) {
   name = name.replace('_out', '');
-
-
-
   return camelCase(name);
 }
 
@@ -135,7 +130,7 @@ function renderObjectOutmap(decl, fullSig) {
   var assignArgs = decl.origArguments.filter(arg => arg.outArg)
     .map((arg, index) => {
       var key = `SWIGV8_STRING_NEW("${processOutArgName(arg.name)}")`;
-      var value = swigConvert(arg.decl, '$' + (index + 1));
+      var value = swigConvert(arg.type, '$' + (index + 1));
 
       var res = `obj->Set(${key}, ${value.expr});`;
 
@@ -159,7 +154,7 @@ function renderSingleValueOutmap(decl, fullSig) {
   if (argouts.length > 1)
     throw new Error('single value outmap can only be used with single arg');
 
-  var value = swigConvert(argouts[0].decl, '$1');
+  var value = swigConvert(argouts[0].type, '$1');
 
   return `%typemap(argout) ${fullSig} {// renderSingleValueOutmap for ${decl.name}\n
 ${value.statements || '\n'}\
@@ -222,9 +217,27 @@ function renderArgouts(decl) {
     outMap = renderObjectOutmap(decl, fullSignature);
 
   var inMap = renderArgoutInit(decl, fullSignature);
+  
+  var freeargs = argouts.map((arg, index) => {
+    var typemap = features.getTypemap(arg.type);
+    
+    if (!typemap || !typemap.freearg)
+      return null;
+
+    return typemap.freearg('$'+(index + 1));
+  })
+  .filter(freearg => freearg !== null);
+  
+  var freeargsMap = '';
+  if(freeargs.length > 0){
+    freeargsMap = `\n%typemap(newfree) (${sigArgs}) {\n ${freeargs.join('\n  ')}\n}`;
+  }
+    
+  
+  
   return {
     name: 'typemaps.i',
-    src: [inMap, outMap].join('\n')
+    src: [inMap, outMap].join('\n') + freeargsMap
   };
 }
 
