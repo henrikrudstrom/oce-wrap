@@ -5,6 +5,7 @@ var modules; // intialized on demand;
 const glob = require('glob');
 const fs = require('fs');
 const path = require('path');
+const yargs = require('yargs');
 
 
 // Parse specs in module folder to remove tests that are manually defined
@@ -178,11 +179,10 @@ function renderTest(member, testSrc, parts) {
     testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   }
   testSrc += parts.get(cls.name + '.' + signature + 'Expectations');
-
+  var consolelog = yargs.argv.logspec ? `    console.log('${signature}')\n` : '';
   var src = `\n${comment}
   ${disable}it('${signature}', function(){
-  console.log('${signature}')
-${testSrc}
+${consolelog}${testSrc}
   });`;
 
   resetNumbers();

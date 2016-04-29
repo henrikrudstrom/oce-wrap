@@ -48,7 +48,7 @@ module.exports = function(gulp) {
     
   	return gulp.src(specSource, {read: false})
   		// gulp-mocha needs filepaths so you can't have any plugins before it 
-  		.pipe(mocha({reporter: 'nyan', timeout: 10000})
+  		.pipe(mocha({reporter: 'spec', timeout: 10000})
   	);
   });
 // ----------------------------------------------------------------------------
