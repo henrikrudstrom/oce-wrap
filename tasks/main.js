@@ -1,3 +1,5 @@
+var path = require('path');
+var gulpif = require('gulp-if');
 var settings = require('../src/settings.js');
 
 
@@ -45,27 +47,32 @@ module.exports = function(gulp) {
   gulp.task('all', function(done) {
     runSequence('init', 'render', 'build', 'dist', 'test', done);
   });
+  
+  
+  function copy(src, ext, dest, flat){
+    var destPath = path.join(settings.paths.build, dest);
+    var basePath = path.join(settings.paths.definition, src);
+    var srcPath = path.join(basePath, '**', '*' + ext);
+    
+    return gulp.src(srcPath, { base: basePath })
+      .pipe(gulpif(flat, rename({ dirname: ''})))
+      .pipe(gulp.dest(destPath));
+  }
+  
   gulp.task('copy-swig', function() {
-    return gulp.src(`${settings.paths.definition}/modules/**/*.i`, {
-      base: `${settings.paths.definition}/modules/`
-    }).pipe(gulp.dest(settings.paths.swig));
+    return copy('modules', '.i', 'swig');
   });
 
   gulp.task('copy-sources', function() {
-    return gulp.src(`${settings.paths.definition}/modules/**/*.c*`)
-      .pipe(rename({ dirname: '' }))
-      .pipe(gulp.dest(settings.paths.cxx));
+    return copy('modules', '.c*', 'src', true);
   });
+  
   gulp.task('copy-headers', function() {
-    return gulp.src(`${settings.paths.definition}/modules/**/*.h*`)
-      .pipe(rename({ dirname: '' }))
-      .pipe(gulp.dest(settings.paths.inc));
+    return copy('modules', '.h*', 'inc', true);
   });
 
   gulp.task('copy-js', function() {
-    return gulp.src(`${settings.paths.definition}/modules/*/*.js`)
-      .pipe(rename({ dirname: '' }))
-      .pipe(gulp.dest(`${settings.paths.build}/lib`));
+    return copy('modules', '.js', 'lib', true);
   });
 
   gulp.task('copy', function(done) {
