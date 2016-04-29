@@ -70,7 +70,6 @@ function indexableToArray(tm) {
     `\
   v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
   for(int i = 1; i <= ${nativeObj}->${tm.getSize}(); i++){
-    std::cout << "index" << i << "buckets" << ${nativeObj}->${tm.getSize}();
     array->Set(i-1, ${swigValue(tm.elemType, nativeObj + '->' + tm.getElem + '(i)')});
   }
   ${wrappedObj} = array;`;
