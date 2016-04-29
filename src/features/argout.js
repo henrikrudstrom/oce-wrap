@@ -12,6 +12,12 @@ function isOutArg(arg) {
     arg.decl.indexOf('const') === -1;
 }
 
+function argoutName(name){
+  if (name.indexOf('the') !== -1 && name.length > 3)
+    name = name.replace('the', '');
+  return name;
+}
+
 function defineArgout(mem, type) {
   var argoutIndices = mem.origArguments.map((a, index) => index)
     .filter(index => isOutArg(mem.origArguments[index]));
@@ -20,9 +26,10 @@ function defineArgout(mem, type) {
 
   argoutIndices
     .forEach(index => {
-      mem.origArguments[index].name = mem.origArguments[index].name + '_out';
+      mem.origArguments[index].name = argoutName(mem.origArguments[index].name) + '_out';
       mem.origArguments[index].outArg = true;
       mem.arguments[index].outArg = true;
+      mem.arguments[index].name = argoutName(mem.arguments[index].name);
     });
 
   if (argoutIndices.length > 1)
@@ -119,8 +126,7 @@ function swigConvert(type, arg) {
 function processOutArgName(name) {
   name = name.replace('_out', '');
 
-  if (name.indexOf('the') !== -1 && name.length > 3)
-    name = name.replace('the', '');
+
 
   return camelCase(name);
 }

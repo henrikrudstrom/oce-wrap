@@ -65,9 +65,10 @@ function renderPropertyTest(prop, parts) {
   var value = testLib.createValue(prop.type);
   var src = `\
     var obj = create.${cls.parent}.${cls.name}();
-    obj.${prop.name} = ${value};
+    var value = ${value};
+    obj.${prop.name} = value;
     var res = obj.${prop.name};
-    expect(obj.${prop.name}).toBe(${value});`;
+    expect(obj.${prop.name}).to.equal(value);`;
   return {
     name: cls.name + 'MemberSpecs',
     src: testLib.renderTest(prop, src, parts)

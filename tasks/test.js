@@ -57,22 +57,40 @@ module.exports = function(gulp) {
     .pipe(gulp.dest(`${settings.paths.build}/spec`));
   });
 
-  gulp.task('just-test', ['copy-spec'], function() {
-    var specSource = `${settings.paths.build}/spec/`;
-    var arg = yargs.argv.spec;
-    if (arg)
-      specSource += yargs.argv.spec + 'Spec.js';
-    else
-      specSource += '**/*Spec.js';
+  // gulp.task('just-test', ['copy-spec'], function() {
+  //   var specSource = `${settings.paths.build}/spec/`;
+  //   var arg = yargs.argv.spec;
+  //   if (arg)
+  //     specSource += yargs.argv.spec + 'Spec.js';
+  //   else
+  //     specSource += '**/*Spec.js';
 
-    gulp.src(specSource)
-      .pipe(jasmine({
-        verbose: yargs.argv.verbose,
-        includeStackTrace: yargs.argv.verbose,
-        reporter
-      }));
+  //   gulp.src(specSource)
+  //     .pipe(jasmine({
+  //       verbose: yargs.argv.verbose,
+  //       includeStackTrace: yargs.argv.verbose,
+  //       reporter
+  //     }));
+  // });
+
+
+
+//var gulp = require('gulp');
+var mocha = require('gulp-mocha');
+ 
+  gulp.task('just-test', ['copy-spec'], function () {
+      var specSource = `${settings.paths.build}/spec/`;
+      var arg = yargs.argv.spec;
+      if (arg)
+        specSource += yargs.argv.spec + 'Spec.js';
+      else
+        specSource += '**/*Spec.js';
+    
+  	return gulp.src(specSource, {read: false})
+  		// gulp-mocha needs filepaths so you can't have any plugins before it 
+  		.pipe(mocha({reporter: 'spec', timeout: 10000})
+  	);
   });
-
 // ----------------------------------------------------------------------------
 // Diff testing
 // run `gulp diff-test-init` to make a copy of the current output before you

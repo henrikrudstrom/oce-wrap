@@ -33,13 +33,14 @@ function renderClassSuite(cls, parts) {
     return false;
 
   var imports = [cls.parent].concat(cls.moduleDepends || [])
-    .map(mod => (`var ${mod} = require('../../lib/${mod}.js');`))
+    .map(mod => (`const ${mod} = require('../../lib/${mod}.js');`))
     .join('\n');
 
   var src = `\
 ${imports}
-var create = require('../create.js');
-var helpers = require('./testHelpers.js');
+const create = require('../create.js');
+const helpers = require('../testHelpers.js');
+const expect = require('chai').expect;
 describe('${cls.parent}.${cls.name}', function(){
 ${parts.get(cls.name + 'MemberSpecs')}
 });
