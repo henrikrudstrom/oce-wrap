@@ -7,27 +7,8 @@ const diff = require('gulp-diff');
 const arrify = require('arrify');
 const glob = require('glob');
 const run = require('gulp-run');
-const jasmine = require('gulp-jasmine');
+const mocha = require('gulp-mocha');
 
-var Reporter = require('jasmine-terminal-reporter');
-var reporter = new Reporter({ isVerbose: yargs.argv.verbose });
-var oldSpecDone = reporter.specDone;
-
-reporter.specDone = function(result) {
-  oldSpecDone(result);
-  for (var i = 0; i < result.failedExpectations.length; i++) {
-    if (result.failedExpectations[i].stack === undefined) return;
-
-    gutil.log('\n' + result.failedExpectations[i].stack
-      .split('\n')
-      .filter((l) => !l.includes('node_modules'))
-      .join('\n')
-    );
-  }
-};
-
-
-module.exports.reporter = reporter;
 module.exports = function(gulp) {
   const render = require('../src/render.js');
   const settings = require('../src/settings.js');
@@ -56,27 +37,6 @@ module.exports = function(gulp) {
     ])
     .pipe(gulp.dest(`${settings.paths.build}/spec`));
   });
-
-  // gulp.task('just-test', ['copy-spec'], function() {
-  //   var specSource = `${settings.paths.build}/spec/`;
-  //   var arg = yargs.argv.spec;
-  //   if (arg)
-  //     specSource += yargs.argv.spec + 'Spec.js';
-  //   else
-  //     specSource += '**/*Spec.js';
-
-  //   gulp.src(specSource)
-  //     .pipe(jasmine({
-  //       verbose: yargs.argv.verbose,
-  //       includeStackTrace: yargs.argv.verbose,
-  //       reporter
-  //     }));
-  // });
-
-
-
-//var gulp = require('gulp');
-var mocha = require('gulp-mocha');
  
   gulp.task('just-test', ['copy-spec'], function () {
       var specSource = `${settings.paths.build}/spec/`;
@@ -88,7 +48,7 @@ var mocha = require('gulp-mocha');
     
   	return gulp.src(specSource, {read: false})
   		// gulp-mocha needs filepaths so you can't have any plugins before it 
-  		.pipe(mocha({reporter: 'spec', timeout: 10000})
+  		.pipe(mocha({reporter: 'nyan', timeout: 10000})
   	);
   });
 // ----------------------------------------------------------------------------
