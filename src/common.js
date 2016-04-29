@@ -20,6 +20,9 @@ function keyMatcher(exp, matchValue, wrapped) {
     matchValue = true;
 
   return function(obj) {
+    // HACK: obj should be undefined here
+    if(obj === undefined) return false;
+
     var key = obj.key;
     if (wrapped !== undefined) {
       key = obj.name;
@@ -87,8 +90,9 @@ function stripTypeQualifiers(typeDecl) {
   typeDecl = replaceAll(typeDecl, '&', '');
   typeDecl = replaceAll(typeDecl, '*', '');
   typeDecl = replaceAll(typeDecl, 'const', '');
-  return replaceAll(typeDecl, ' ', '')
+  return replaceAll(typeDecl, ' ', '');
 }
+
 
 module.exports = {
   match,

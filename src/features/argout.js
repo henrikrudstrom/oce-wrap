@@ -45,7 +45,7 @@ function argout(expr, type) {
     throw new Error('argout type must be specified');
 
   this.pushQuery(9, expr, (mem) => {
-    if (mem.declType !== 'memfun') return false;
+    //if (mem.declType !== 'memfun') return false;
     defineArgout(mem, type);
     return true;
   });

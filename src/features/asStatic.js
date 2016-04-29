@@ -9,7 +9,7 @@ function includeAsStatic(expr, template, valueFunc) {
   var clsName = expr.split('(')[0];
   var cls = headers.get(clsName);
   var returnType = cls.declarations.find(decl => decl.name === valueFunc).returnType;
-
+  //console.log(cls.name, cls.declarations)
   var name = camelCase(common.removePrefix(cls.name));
   var res = cls.declarations
     .filter(decl => decl.declType === 'constructor')
