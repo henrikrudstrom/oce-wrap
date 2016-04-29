@@ -2,6 +2,8 @@ const extend = require('extend');
 const features = require('../features.js');
 const headers = require('../headers.js');
 
+// Not working, should probably be implemented in js instead of native
+
 function customMethod(decl) {
   this.pushMethod(8, () => {
     decl = extend({}, decl);
@@ -23,8 +25,8 @@ function topoSubShapes(name, shapeType) {
   );
 
   var decl = extend(true, {}, src);
-
-  decl.arguments = [extend({}, decl.arguments[0])];
+  decl.origArguments = extend([], decl.arguments);
+  decl.arguments = [extend({}, decl.arguments[0]), extend({}, decl.arguments[2])];
   decl.name = name;
   decl.shapeType = shapeType;
   decl.key = this.key + '::' + decl.key;

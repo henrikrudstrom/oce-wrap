@@ -7,28 +7,8 @@ const diff = require('gulp-diff');
 const arrify = require('arrify');
 const glob = require('glob');
 const run = require('gulp-run');
-const jasmine = require('gulp-jasmine');
+const mocha = require('gulp-mocha');
 
-var Reporter = require('jasmine-terminal-reporter');
-var reporter = new Reporter({ isVerbose: yargs.argv.verbose });
-var oldSpecDone = reporter.specDone;
-
-reporter.specDone = function(result) {
-  oldSpecDone(result);
-  
-  for (var i = 0; i < result.failedExpectations.length; i++) {
-    if (result.failedExpectations[i].stack === undefined) return;
-    
-    gutil.log('\n' + result.failedExpectations[i].stack
-      .split('\n')
-      .filter((l) => !l.includes('node_modules'))
-      .join('\n')
-    );
-  }
-};
-
-
-module.exports.reporter = reporter;
 module.exports = function(gulp) {
   const render = require('../src/render.js');
   const settings = require('../src/settings.js');
@@ -52,28 +32,32 @@ module.exports = function(gulp) {
 
   gulp.task('copy-spec', function() {
     return gulp.src([
-        `${settings.paths.definition}/spec/**/*.js`,
-        `${settings.paths.definition}/spec/*.js`
-      ])
-      .pipe(gulp.dest(`${settings.paths.build}/spec`));
+      `${settings.paths.definition}/spec/**/*.js`,
+      `${settings.paths.definition}/spec/*.js`
+    ])
+    .pipe(gulp.dest(`${settings.paths.build}/spec`));
   });
-
-  gulp.task('just-test', ['copy-spec'], function() {
-    var specSource = `${settings.paths.build}/spec/`;
-    var arg = yargs.argv.spec;
-    if (arg)
-      specSource += yargs.argv.spec + 'Spec.js';
-    else
-      specSource += '**/*Spec.js';
-
-    gulp.src(specSource)
-      .pipe(jasmine({
-        verbose: yargs.argv.verbose,
-        includeStackTrace: yargs.argv.verbose,
-        reporter
-      }));
+ 
+  gulp.task('just-test', ['copy-spec'], function () {
+      var specSource = `${settings.paths.build}/spec/`;
+      var arg = yargs.argv.spec;
+      if (arg)
+        specSource += yargs.argv.spec + 'Spec.js';
+      else
+        specSource += '**/*Spec.js';
+    
+  	return gulp.src(specSource, {read: false})
+  		// gulp-mocha needs filepaths so you can't have any plugins before it 
+  		.pipe(mocha({reporter: 'spec', timeout: 10000})
+  	);
   });
-
+// ----------------------------------------------------------------------------
+// Diff testing
+// run `gulp diff-test-init` to make a copy of the current output before you
+// make a change and render the output.
+// Afterwards run `gulp diff-test` to output the changes to
+// the config/swig/spec or cxx files
+// ----------------------------------------------------------------------------
 
   function diffTestSubpaths(more) {
     var subpaths = ['swig', 'config', 'spec'].concat(arrify(more));
@@ -88,7 +72,7 @@ module.exports = function(gulp) {
     del.sync('.diff-test-ref/**');
 
     return done();
-  })
+  });
 
   gulp.task('diff-test-init', ['diff-test-clean'], function() {
     var sources = diffTestSubpaths('src')
@@ -108,6 +92,6 @@ module.exports = function(gulp) {
       base: '.diff-test-ref/'
     })
     .pipe(diff(settings.paths.build))
-    .pipe(diff.reporter({ fail: false }));
+    .pipe(diff.reporter({ fail: false, compact: true }));
   });
 };

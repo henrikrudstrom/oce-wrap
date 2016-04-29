@@ -5,6 +5,7 @@ var modules; // intialized on demand;
 const glob = require('glob');
 const fs = require('fs');
 const path = require('path');
+const yargs = require('yargs');
 
 
 // Parse specs in module folder to remove tests that are manually defined
@@ -71,7 +72,7 @@ function double() {
 
 function bool() {
   next += 1;
-  return !Math.round(next) % 2;
+  return Boolean(!Math.round(next) % 2);
 }
 
 function resetNumbers() {
@@ -127,9 +128,9 @@ function pending(qualifiedClsName, member) {
 
 function expectType(returnType) {
   if (returnType === 'Integer' || returnType === 'Double')
-    return ['expect(typeof res).toBe(\'number\');'];
+    return ['expect(typeof res).to.equal(\'number\');'];
   else if (returnType === 'Boolean')
-    return ['expect(typeof res).toBe(\'boolean\');'];
+    return ['expect(typeof res).to.equal(\'boolean\');'];
   else if (returnType !== 'void')
     return [
       `helpers.expectType(res, '${returnType}');`
@@ -178,11 +179,10 @@ function renderTest(member, testSrc, parts) {
     testSrc += expectType(returnType).map(l => '\n    ' + l).join('');
   }
   testSrc += parts.get(cls.name + '.' + signature + 'Expectations');
-
+  var consolelog = yargs.argv.logspec ? `    console.log('${signature}')\n` : '';
   var src = `\n${comment}
   ${disable}it('${signature}', function(){
-  console.log('${signature}')
-${testSrc}
+${consolelog}${testSrc}
   });`;
 
   resetNumbers();

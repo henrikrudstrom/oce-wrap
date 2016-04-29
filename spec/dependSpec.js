@@ -1,30 +1,20 @@
-const settings = require('../src/settings.js');
-settings.initialize({
-  paths: {
-    build: 'spec/test-proj/build',
-    dist: 'spec/test-proj/dist',
-    definition: 'spec/test-proj/def'
-  }
-});
-//require('../src/settings.js').initialize;
-var headers = require('../src/headers.js');
+const expect = require('chai').expect;
 
-require('../src/features/rename.js');
+const settings = require('../src/settings.js');
+settings.initialize();
+
+var headers = require('../src/headers.js');
 const conf = require('../src/conf.js');
 const configure = require('../src/configure.js');
+const moduleReader = require('../src/modules.js');
+const depend = require('../src/dependencies.js');
 
-const render = require('../src/render.js');
-var moduleReader = require('../src/modules.js');
-var depend = require('../src/dependencies.js');
 
 describe('classDepends', function() {
   beforeEach(function() {
     var mod1 = new conf.Conf();
     mod1.name = 'gp';
     mod1.include('gp_*');
-    // mod1.include('Standard_Real');
-    // mod1.include('Standard_Integer');
-    // mod1.include('Standard_Boolean');
     mod1.find('gp_*').include('*');
     mod1.removePrefix('*');
     mod1.process();
@@ -41,7 +31,7 @@ describe('classDepends', function() {
     ];
     res.sort();
     deps.sort();
-    expect(deps).toEqual(res);
+    expect(deps).to.eql(res);
   });
 
   it('can process wrapped dependencies', function() {
@@ -55,21 +45,9 @@ describe('classDepends', function() {
     ];
     res.sort();
     deps.sort();
-    expect(deps).toEqual(res);
+    expect(deps).to.eql(res);
   });
-  it('can process source dependencies', function() {
-    var modules = moduleReader([this.mod]);
-    var pnt = modules.get('gp.Pnt');
-    var reader = depend(modules);
-    var deps = reader.classDepends(pnt, { source: true });
-    var res = [
-      'gp_XYZ', 'Standard_Real', 'Standard_Integer',
-      'Standard_Boolean', 'gp_Ax1', 'gp_Ax2', 'gp_Trsf', 'gp_Vec'
-    ];
-    res.sort();
-    deps.sort();
-    expect(deps).toEqual(res);
-  });
+
   it('can process recursive wrapped dependencies', function() {
     var modules = moduleReader([this.mod]);
     var pnt = modules.get('gp.Pnt');
@@ -83,7 +61,7 @@ describe('classDepends', function() {
     ];
     res.sort();
     deps.sort();
-    expect(deps).toEqual(res);
+    expect(deps).to.eql(res);
   });
   xit('can process recursive wrapped source dependencies', function() {
     var modules = moduleReader([this.mod]);
@@ -98,7 +76,7 @@ describe('classDepends', function() {
     ];
     res.sort();
     deps.sort();
-    expect(deps).toEqual(res);
+    expect(deps).to.eql(res);
   });
   it('can process recursive dependencies', function() {
     var reader = depend(headers);
@@ -115,7 +93,7 @@ describe('classDepends', function() {
 
     res.sort();
     deps.sort();
-    expect(deps).toEqual(res);
+    expect(deps).to.eql(res);
   });
   it('can process recursive dependencies', function() {
     var reader = depend(headers);
@@ -132,6 +110,6 @@ describe('classDepends', function() {
 
     res.sort();
     deps.sort();
-    expect(deps).toEqual(res);
+    expect(deps).to.eql(res);
   });
 });

@@ -32,7 +32,11 @@ function typemapArray1Of(native, wrapped, elemType) {
     getSize: 'Length',
     getElem: 'Value',
     setElem: 'SetValue',
-    initArgout: decl => `new ${native}(1,arg1->${decl.getParent().lengthProperty});`
+    
+    // TODO: not sure these are stored in the config file, might only work when 
+    // configure and render is run in the same session
+    initArgout: decl => `new ${native}(1,arg1->${decl.getParent().lengthProperty});`,
+    freearg: arg => `${arg}->Destroy();`
   });
 }
 
@@ -70,7 +74,6 @@ function indexableToArray(tm) {
     `\
   v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
   for(int i = 1; i <= ${nativeObj}->${tm.getSize}(); i++){
-    std::cout << "index" << i << "buckets" << ${nativeObj}->${tm.getSize}();
     array->Set(i-1, ${swigValue(tm.elemType, nativeObj + '->' + tm.getElem + '(i)')});
   }
   ${wrappedObj} = array;`;
