@@ -20,6 +20,8 @@ module.exports = function(gulp) {
   const paths = settings.paths;
   var reader = depend();
   const hashPath = path.join(settings.paths.build, 'build', 'hash');
+  
+  var debugBuild = yargs.argv.debugBuild;
 
   function moduleSources(mod) {
     var sources = [];
@@ -103,8 +105,10 @@ module.exports = function(gulp) {
     }
 
     fs.writeFileSync(`${settings.paths.build}/binding.gyp`, JSON.stringify(config, null, 2));
-
-    return run('node-gyp configure', {
+    var flags = ''
+    if(debugBuild)
+      flags += ' --debug'
+    return run('node-gyp configure' + flags, {
       cwd: settings.paths.build,
       verbosity: 0
     }).exec(done);
@@ -115,7 +119,12 @@ module.exports = function(gulp) {
     if (!fs.existsSync(`${settings.paths.build}/binding.gyp`))
       return done();
     const options = { cwd: paths.build, maxBuffer: 500 * 1024 };
-    return exec('node-gyp build --jobs 4', options, (error, stdout, stderr) => {
+    
+    var flags = ' --jobs 4';
+    if(debugBuild)
+      flags += ' --debug';
+    
+    return exec('node-gyp build' + flags, options, (error, stdout, stderr) => {
       process.stdout.write(stdout);
       if (error) {
         process.stdout.write(stderr);
@@ -127,7 +136,7 @@ module.exports = function(gulp) {
   });
 
   gulp.task('copy-gyp', function() {
-    return gulp.src(`${settings.paths.build}/build/Release/*.node`)
+    return gulp.src(`${settings.paths.build}/build/Debug/*.node`)
       .pipe(rename({ dirname: '' }))
       .pipe(gulp.dest(`${settings.paths.build}/lib/`));
   });
