@@ -69,7 +69,7 @@ function getTypemapConverter(native){
   if(!typemap) return null;
   return {
     toNative:  convertToNative[typemap.toNative](typemap),
-    toWrapped:  convertToWrapped[typemap.toWrapped](typemap), 
+    toWrapped:  convertToWrapped[typemap.toWrapped](typemap),
     initializer: argoutInitializers[typemap.toNative]
   }
   

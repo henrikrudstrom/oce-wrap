@@ -12,7 +12,7 @@ function isOutArg(arg) {
     arg.decl.indexOf('const') === -1;
 }
 
-function argoutName(name){
+function argoutName(name) {
   if (name.indexOf('the') !== -1 && name.length > 3)
     name = name.replace('the', '');
   return name;
@@ -97,12 +97,14 @@ function swigConvert(type, arg) {
 
   var typemap = features.getTypemapConverter(type);
   if (typemap === null) {
+    // create default swig pointer
     var castedArg = `(new ${type}((const ${type})*${arg})`;
     return {
       expr: `SWIG_NewPointerObj(${castedArg}), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`
     };
   }
   return {
+    // use typemap convertion template
     expr: 'value',
     statements: 'v8::Handle<v8::Value> value;\n  ' + typemap.toWrapped(arg, 'value', '$1') + '\n'
   };
@@ -217,24 +219,24 @@ function renderArgouts(decl) {
     outMap = renderObjectOutmap(decl, fullSignature);
 
   var inMap = renderArgoutInit(decl, fullSignature);
-  
+
   var freeargs = argouts.map((arg, index) => {
     var typemap = features.getTypemap(arg.type);
-    
+
     if (!typemap || !typemap.freearg)
       return null;
 
     return typemap.freearg('$'+(index + 1));
   })
   .filter(freearg => freearg !== null);
-  
+
   var freeargsMap = '';
   if(freeargs.length > 0){
     freeargsMap = `\n%typemap(newfree) (${sigArgs}) {\n ${freeargs.join('\n  ')}\n}`;
   }
-    
-  
-  
+
+
+
   return {
     name: 'typemaps.i',
     src: [inMap, outMap].join('\n') + freeargsMap

@@ -22,6 +22,9 @@ function gpTypemap(native, wrapped, getter) {
   });
 }
 
+
+
+
 features.registerConfig(typemap);
 features.registerConfig(gpTypemap);
 
