@@ -37,7 +37,7 @@ module.exports = function(gulp) {
     function split(array, n) {
       var spl = [];
       for (var i = 0; i < n; i++) {
-        var ii = i; //bind i to this scope.
+        var ii = i; // bind i to this scope.
         spl.push(array.filter((e, index) => index % n === ii));
       }
 
@@ -54,13 +54,13 @@ module.exports = function(gulp) {
     split(modules, n).forEach((mod) => {
       runSequence.apply(this, mod.map(m => task + ':' + m).concat([cb]));
     });
-  };
+  }
 
   // Parse all headers
   gulp.task('parse-headers', function(done) {
     // only parse missing modules, or if forced.
     var parseModules = settings.oce.modules.filter(
-      (mod) => !fs.existsSync(cacheFile(mod)) || yargs.argv.force
+      (mod) => !fs.existsSync(cacheFile(mod))
     );
     if (parseModules.length > 0)
       return limitExecution('parse-headers', parseModules, done);

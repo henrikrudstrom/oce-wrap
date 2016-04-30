@@ -25,6 +25,10 @@
     "GeomInt"
   ],
   "headers": [
+    "BRepApprox_SurfaceTool",
+    "BRepTest",
+    "GeometryTest",
+    "GeomliteTest",
     "ChFiKPart_ComputeData_FilPlnCon",
     "Adaptor3d_HSurfaceTool",
     "AIS_ColoredShape",
