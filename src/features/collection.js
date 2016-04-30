@@ -32,8 +32,8 @@ function typemapArray1Of(native, wrapped, elemType) {
     getSize: 'Length',
     getElem: 'Value',
     setElem: 'SetValue',
-    
-    // TODO: not sure these are stored in the config file, might only work when 
+
+    // TODO: not sure these are stored in the config file, might only work when
     // configure and render is run in the same session
     initArgout: decl => `new ${native}(1,arg1->${decl.getParent().lengthProperty});`,
     freearg: arg => `${arg}->Destroy();`
@@ -47,6 +47,12 @@ features.registerConfig(typemapIndexedMap, typemapListOf, typemapArray1Of);
 // SWIG rendering
 // ----------------------------------------------------------------------------
 
+function isPrimitive(elemType) {
+  return elemType === 'Standard_Real' ||
+    elemType === 'Standard_Integer' ||
+    elemType === 'Standard_Boolean';
+}
+
 function swigValue(type, arg) {
   if (type.indexOf('Standard_Real') !== -1)
     return `SWIGV8_NUMBER_NEW(${arg})`;
@@ -55,7 +61,7 @@ function swigValue(type, arg) {
   if (type.indexOf('Standard_Integer') !== -1)
     return `SWIGV8_INTEGER_NEW(${arg})`;
 
-  return `SWIG_NewPointerObj((${type}*)&(${arg}), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
+  return `SWIG_NewPointerObj((${type}*)(${arg}), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
 }
 
 function nativeValue(type, arg) {
@@ -64,26 +70,37 @@ function nativeValue(type, arg) {
   if (type.indexOf('Standard_Boolean') !== -1)
     return `SWIG_AsVal(bool)(${arg}, &argpointer)`;
   if (type.indexOf('Standard_Integer') !== -1)
-    return `SWIG_AsVal(int)(${arg}, &argpointer)`; // not sure if SWIG_AsVal is always in the swig file
+    // not sure if SWIG_AsVal is always in the swig file
+    return `SWIG_AsVal(int)(${arg}, &argpointer)`;
+
   return `SWIG_ConvertPtr(${arg}, (void **)&argpointer, SWIGTYPE_p_${type}, 0)`;
 }
 
 
 function indexableToArray(tm) {
-  return (nativeObj, wrappedObj) =>
-    `\
+  return (nativeObj, wrappedObj) => {
+    var getExpr = nativeObj + '->' + tm.getElem + '(i)';
+
+    var assign = '';
+    if (isPrimitive(tm.elemType)) {
+      assign = `array->Set(i-1, ${swigValue(tm.elemType, getExpr)});`;
+    } else {
+      // use copy constructor, values are passe byref.
+      assign = `\
+      ${tm.elemType} * val = new ${tm.elemType}(${getExpr});
+      array->Set(i-1, ${swigValue(tm.elemType, 'val')});`;
+    }
+
+    return `\
   v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
   for(int i = 1; i <= ${nativeObj}->${tm.getSize}(); i++){
-    array->Set(i-1, ${swigValue(tm.elemType, nativeObj + '->' + tm.getElem + '(i)')});
+${assign}
   }
   ${wrappedObj} = array;`;
+  };
 }
 
-function isPrimitive(elemType){
-  return elemType === 'Standard_Real' ||
-    elemType === 'Standard_Integer' ||
-    elemType === 'Standard_Boolean';
-}
+
 
 function arrayToAppendable(tm) {
   // TODO: not tested
@@ -133,14 +150,14 @@ function arrayToSettable(tm) {
 function iterableToArray(tm) {
   var name = tm.native.split('_')[1];
   var mod = tm.native.split('_')[0];
-  
+
   return (nativeObj, wrappedObj) =>
     `
   v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
  	${mod}_ListIteratorOf${name} iterator($1);
   int i = 0;
   while(iterator.More()) {
-    array->Set(i, ${swigValue(tm.elemType, 'iterator->Value()')});
+    array->Set(i, ${swigValue(tm.elemType, '&iterator->Value()')});
     iterator.Next();
     i++;
   }
