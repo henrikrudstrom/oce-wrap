@@ -51,7 +51,7 @@ module.exports = function(gulp) {
   function copy(src, ext, dest, flat) {
     var destPath = path.join(settings.paths.build, dest);
     var basePath = path.join(settings.paths.definition, src);
-    var srcPath = path.join(basePath, '**', '*' + ext);
+    var srcPath = path.join(basePath, ext);
 
     return gulp.src(srcPath, { base: basePath })
       .pipe(gulpif(flat, rename({ dirname: '' })))
