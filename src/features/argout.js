@@ -2,11 +2,6 @@ const camelCase = require('camel-case');
 const features = require('../features.js');
 const common = require('../common.js');
 
-
-// ----------------------------------------------------------------------------
-// Config
-// ----------------------------------------------------------------------------
-
 function isOutArg(arg) {
   return arg.decl.indexOf('&') !== -1 &&
     arg.decl.indexOf('const') === -1;
@@ -17,6 +12,11 @@ function argoutName(name) {
     name = name.replace('the', '');
   return name;
 }
+
+
+// ----------------------------------------------------------------------------
+// Config functions
+// ----------------------------------------------------------------------------
 
 function defineArgout(mem, type) {
   var argoutIndices = mem.origArguments.map((a, index) => index)
@@ -45,15 +45,10 @@ function argout(expr, type) {
     throw new Error('argout type must be specified');
 
   this.pushQuery(9, expr, (mem) => {
-    //if (mem.declType !== 'memfun') return false;
     defineArgout(mem, type);
     return true;
   });
 }
-
-// function argoutArray(expr) {
-//   return this.argout(expr, 'Array');
-// }
 
 function argoutObject(expr) {
   return this.argout(expr, 'Object');
@@ -80,6 +75,7 @@ features.registerConfig(argout, defaultArgouts, /* argoutArray,*/ argoutObject);
 // Render swig
 // ----------------------------------------------------------------------------
 
+// generate code to convert variable `arg` to wrapped `type`
 function swigConvert(type, arg) {
   if (type.indexOf('Standard_Real') !== -1)
     return { expr: `SWIGV8_NUMBER_NEW(*${arg})` };
@@ -87,17 +83,12 @@ function swigConvert(type, arg) {
     return { expr: `SWIGV8_BOOLEAN_NEW(*${arg})` };
   if (type.indexOf('Standard_Integer') !== -1)
     return { expr: `SWIGV8_INTEGER_NEW(*${arg})` };
-  // if (type.indexOf('Standard_OStream') !== -1) {
-  //   return {
-  //     statements: `std::ostringstream *output = static_cast<std::ostringstream *> (${arg});`,
-  //     expr: 'SWIGV8_STRING_NEW(output->str().c_str());'
-  //   };
-  // }
 
+  var typemap = features.getTypemap(type);
+  var render = features.getTypemapRenderer(typemap);
 
-  var typemap = features.getTypemapConverter(type);
-  if (typemap === null) {
-    // create default swig pointer
+  if (!render) {
+    // create default swig pointer with copy constructor
     var castedArg = `(new ${type}((const ${type})*${arg})`;
     return {
       expr: `SWIG_NewPointerObj(${castedArg}), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`
@@ -106,27 +97,16 @@ function swigConvert(type, arg) {
   return {
     // use typemap convertion template
     expr: 'value',
-    statements: 'v8::Handle<v8::Value> value;\n  ' + typemap.toWrapped(arg, 'value', '$1') + '\n'
+    statements: 'v8::Handle<v8::Value> value;\n  ' + render.toWrapped(arg, 'value', '$1') + '\n'
   };
 }
 
-// function renderArrayOutmap(argouts, sigArgs) {
-//   var assignArgs = argouts
-//     .map((arg, index) => `  array->Set(${index}, ${swigConvert(arg.decl, '$' + (index + 1))});`)
-//     .join('\n');
-
-//   return `%typemap(argout) (${sigArgs}) {// argoutout\n
-//     v8::Handle<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 4);
-//   ${assignArgs}
-//     $result = array;
-//   }`;
-// }
-
-
+// make object property names pretty
 function processOutArgName(name) {
   name = name.replace('_out', '');
   return camelCase(name);
 }
+
 
 function renderObjectOutmap(decl, fullSig) {
   var assignArgs = decl.origArguments.filter(arg => arg.outArg)
@@ -172,13 +152,9 @@ function renderArgoutInit(decl, fullSig) {
   argouts.forEach((arg, index) => {
     var nativeType = common.stripTypeQualifiers(arg.decl);
     var tm = features.getTypemap(nativeType);
-    if (tm && tm.initArgout) {
-      argInit.push(`$${index + 1} = ${tm.initArgout(decl)}`);
-    // } else if (nativeType === 'Standard_OStream') {
-    //   //argDef.push('std')
-    //   //argInit.push('std::ostringstream strout();');
-    //   argInit.push('std::ostringstream strout();');
-    //   argInit.push(`$${index + 1} = cast<std::ostream&strout;`);
+    var render = features.getTypemapRenderer(tm);
+    if (render && render.initArgout) {
+      argInit.push(`$${index + 1} = ${render.initArgout(decl)}`);
     } else {
       argDef.push(nativeType + ' argout' + (index + 1));
       argInit.push(`$${index + 1} = &argout${index + 1};`);
@@ -195,6 +171,7 @@ function renderArgoutInit(decl, fullSig) {
 }`;
 }
 
+// main render function
 function renderArgouts(decl) {
   if (!decl.arguments)
     return false;
@@ -207,14 +184,13 @@ function renderArgouts(decl) {
     .map(arg => `${arg.decl}${arg.name}`)
     .join(', ');
 
-  var fullSignature = `${decl.origReturnType} ${decl.getParent().origName}::${decl.origName}(${sigArgs})`;
+  var fullSignature =
+    `${decl.origReturnType} ${decl.getParent().origName}::${decl.origName}(${sigArgs})`;
   fullSignature = `(${sigArgs})`;
 
   var outMap;
   if (argouts.length === 1)
     outMap = renderSingleValueOutmap(decl, fullSignature);
-  // else if (decl.returnType === 'Array')
-  //   outMap = renderArrayOutmap(decl, fullSignature);
   else
     outMap = renderObjectOutmap(decl, fullSignature);
 
@@ -222,20 +198,18 @@ function renderArgouts(decl) {
 
   var freeargs = argouts.map((arg, index) => {
     var typemap = features.getTypemap(arg.type);
-
-    if (!typemap || !typemap.freearg)
+    var render = features.getTypemapRenderer(typemap);
+    if (!render || !render.freearg)
       return null;
 
-    return typemap.freearg('$'+(index + 1));
+    return render.freearg('$' + (index + 1));
   })
   .filter(freearg => freearg !== null);
 
   var freeargsMap = '';
-  if(freeargs.length > 0){
+  if (freeargs.length > 0) {
     freeargsMap = `\n%typemap(newfree) (${sigArgs}) {\n ${freeargs.join('\n  ')}\n}`;
   }
-
-
 
   return {
     name: 'typemaps.i',

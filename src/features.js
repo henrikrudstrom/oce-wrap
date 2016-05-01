@@ -38,49 +38,35 @@ function getRenderers(type) {
   return result;
 }
 
-//
-// typemaps
-//
-const convertToNative = {};
-const convertToWrapped = {};
-const argoutInitializers = {};
-const typemaps = {}
 
-function registerNativeConverter(fn) {
-  convertToNative[fn.name] = fn;
+// ----------------------------------------------------------------------------
+// Typemaps
+// ----------------------------------------------------------------------------
+
+const typemaps = {};
+const typemapRenderers = {};
+
+function registerTypemapRenderer(name, renderer) {
+  typemapRenderers[name] = renderer;
 }
 
-function registerWrappedConverter(fn) {
-  convertToWrapped[fn.name] = fn;
+function getTypemapRenderer(tm) {
+  if (!tm || !tm.renderer) return null;
+  var res = typemapRenderers[tm.renderer];
+  if (!res) return null;
+  return res(tm);
 }
 
-function registerArgoutInitializer(fn) {
-  argoutInitializers[fn.name] = fn;
-}
-function registerTypemap(typemap){
+function registerTypemap(typemap) {
   typemaps[typemap.native] = typemap;
 }
+
 function getTypemap(nativeType) {
-  return typemaps[nativeType];
+  return typemaps[nativeType] || null;
 }
 
-function getTypemapConverter(native){
-  var typemap = typemaps[native];
-  if(!typemap) return null;
-  return {
-    toNative:  convertToNative[typemap.toNative](typemap),
-    toWrapped:  convertToWrapped[typemap.toWrapped](typemap),
-    initializer: argoutInitializers[typemap.toNative]
-  }
-  
-}
-
-function getNativeConverter(name, typemap) {
-  return convertToNative[name](typemap);
-}
-
-function getWrappedConverter(name, typemap) {
-  return convertToWrapped[name](typemap);
+function getTypemaps() {
+  return Object.keys(typemaps).map(key => typemaps[key]);
 }
 
 function load() {
@@ -102,12 +88,10 @@ module.exports = {
   registerConfig,
   registerRenderer,
   getRenderers,
-  registerNativeConverter,
-  registerWrappedConverter,
-  getNativeConverter,
-  getWrappedConverter,
-  getTypemapConverter,
   registerTypemap,
   getTypemap,
+  getTypemaps,
+  registerTypemapRenderer,
+  getTypemapRenderer,
   load
 };

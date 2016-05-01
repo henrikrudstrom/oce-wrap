@@ -3,6 +3,7 @@ const headers = require('../headers.js');
 
 // Attaches handle to javascript proxy to prevent garbage collection
 // Typemaps all functions to accept/return the handled type instead of the handle.
+// TODO: implement as proper typemap
 
 function noHandle(expr) {
   this.find(expr).forEach(cls => {
@@ -18,7 +19,7 @@ function noHandle(expr) {
     if (handle)
       handle.include('Handle_' + cls.name + '(*)');
   });
-  
+
   this.pushQuery(5, expr, (obj) => {
     if (obj.key.startsWith('Handle_')) return;
 
@@ -60,7 +61,7 @@ function renderHandleTypemaps(cls) {
   const std::string lookup_typename = name + " *";
   swig_type_info * const outtype = SWIG_TypeQuery(lookup_typename.c_str());
   $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), outtype, $owner);
-  
+
   // attach handle
   Handle_${name} *handle = (Handle_${name} *)new Handle_${name}($1);
   $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_Standard_Transient));

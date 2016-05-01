@@ -1,5 +1,6 @@
 const settings = require('./settings.js');
 const builtins = require('./builtinModule.js');
+const features = require('./features');
 
 
 module.exports = function typedict(mods) {
@@ -19,7 +20,7 @@ module.exports = function typedict(mods) {
         dict[decl.key] = `${mod.name}.${decl.name}`;
     });
   });
-  
+  //
   // process typemaps
   mods.concat(mods.map(mod => mod.declarations))
     .filter(mod => mod.typemaps)
@@ -27,8 +28,14 @@ module.exports = function typedict(mods) {
       dict[tm.native] = dict.hasOwnProperty(tm.wrapped) ? dict[tm.wrapped] : tm.wrapped;
     }));
 
-  return (name) => {
+  function getName(name) {
+    // var n = name.indexOf('.') !== -1 ? name.split('.')[0] : name;
+    // var typemap = features.getTypemap(n);
+    // if (typemap) {
+    //   return getName(typemap.wrapped);
+    // }
     if (dict.hasOwnProperty(name)) return dict[name];
     return name;
-  };
+  }
+  return getName;
 };

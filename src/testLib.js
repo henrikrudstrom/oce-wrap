@@ -89,6 +89,8 @@ function createValue(typeName) {
 }
 module.exports.createValue = createValue;
 
+
+// check if all arguments / return types are wrapped, otherwise dont test it.
 function requiredTypesWrapped(member) {
   modules = modules || require('./modules.js')();
 

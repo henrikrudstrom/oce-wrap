@@ -1,46 +1,26 @@
 const features = require('../features.js');
 
-function typemapIndexedMap(native, wrapped, elemType) {
-  return this.typemap(native, wrapped, {
-    render: true,
-    toNative: 'arrayToAppendable',
-    toWrapped: 'indexableToArray',
-    elemType,
-    getSize: 'Extent',
-    getElem: 'FindKey',
-    addElem: 'Add'
-  });
+
+// ----------------------------------------------------------------------------
+// configuration functions
+// ----------------------------------------------------------------------------
+
+function typemapIndexedMap(collectionMod, elemType) {
+  var listType = collectionMod + '_IndexedMapOf' + elemType.split('_')[1];
+  return this.typemap(listType, 'Array', 'indexedMap', { elemType });
 }
 
-function typemapListOf(native, wrapped, elemType) {
-  return this.typemap(native, wrapped, {
-    render: true,
-    toNative: 'arrayToAppendable',
-    toWrapped: 'iterableToArray',
-    elemType,
-    getSize: 'Extent',
-    addElem: 'Append'
-  });
+function typemapList(collectionMod, elemType) {
+  var listType = collectionMod + '_ListOf' + elemType.split('_')[1];
+  return this.typemap(listType, 'Array', 'list', { elemType });
 }
 
-function typemapArray1Of(native, wrapped, elemType) {
-  return this.typemap(native, wrapped, {
-    render: true,
-    toNative: 'arrayToSettable',
-    toWrapped: 'indexableToArray',
-    elemType,
-    getSize: 'Length',
-    getElem: 'Value',
-    setElem: 'SetValue',
-
-    // TODO: not sure these are stored in the config file, might only work when
-    // configure and render is run in the same session
-    initArgout: decl => `new ${native}(1,arg1->${decl.getParent().lengthProperty});`,
-    freearg: arg => `${arg}->Destroy();`
-  });
+function typemapArray1(collectionMod, elemType) {
+  var listType = collectionMod + '_Array1Of' + elemType.split('_')[1];
+  return this.typemap(listType, 'Array', 'array1', { elemType });
 }
 
-features.registerConfig(typemapIndexedMap, typemapListOf, typemapArray1Of);
+features.registerConfig(typemapIndexedMap, typemapList, typemapArray1);
 
 
 // ----------------------------------------------------------------------------
@@ -77,96 +57,142 @@ function nativeValue(type, arg) {
 }
 
 
-function indexableToArray(tm) {
-  return (nativeObj, wrappedObj) => {
-    var getExpr = nativeObj + '->' + tm.getElem + '(i)';
+// ----------------------------------------------------------------------------
+// array to native collection helpers
+// ----------------------------------------------------------------------------
 
-    var assign = '';
-    if (isPrimitive(tm.elemType)) {
-      assign = `array->Set(i-1, ${swigValue(tm.elemType, getExpr)});`;
-    } else {
-      // use copy constructor, values are passe byref.
-      assign = `\
-      ${tm.elemType} * val = new ${tm.elemType}(${getExpr});
-      array->Set(i-1, ${swigValue(tm.elemType, 'val')});`;
-    }
-
-    return `\
-  v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
-  for(int i = 1; i <= ${nativeObj}->${tm.getSize}(); i++){
-${assign}
-  }
-  ${wrappedObj} = array;`;
-  };
-}
-
-
-
-function arrayToAppendable(tm) {
-  // TODO: not tested
-  var deref = '*';
-  if (isPrimitive(tm.elemType))
-    deref = '';
-
-  return (nativeObj, wrappedObj) =>
-    `\
-    v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(${wrappedObj});
-    int length = obj->Get(SWIGV8_SYMBOL_NEW("length"))->ToObject()->Uint32Value();
-
-    ${tm.native} * list = new ${tm.native}();
-    ${tm.elemType} ${deref}argpointer;
-
-    for(int i = 1; i <= length; i++){
-      ${nativeValue(tm.elemType, 'array->Get(i-1)')};
-      list->${tm.addElem}((const ${tm.elemType} &)${deref}argpointer);
-    }
-
-    ${nativeObj} = list;
-`;
-}
-
-function arrayToSettable(tm) {
-  var deref = '*';
-  if (isPrimitive(tm.elemType))
-    deref = '';
-
-  return (nativeObj, wrappedObj) =>
-    `\
-    v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(${wrappedObj});
+function arrayToNative(input, output, content) {
+  return `\
+    v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(${input});
     int length = array->Get(SWIGV8_SYMBOL_NEW("length"))->ToObject()->Uint32Value();
 
-    ${tm.native} * list = new ${tm.native}(1, length);
-    ${tm.elemType} ${deref}argpointer;
+    ${content}
+
+    ${output} = list;`;
+}
+
+function arrayToSettable(listType, elemType, setter) {
+  var deref = isPrimitive(elemType) ? '' : '*';
+  return `\
+    ${listType} * list = new ${listType}(1, length);
+    ${elemType} ${deref}argpointer;
 
     for(int i = 1; i <= length; i++){
-      ${nativeValue(tm.elemType, 'array->Get(i-1)')};
-      list->${tm.setElem}(i, (const ${tm.elemType} &)${deref}argpointer);
-    }
-
-    ${nativeObj} = list;
-`;
+      ${nativeValue(elemType, 'array->Get(i-1)')};
+      list->${setter}(i, (const ${elemType} &)${deref}argpointer);
+    }`;
 }
 
-function iterableToArray(tm) {
-  var name = tm.native.split('_')[1];
-  var mod = tm.native.split('_')[0];
+function arrayToAppendable(listType, elemType, add) {
+  var deref = isPrimitive(elemType) ? '' : '*';
+  return `\
+    ${listType} * list = new ${listType}(1, length);
+    ${elemType} ${deref}argpointer;
 
-  return (nativeObj, wrappedObj) =>
-    `
-  v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), ${nativeObj}->${tm.getSize}());
- 	${mod}_ListIteratorOf${name} iterator($1);
-  int i = 0;
-  while(iterator.More()) {
-    array->Set(i, ${swigValue(tm.elemType, '&iterator->Value()')});
-    iterator.Next();
-    i++;
+    for(int i = 1; i <= length; i++){
+      ${nativeValue(elemType, 'array->Get(i-1)')};
+      list->${add}((const ${elemType} &)${deref}argpointer);
+    }`;
+}
+
+
+// ----------------------------------------------------------------------------
+// Native collections to array helpers
+// -------------------------------------------------------------------------
+
+function nativeToArray(input, output, getSize, content) {
+  return `\
+    v8::Local<v8::Array> array = v8::Array::New(
+      v8::Isolate::GetCurrent(), ${input}->${getSize}());
+    int length = ${input}->${getSize}();
+    ${content}
+    ${output} = array;
+    `;
+}
+
+function assignSettable(input, elemType, getExpr) {
+  if (isPrimitive(elemType)) {
+    return `array->Set(i-1, ${swigValue(elemType, getExpr)});`;
   }
+  return `\
+    ${elemType} * val = new ${elemType}(${getExpr});
+    array->Set(i-1, ${swigValue(elemType, 'val')});`;
+}
 
-  ${wrappedObj} = array;`;
+function iterableToArray(input, listType, elemType) {
+  var name = listType.split('_')[1];
+  var mod = listType.split('_')[0];
+  var assign = assignSettable(input, elemType, '&iterator->Value()');
+  return `\
+   	${mod}_ListIteratorOf${name} iterator($1);
+    int i = 0;
+    while(iterator.More()) {
+      ${assign}
+      iterator.Next();
+      i++;
+    }`;
+}
+
+function indexableToArray(input, elemType, getter) {
+  var assign = assignSettable(input, elemType, input + '->' + getter + '(i)');
+  return `\
+    for(int i = 1; i <= length; i++){
+      ${assign}
+    }`;
 }
 
 
-features.registerWrappedConverter(indexableToArray);
-features.registerWrappedConverter(iterableToArray);
-features.registerNativeConverter(arrayToAppendable);
-features.registerNativeConverter(arrayToSettable);
+features.registerTypemapRenderer('array1', function array1Typemap(tm) {
+  return {
+    toNative(input, output) {
+      return arrayToNative(input, output,
+        arrayToSettable(tm.native, tm.elemType, 'SetValue')
+      );
+    },
+
+    toWrapped(input, output) {
+      return nativeToArray(input, output, 'Length',
+        indexableToArray(input, tm.elemType, 'Value')
+      );
+    },
+
+    initArgout(decl) {
+      return `new ${tm.native}(1,arg1->${decl.getParent().lengthProperty});`;
+    },
+    freearg(arg) {
+      return `${arg}->Destroy();`;
+    }
+  };
+});
+
+features.registerTypemapRenderer('list', function listTypemap(tm) {
+  return {
+    toNative(input, output) {
+      return arrayToNative(input, output,
+        arrayToAppendable(tm.native, tm.elemType, 'Append')
+      );
+    },
+
+    toWrapped(input, output) {
+      return nativeToArray(input, output, 'Extent',
+        iterableToArray(input, tm.native, tm.elemType)
+      );
+    }
+  };
+});
+
+features.registerTypemapRenderer('indexedMap', function indexedMapTypemap(tm) {
+  return {
+    toNative(input, output) {
+      return arrayToNative(input, output,
+        arrayToAppendable(tm.native, tm.elemType, 'Add')
+      );
+    },
+
+    toWrapped(input, output) {
+      return nativeToArray(input, output, 'Extent',
+        indexableToArray(input, tm.elemType, 'FindKey')
+      );
+    }
+  };
+});
