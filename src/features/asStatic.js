@@ -9,7 +9,7 @@ function includeAsStatic(expr, template, valueFunc) {
   var clsName = expr.split('(')[0];
   var cls = headers.get(clsName);
   var returnType = cls.declarations.find(decl => decl.name === valueFunc).returnType;
-  //console.log(cls.name, cls.declarations)
+
   var name = camelCase(common.removePrefix(cls.name));
   var res = cls.declarations
     .filter(decl => decl.declType === 'constructor')
@@ -46,25 +46,44 @@ function includeGCMake(clsName) {
 function includeBRepBuilder(clsName, valueFunc) {
   return this.includeAsStatic(clsName, 'BRepBuilder', valueFunc);
 }
+function includeBRepPrim(clsName, valueFunc) {
+  return this.includeAsStatic(clsName, 'BRepPrim', valueFunc);
+}
 
 features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder);
 
 
 var templates = {
   renderGCMake(decl, args, argNames) {
-    return `%extend ${decl.sourceParent} {
+    return `
+%extend ${decl.sourceParent} {
   static const ${decl.sourceReturnType} ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     return obj->${decl.valueFunc}();
   }
 }`;
   },
+
   renderBRepBuilder(decl, args, argNames) {
-    return `%inline {
+    return `
+%inline {
   static const ${decl.sourceReturnType} ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     if(!obj->IsDone())
-      SWIG_V8_Raise("could not make edge"); // TODO check error
+      SWIG_V8_Raise("could not make brep"); // TODO check error
+    return obj->${decl.valueFunc}();
+  }
+}`;
+  },
+
+  renderBRepPrim(decl, args, argNames) {
+    return `
+%inline {
+  static const ${decl.sourceReturnType} ${decl.name}(${args}){
+    ${decl.origName}* obj = new ${decl.origName}(${argNames});
+    obj->Build();
+    if(!obj->IsDone())
+      SWIG_V8_Raise("could not make primitive"); // TODO check error
     return obj->${decl.valueFunc}();
   }
 }`;
@@ -73,10 +92,10 @@ var templates = {
 
 function renderAsStatic(decl) {
   if (decl.declType !== 'staticfunc') return false;
-  
+
   var args = decl.arguments.map(arg => arg.decl + ' ' + arg.name).join(', ');
   var argNames = decl.arguments.map(arg => arg.name).join(', ');
-  
+
   var src = templates['render' + decl.template](decl, args, argNames);
   return { name: 'extends', src };
 }
