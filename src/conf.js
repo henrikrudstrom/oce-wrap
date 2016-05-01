@@ -37,7 +37,7 @@ function Conf(decl, parent) {
   } else {
     this.declType = 'module';
   }
-  
+
   this.declarations = [];
   this.typemaps = [];
   this.stacks = [];
@@ -49,7 +49,7 @@ function processInclude(decl, parent) {
   if (decl.declarations) {
     newDecl = new Conf(decl, parent.name);
     newDecl.key = decl.name; //TODO: get rid of .key
-    
+
   } else {
     newDecl = extend(true, {}, decl);
 
@@ -62,21 +62,21 @@ function processInclude(decl, parent) {
 
   if(newDecl.origName === undefined)
     newDecl.origName = decl.name;
-  
+
   if(newDecl.returnType !== undefined && newDecl.origReturnType === undefined)
     newDecl.origReturnType = decl.returnType;
-  
+
   if(newDecl.type !== undefined && newDecl.origType === undefined)
     newDecl.origType = decl.type;
-    
+
   if(newDecl.arguments !== undefined && newDecl.origArguments === undefined){
     newDecl.origArguments = extend(true, [], newDecl.arguments);
   }
-  
+
   if(newDecl.bases !== undefined)
     newDecl.bases.forEach(base => base.origName = base.name);
-  
-  
+
+
   newDecl.getParent = () => parent;
 
   newDecl.extend = function(props) {
@@ -120,15 +120,15 @@ Conf.prototype = {
   },
   include(expr) {
     if (Array.isArray(expr)) expr.map(this.include.bind(this));
-    
+
     if (typeof expr !== 'function')
       if (this.declType && (this.declType === 'class' || this.declType === 'enum' || this.declType === 'typedef'))
         expr = `${this.key}::${expr}`;
-    
+
     // query parsed headers for declaration
     var res = headers.find(expr);
-    
-    if (res.length < 1) 
+
+    if (res.length < 1)
       logger.warn('Expression ' + expr + ' returned no results.');
 
     this.add(res);

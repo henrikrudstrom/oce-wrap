@@ -20,7 +20,7 @@ module.exports = function(gulp) {
   const paths = settings.paths;
   var reader = depend();
   const hashPath = path.join(settings.paths.build, 'build', 'hash');
-  
+
   var debugBuild = yargs.argv.debugBuild;
 
   function moduleSources(mod) {
@@ -77,7 +77,8 @@ module.exports = function(gulp) {
       cflags: [
         '-DCSFDB', '-DHAVE_CONFIG_H', '-DOCC_CONVERT_SIGNALS',
         '-D_OCC64', '-Dgp_EXPORTS', '-Os', '-DNDEBUG', '-fPIC',
-        '-fpermissive',
+        // '-fpermissive',
+        // '-wclobbered',
         '-DSWIG_TYPE_TABLE=occ.js'
       ],
       'cflags!': ['-fno-exceptions'],
@@ -89,6 +90,11 @@ module.exports = function(gulp) {
     if (!fs.existsSync(paths.gyp)) return done();
     return run(`rm -rf ${paths.gyp}`).exec(done);
   });
+
+
+
+
+
 
   gulp.task('gyp-configure', function(done) {
     var modules = loadModules();
@@ -106,7 +112,7 @@ module.exports = function(gulp) {
 
     fs.writeFileSync(`${settings.paths.build}/binding.gyp`, JSON.stringify(config, null, 2));
     var flags = ''
-    if(debugBuild)
+    if (debugBuild)
       flags += ' --debug'
     return run('node-gyp configure' + flags, {
       cwd: settings.paths.build,
@@ -115,19 +121,22 @@ module.exports = function(gulp) {
   });
 
 
+
+
+
   gulp.task('gyp-build', function(done) {
     if (!fs.existsSync(`${settings.paths.build}/binding.gyp`))
       return done();
     const options = { cwd: paths.build, maxBuffer: 500 * 1024 };
-    
+
     var flags = ' --jobs 4';
-    if(debugBuild)
+    if (debugBuild)
       flags += ' --debug';
-    
+
     return exec('node-gyp build' + flags, options, (error, stdout, stderr) => {
+      process.stdout.write(stderr);
       process.stdout.write(stdout);
       if (error) {
-        process.stdout.write(stderr);
         return done(error);
       }
       execSync(`mv ${path.join(hashPath, 'tmp')}/*.hash ${hashPath}`);
@@ -136,7 +145,10 @@ module.exports = function(gulp) {
   });
 
   gulp.task('copy-gyp', function() {
-    return gulp.src(`${settings.paths.build}/build/Debug/*.node`)
+    var releaseType = debugBuild ? 'Debug' : 'Release';
+    var files = path.join(settings.paths.build, 'build', releaseType, '*.node');
+    console.log(files)
+    return gulp.src(files)
       .pipe(rename({ dirname: '' }))
       .pipe(gulp.dest(`${settings.paths.build}/lib/`));
   });

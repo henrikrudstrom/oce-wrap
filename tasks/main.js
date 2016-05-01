@@ -20,8 +20,7 @@ module.exports = function(gulp) {
 
   gulp.task('render', function(done) {
     runSequence(
-      ['swig-clean', 'configure'],
-      ['render-swig', 'render-js', 'copy'],
+      ['swig-clean', 'configure'], ['render-swig', 'render-js', 'copy'],
       'swig-cxx', 'swig-hack-handles', done
     );
   });
@@ -47,32 +46,32 @@ module.exports = function(gulp) {
   gulp.task('all', function(done) {
     runSequence('init', 'render', 'build', 'dist', 'test', done);
   });
-  
-  
-  function copy(src, ext, dest, flat){
+
+
+  function copy(src, ext, dest, flat) {
     var destPath = path.join(settings.paths.build, dest);
     var basePath = path.join(settings.paths.definition, src);
-    var srcPath = path.join(basePath, '**', '*' + ext);
-    
+    var srcPath = path.join(basePath, ext);
+
     return gulp.src(srcPath, { base: basePath })
-      .pipe(gulpif(flat, rename({ dirname: ''})))
+      .pipe(gulpif(flat, rename({ dirname: '' })))
       .pipe(gulp.dest(destPath));
   }
-  
+
   gulp.task('copy-swig', function() {
-    return copy('modules', '.i', 'swig');
+    return copy('modules', '**/*.i', 'swig');
   });
 
   gulp.task('copy-sources', function() {
-    return copy('modules', '.c*', 'src', true);
+    return copy('modules', '**/*.c*', 'src', true);
   });
-  
+
   gulp.task('copy-headers', function() {
-    return copy('modules', '.h*', 'inc', true);
+    return copy('modules', '**/*.h*', 'inc', true);
   });
 
   gulp.task('copy-js', function() {
-    return copy('modules', '.js', 'lib', true);
+    return copy('modules', '*/*.js', 'lib', true);
   });
 
   gulp.task('copy', function(done) {
