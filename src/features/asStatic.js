@@ -5,10 +5,30 @@ const features = require('../features.js');
 const common = require('../common.js');
 const headers = require('../headers.js');
 
+function getMember(cls, memberName) {
+  var member = cls.declarations.find(decl => decl.name === memberName);
+
+  if (!member && cls.bases.length > 0) {
+    var base = headers.get(cls.bases[0].name);
+    return getMember(base, memberName);
+  }
+
+  return member || null;
+}
+
+
 function includeAsStatic(expr, template, valueFunc) {
   var clsName = expr.split('(')[0];
   var cls = headers.get(clsName);
-  var returnType = cls.declarations.find(decl => decl.name === valueFunc).returnType;
+  var returnType;
+
+  if (typeof valueFunc === 'string') {
+    returnType = getMember(cls, valueFunc).returnType;
+  } else if (typeof valueFunc === 'object') {
+    returnType = 'Object';
+  } else
+    throw new Error('missing argument valueFunc');
+
 
   var name = camelCase(common.removePrefix(cls.name));
   var res = cls.declarations
@@ -24,18 +44,16 @@ function includeAsStatic(expr, template, valueFunc) {
         parent: this.name,
         sourceParent: this.name,
         parentKey: cls.name,
-        originDeclType: cls.name,
         origName: cls.name,
         returnType,
-        sourceReturnType: returnType,
         arguments: args,
-        origArguments: args,
         depends: cls.name,
         template,
         valueFunc
       };
     });
-  this.declarations = this.declarations.concat(res);
+  res.forEach(decl => this.add(decl));
+
   return this;
 }
 
@@ -46,18 +64,20 @@ function includeGCMake(clsName) {
 function includeBRepBuilder(clsName, valueFunc) {
   return this.includeAsStatic(clsName, 'BRepBuilder', valueFunc);
 }
+
 function includeBRepPrim(clsName, valueFunc) {
+  valueFunc = valueFunc || 'Shape';
   return this.includeAsStatic(clsName, 'BRepPrim', valueFunc);
 }
 
-features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder);
+features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder, includeBRepPrim);
 
 
 var templates = {
   renderGCMake(decl, args, argNames) {
     return `
 %extend ${decl.sourceParent} {
-  static const ${decl.sourceReturnType} ${decl.name}(${args}){
+  static const ${decl.origReturnType} ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     return obj->${decl.valueFunc}();
   }
@@ -67,7 +87,7 @@ var templates = {
   renderBRepBuilder(decl, args, argNames) {
     return `
 %inline {
-  static const ${decl.sourceReturnType} ${decl.name}(${args}){
+  static const ${decl.origReturnType} & ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     if(!obj->IsDone())
       SWIG_V8_Raise("could not make brep"); // TODO check error
@@ -79,7 +99,7 @@ var templates = {
   renderBRepPrim(decl, args, argNames) {
     return `
 %inline {
-  static const ${decl.sourceReturnType} ${decl.name}(${args}){
+  static const ${decl.origReturnType} & ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     obj->Build();
     if(!obj->IsDone())

@@ -7,7 +7,8 @@ features.registerConfig(function upcast(baseclass, template) {
 
 
 features.registerRenderer('swig', 7, function(decl) {
-  if (!decl.typemaps) return false;
+  if (!decl.typemaps || decl.typemaps.length < 1) return false;
+
   var typemap = decl.typemaps.find(tm => tm.renderer === 'upcastTopoDS');
   if (!typemap) return false;
 
@@ -24,8 +25,7 @@ features.registerRenderer('swig', 7, function(decl) {
 #include<TopoDS_Solid.hxx>
 #include<TopoDS_CompSolid.hxx>
 #include<TopoDS_Compound.hxx>
-%}
-%inline{
+
 v8::Handle<v8::Value> upcastTopoDS_Shape(const TopoDS_Shape & shape){
     // lookup type
     int type = shape.ShapeType();
@@ -67,14 +67,14 @@ v8::Handle<v8::Value> upcastTopoDS_Shape(const TopoDS_Shape & shape){
     swig_type_info * const outtype = SWIG_TypeQuery(typeName.c_str());
     return SWIG_NewPointerObj(voidptr, outtype, SWIG_POINTER_OWN |  0);
   }
-}`
+%}`
   };
 });
 
 features.registerTypemapRenderer('upcastTopoDS', function() {
   return {
     toWrapped(input, output) {
-      return `${output} = upcastTopoDS_Shape(${input});`;
-    },
+      return `${output} = upcastTopoDS_Shape((const TopoDS_Shape &)${input});`;
+    }
   };
 });

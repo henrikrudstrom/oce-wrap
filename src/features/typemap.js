@@ -27,7 +27,6 @@ function renderTypemap(tm) {
   if (!render) return '';
 
   var toNative = !render.toNative ? '' : `
-  
 #include <${native}.hxx>
 %typemap(in) const ${native} &{
   // typemap inmap
