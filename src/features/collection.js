@@ -50,7 +50,7 @@ function nativeValue(type, arg) {
   if (type.indexOf('Standard_Boolean') !== -1)
     return `SWIG_AsVal(bool)(${arg}, &argpointer)`;
   if (type.indexOf('Standard_Integer') !== -1)
-    // not sure if SWIG_AsVal is always in the swig file
+  // not sure if SWIG_AsVal is always in the swig file
     return `SWIG_AsVal(int)(${arg}, &argpointer)`;
 
   return `SWIG_ConvertPtr(${arg}, (void **)&argpointer, SWIGTYPE_p_${type}, 0)`;
@@ -113,6 +113,12 @@ function nativeToArray(input, output, getSize, content) {
 function assignSettable(input, elemType, getExpr) {
   if (isPrimitive(elemType)) {
     return `array->Set(i-1, ${swigValue(elemType, getExpr)});`;
+  }
+  var typemap = features.getTypemap(elemType);
+  var render = features.getTypemapRenderer(typemap);
+  if (render) {
+    return 'v8::Handle<v8::Value> '
+      + render.toWrapped(getExpr, 'val') + '\n    array->Set(i-1, val);';
   }
   return `\
     ${elemType} * val = new ${elemType}(${getExpr});

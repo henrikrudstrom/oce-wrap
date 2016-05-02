@@ -29,6 +29,7 @@
     "eslint-plugin-react": "^4.2.3",
     "extend": "^3.0.0",
     "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
     "gulp-coverage": "^0.3.38",
     "gulp-coveralls": "^0.1.4",
     "gulp-debug": "^2.1.2",

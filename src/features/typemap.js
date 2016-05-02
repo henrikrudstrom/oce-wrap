@@ -26,17 +26,20 @@ function renderTypemap(tm) {
 
   if (!render) return '';
 
-  return `
+  var toNative = !render.toNative ? '' : `
 #include <${native}.hxx>
 %typemap(in) const ${native} &{
   // typemap inmap
   ${render.toNative('$input', '$1')}
-}
+}`;
+
+  var toWrapped = `
 %typemap(out) ${native} {
   //typemap outmap
   ${render.toWrapped('$1', '$result')}
 }
 `;
+  return toWrapped + toNative;
 }
 
 

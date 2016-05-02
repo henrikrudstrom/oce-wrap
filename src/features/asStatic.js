@@ -5,11 +5,31 @@ const features = require('../features.js');
 const common = require('../common.js');
 const headers = require('../headers.js');
 
+function getMember(cls, memberName) {
+  var member = cls.declarations.find(decl => decl.name === memberName);
+
+  if (!member && cls.bases.length > 0) {
+    var base = headers.get(cls.bases[0].name);
+    return getMember(base, memberName);
+  }
+
+  return member || null;
+}
+
+
 function includeAsStatic(expr, template, valueFunc) {
   var clsName = expr.split('(')[0];
   var cls = headers.get(clsName);
-  var returnType = cls.declarations.find(decl => decl.name === valueFunc).returnType;
-  //console.log(cls.name, cls.declarations)
+  var returnType;
+
+  if (typeof valueFunc === 'string') {
+    returnType = getMember(cls, valueFunc).returnType;
+  } else if (typeof valueFunc === 'object') {
+    returnType = 'Object';
+  } else
+    throw new Error('missing argument valueFunc');
+
+
   var name = camelCase(common.removePrefix(cls.name));
   var res = cls.declarations
     .filter(decl => decl.declType === 'constructor')
@@ -24,18 +44,16 @@ function includeAsStatic(expr, template, valueFunc) {
         parent: this.name,
         sourceParent: this.name,
         parentKey: cls.name,
-        originDeclType: cls.name,
         origName: cls.name,
         returnType,
-        sourceReturnType: returnType,
         arguments: args,
-        origArguments: args,
         depends: cls.name,
         template,
         valueFunc
       };
     });
-  this.declarations = this.declarations.concat(res);
+  res.forEach(decl => this.add(decl));
+
   return this;
 }
 
@@ -47,24 +65,45 @@ function includeBRepBuilder(clsName, valueFunc) {
   return this.includeAsStatic(clsName, 'BRepBuilder', valueFunc);
 }
 
-features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder);
+function includeBRepPrim(clsName, valueFunc) {
+  valueFunc = valueFunc || 'Shape';
+  return this.includeAsStatic(clsName, 'BRepPrim', valueFunc);
+}
+
+features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder, includeBRepPrim);
 
 
 var templates = {
   renderGCMake(decl, args, argNames) {
-    return `%extend ${decl.sourceParent} {
-  static const ${decl.sourceReturnType} ${decl.name}(${args}){
+    return `
+%extend ${decl.sourceParent} {
+  static const ${decl.origReturnType} ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     return obj->${decl.valueFunc}();
   }
 }`;
   },
+
   renderBRepBuilder(decl, args, argNames) {
-    return `%inline {
-  static const ${decl.sourceReturnType} ${decl.name}(${args}){
+    return `
+%inline {
+  static const ${decl.origReturnType} & ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     if(!obj->IsDone())
-      SWIG_V8_Raise("could not make edge"); // TODO check error
+      SWIG_V8_Raise("could not make brep"); // TODO check error
+    return obj->${decl.valueFunc}();
+  }
+}`;
+  },
+
+  renderBRepPrim(decl, args, argNames) {
+    return `
+%inline {
+  static const ${decl.origReturnType} & ${decl.name}(${args}){
+    ${decl.origName}* obj = new ${decl.origName}(${argNames});
+    obj->Build();
+    if(!obj->IsDone())
+      SWIG_V8_Raise("could not make primitive"); // TODO check error
     return obj->${decl.valueFunc}();
   }
 }`;
@@ -73,10 +112,10 @@ var templates = {
 
 function renderAsStatic(decl) {
   if (decl.declType !== 'staticfunc') return false;
-  
+
   var args = decl.arguments.map(arg => arg.decl + ' ' + arg.name).join(', ');
   var argNames = decl.arguments.map(arg => arg.name).join(', ');
-  
+
   var src = templates['render' + decl.template](decl, args, argNames);
   return { name: 'extends', src };
 }

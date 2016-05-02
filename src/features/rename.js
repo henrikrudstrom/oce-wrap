@@ -39,8 +39,8 @@ function removePrefix(expr) {
 features.registerConfig(rename, renameCamelCase, removePrefix);
 
 
-function renderRename(decl) {
-  if (decl.declType === 'module') {
+function renderRename(decl, parts) {
+  if (decl.declType === 'module' && parts.get('renames.i') !== '') {
     return {
       name: 'featureIncludes',
       src: '%include "renames.i";'
