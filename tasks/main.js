@@ -1,9 +1,8 @@
 var path = require('path');
 var gulpif = require('gulp-if');
+var clean = require('gulp-clean');
 var settings = require('../src/settings.js');
 
-
-//const gulp = require('gulp');
 module.exports = function(gulp) {
   const runSequence = require('run-sequence').use(gulp);
   const rename = require('gulp-rename');
@@ -32,8 +31,24 @@ module.exports = function(gulp) {
     );
   });
 
-  gulp.task('dist', ['build'], function(done) {
-    runSequence([], done);
+
+  gulp.task('dist-clean', function(done) {
+    return gulp.src([
+      '../noce/lib', '../noce/spec',
+      '../noce/inc', '../noce/src'
+    ], { read: false, force: true })
+      .pipe(clean({ force: true }));
+  });
+
+  gulp.task('dist-copy', function() {
+    return gulp.src([
+      'build/lib/**/*', 'build/spec/**/*',
+      'build/inc/**/*', 'build/src/**/*'
+    ], { base: 'build' })
+      .pipe(gulp.dest('../noce'));
+  });
+  gulp.task('dist', function(done) {
+    return runSequence('dist-clean', 'dist-copy', done);
   });
 
   gulp.task('test', function(done) {
@@ -77,6 +92,4 @@ module.exports = function(gulp) {
   gulp.task('copy', function(done) {
     runSequence('copy-swig', 'copy-headers', 'copy-sources', 'copy-js', 'copy-spec', done);
   });
-
-
 };
