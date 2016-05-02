@@ -39,14 +39,14 @@ function renderModuleSwig(decl, parts) {
   function includeIfDefined(partName) {
     return parts.contains(partName) ? `%include "${partName}"` : '';
   }
-  
+
   var typemaps = decl.typemaps ? '%include "typemaps.i"' : '// no typemaps';
 
   return {
     name: 'module.i',
     src: `\
 // Module ${decl.name}
-%module(package="OCC") ${decl.name}
+%module(package="noce") ${decl.name}
 ${parts.get('moduleIncludes')}
 %include ../common/ModuleHeader.i
 %include "headers.i"
@@ -87,7 +87,7 @@ describe('${mod.name}', function(){
 ${parts.get(mod.name + 'ModuleSpecs')}
 });
 `;
-  
+
   return {
     name: mod.name + 'AutoSpec.js',
     src
