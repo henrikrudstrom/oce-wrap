@@ -75,8 +75,10 @@ function renderModuleSpec(mod, parts) {
     return false;
 
   var imports = [mod.name].concat(mod.moduleDepends || [])
-    .map(m => (`var ${m} = require('../../lib/${m}.js');`))
+    .map(m => (`var ${m} = require('../../lib/${m}.js');
+var ${m}Create = require('../${m}/create.js');`))
     .join('\n');
+
 
   var src = `\
 ${imports}

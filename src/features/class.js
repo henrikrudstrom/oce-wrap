@@ -32,8 +32,9 @@ function renderClassSuite(cls, parts) {
   if (cls.declType !== 'class' || cls.abstract || cls.name.startsWith('Handle_'))
     return false;
 
-  var imports = [cls.parent].concat(cls.moduleDepends || [])
-    .map(mod => (`const ${mod} = require('../../lib/${mod}.js');`))
+  var imports = [cls.parent].concat(cls.getParent().moduleDepends || [])
+    .map(mod => (`const ${mod} = require('../../lib/${mod}.js');
+var ${mod}Create = require('../${mod}/create.js');`))
     .join('\n');
 
   var src = `\

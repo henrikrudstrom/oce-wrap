@@ -1,5 +1,6 @@
 const features = require('../features.js');
 const testLib = require('../testLib.js');
+const camelCase = require('camel-case');
 
 //
 // swig rendering
@@ -55,7 +56,7 @@ function renderMemberFunctionTest(calldef, parts) {
   var cls = calldef.getParent();
   var args = argValues(calldef.arguments.filter(arg => !arg.outArg));
   var testSrc = `\
-    var obj = create.${cls.parent}.${cls.name}();
+    var obj = ${cls.parent}Create.${camelCase(cls.name)}();
     var res = obj.${calldef.name}(${args});`;
 
   return {

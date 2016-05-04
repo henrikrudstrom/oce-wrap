@@ -1,3 +1,4 @@
+const camelCase = require('camel-case');
 const features = require('../features.js');
 const common = require('../common.js');
 const testLib = require('../testLib.js');
@@ -24,7 +25,7 @@ function property(getter, setter, name) {
       setterKey: setMethod ? setMethod.key : undefined,
       getterSignature: common.signature(getMethod, true),
       setterSignature: common.signature(setMethod, true),
-      parent: this.name, 
+      parent: this.name,
       origParent: this.name
     };
     this.exclude(getMethod.key);
@@ -64,7 +65,7 @@ function renderPropertyTest(prop, parts) {
 
   var value = testLib.createValue(prop.type);
   var src = `\
-    var obj = create.${cls.parent}.${cls.name}();
+    var obj = ${cls.parent}Create.${camelCase(cls.name)}();
     var value = ${value};
     obj.${prop.name} = value;
     var res = obj.${prop.name};

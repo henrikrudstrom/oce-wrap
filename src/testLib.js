@@ -6,7 +6,7 @@ const glob = require('glob');
 const fs = require('fs');
 const path = require('path');
 const yargs = require('yargs');
-
+const camelCase = require('camel-case');
 
 // Parse specs in module folder to remove tests that are manually defined
 // TODO: find a package for this or make it explicit
@@ -84,8 +84,10 @@ function createValue(typeName) {
   if (typeName === 'Double') return double();
   if (typeName === 'Boolean') return bool();
   if (typeName === 'String') return '';
-
-  return `create.${typeName}()`;
+  var mod = typeName.split('.')[0];
+  var type = typeName.split('.')[1];
+  //if (!mod || !type) throw new Error(typeName)
+  return `${mod}Create.${camelCase(type)}()`;
 }
 module.exports.createValue = createValue;
 
@@ -159,21 +161,23 @@ function memberReturnType(cls, member, suiteKey) {
   return returnType;
 }
 
+function renderPendingTest(signature, comment) {
+  return `
+// ${comment}
+xit('${signature}', function() { });`;
+}
+
 function renderTest(member, testSrc, parts) {
   var cls = member.getParent();
   var signature = common.signature(member);
 
   var excludedReason = excluded(cls.qualifiedName, member);
   if (excludedReason)
-    return '  // ' + excludedReason;
-
-  var comment = '';
+    return '// ${excludedReason}';
 
   var pendingReason = pending(cls.qualifiedName, member);
   if (pendingReason)
-    comment = '  // ' + pendingReason + '\n';
-
-  var disable = pendingReason ? 'x' : '';
+    return renderPendingTest(signature, pendingReason);
 
 
   if (member.declType !== 'constructor' || member.declType !== 'property') {
@@ -182,8 +186,8 @@ function renderTest(member, testSrc, parts) {
   }
   testSrc += parts.get(cls.name + '.' + signature + 'Expectations');
   var consolelog = yargs.argv.logspec ? `    console.log('${signature}')\n` : '';
-  var src = `\n${comment}
-  ${disable}it('${signature}', function(){
+  var src = `
+  it('${signature}', function() {
 ${consolelog}${testSrc}
   });`;
 
