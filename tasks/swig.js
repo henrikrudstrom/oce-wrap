@@ -16,15 +16,29 @@ module.exports = function(gulp) {
 
   function runSwig(moduleName, done) {
     const input = path.join(settings.paths.swig, `${moduleName}/module.i`);
-    if(!fs.existsSync(input))
+    if (!fs.existsSync(input))
       return done();
 
     const output = path.join(settings.paths.cxx, `${moduleName}_wrap.cxx`);
     const includes = include.join(' ');
-    
+
     mkdirp.sync(path.dirname(output));
-    
+
     const cmd = `${settings.swig} ${flags} ${otherFlags} ${includes} -o ${output} ${input}`;
+    exec(cmd, done);
+  }
+
+  function runSwigRuntimeHeader(moduleName, done){
+    const input = path.join(settings.paths.swig, `${moduleName}/module.i`);
+    if (!fs.existsSync(input))
+      return done();
+
+    const output = path.join(settings.paths.cxx, `${moduleName}_runtime.h`);
+    const includes = include.join(' ');
+
+    mkdirp.sync(path.dirname(output));
+
+    const cmd = `${settings.swig} ${flags} ${otherFlags} ${includes} -external-runtime ${output}`;
     exec(cmd, done);
   }
 
@@ -58,6 +72,12 @@ module.exports = function(gulp) {
     );
   });
 
+  gulp.task('swig-headers', function(done) {
+    async.parallel(
+      settings.build.modules.map((mod) => (cb) => runSwigRuntimeHeader(mod, cb)),
+      done
+    );
+  });
 
   var replace = require('gulp-replace');
   gulp.task('swig-hack-handles', function() {

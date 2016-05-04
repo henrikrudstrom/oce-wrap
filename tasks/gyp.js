@@ -67,13 +67,15 @@ module.exports = function(gulp) {
     ].concat(mod.extraIncludes || []);
 
     var shadow = mod.shadowed ? '_' : '';
-
+    var libs = (mod.libraries || reader.toolkitDepends(mod))
+    if (!libs.find(lib => lib === "TKernel"))
+      libs.push('TKernel')
     return {
       target_name: shadow + mod.name,
       sources,
       include_dirs: include,
       libraries: ['-L' + settings.oce.lib].concat(
-        (mod.libraries || reader.toolkitDepends(mod)).map(lib => '-l' + lib)),
+        libs.map(lib => '-l' + lib)),
       cflags: [
         '-DCSFDB', '-DHAVE_CONFIG_H', '-DOCC_CONVERT_SIGNALS',
         '-D_OCC64', '-Dgp_EXPORTS', '-Os', '-DNDEBUG', '-fPIC',

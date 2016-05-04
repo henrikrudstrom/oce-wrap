@@ -17,18 +17,18 @@ function getMember(cls, memberName) {
 }
 
 
-function includeAsStatic(expr, template, valueFunc) {
+function includeAsStatic(expr, template, valueFunc, returnType) {
   var clsName = expr.split('(')[0];
   var cls = headers.get(clsName);
-  var returnType;
 
-  if (typeof valueFunc === 'string') {
-    returnType = getMember(cls, valueFunc).returnType;
-  } else if (typeof valueFunc === 'object') {
-    returnType = 'Object';
-  } else
-    throw new Error('missing argument valueFunc');
-
+  if (!returnType) {
+    if (typeof valueFunc === 'string') {
+      returnType = getMember(cls, valueFunc).returnType;
+    } else if (typeof valueFunc === 'object') {
+      returnType = 'Object';
+    } else
+      throw new Error('missing argument valueFunc');
+  }
 
   var name = camelCase(common.removePrefix(cls.name));
   var res = cls.declarations
@@ -61,13 +61,13 @@ function includeGCMake(clsName) {
   return this.includeAsStatic(clsName, 'GCMake', 'Value');
 }
 
-function includeBRepBuilder(clsName, valueFunc) {
-  return this.includeAsStatic(clsName, 'BRepBuilder', valueFunc);
+function includeBRepBuilder(clsName) {
+  return this.includeAsStatic(clsName, 'BRepBuilder', 'Shape');
 }
 
 function includeBRepPrim(clsName, valueFunc) {
-  valueFunc = valueFunc || 'Shape';
-  return this.includeAsStatic(clsName, 'BRepPrim', valueFunc);
+  valueFunc = valueFunc || 'Solid';
+  return this.includeAsStatic(clsName, 'BRepPrim', valueFunc, 'TopoDS_Shape');
 }
 
 features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder, includeBRepPrim);
@@ -87,11 +87,11 @@ var templates = {
   renderBRepBuilder(decl, args, argNames) {
     return `
 %inline {
-  static const ${decl.origReturnType} & ${decl.name}(${args}){
+  static v8::Handle<v8::Value> ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     if(!obj->IsDone())
       SWIG_V8_Raise("could not make brep"); // TODO check error
-    return obj->${decl.valueFunc}();
+    return upcastTopoDS_Shape(obj->Shape());
   }
 }`;
   },
@@ -99,12 +99,13 @@ var templates = {
   renderBRepPrim(decl, args, argNames) {
     return `
 %inline {
-  static const ${decl.origReturnType} & ${decl.name}(${args}){
+  static v8::Handle<v8::Value> ${decl.name}(${args}){
     ${decl.origName}* obj = new ${decl.origName}(${argNames});
     obj->Build();
     if(!obj->IsDone())
       SWIG_V8_Raise("could not make primitive"); // TODO check error
-    return obj->${decl.valueFunc}();
+
+    return upcastTopoDS_Shape(obj->${decl.valueFunc}());
   }
 }`;
   }

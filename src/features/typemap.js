@@ -38,6 +38,10 @@ function renderTypemap(tm) {
   //typemap outmap
   ${render.toWrapped('$1', '$result')}
 }
+%typemap(out) const ${native} & {
+  //typemap outmap const &
+  ${render.toWrapped('*$1', '$result')}
+}
 `;
   return toWrapped + toNative;
 }

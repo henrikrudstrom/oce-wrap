@@ -1,5 +1,6 @@
 const features = require('../features.js');
 
+// Upcast all TopoDS_Shape to the actual subtype, using ->ShapeType();
 
 features.registerConfig(function upcast(baseclass, template) {
   this.typemap(baseclass, baseclass, template);
@@ -30,41 +31,41 @@ v8::Handle<v8::Value> upcastTopoDS_Shape(const TopoDS_Shape & shape){
     // lookup type
     int type = shape.ShapeType();
     std::string typeName = "";
-    void * voidptr;
+    void * voidptr = 0;
     switch(type){
       case 7:
-        typeName = "TopoDS_Vertex *";
+        typeName = "TopoDS_Vertex";
         voidptr = SWIG_as_voidptr(new TopoDS_Vertex(TopoDS::Vertex(shape)));
         break;
       case 6:
-        typeName = "TopoDS_Edge *";
+        typeName = "TopoDS_Edge";
         voidptr = SWIG_as_voidptr(new TopoDS_Edge(TopoDS::Edge(shape)));
         break;
       case 5:
-        typeName = "TopoDS_Wire *";
+        typeName = "TopoDS_Wire";
         voidptr = SWIG_as_voidptr(new TopoDS_Wire(TopoDS::Wire(shape)));
         break;
       case 4:
-        typeName = "TopoDS_Face *";
+        typeName = "TopoDS_Face";
         voidptr = SWIG_as_voidptr(new TopoDS_Face(TopoDS::Face(shape)));
         break;
       case 3:
-        typeName = "TopoDS_Shell *";
+        typeName = "TopoDS_Shell";
         voidptr = SWIG_as_voidptr(new TopoDS_Shell(TopoDS::Shell(shape)));
         break;
       case 2:
-        typeName = "TopoDS_Solid *";
+        typeName = "TopoDS_Solid";
         voidptr = SWIG_as_voidptr(new TopoDS_Solid(TopoDS::Solid(shape)));
         break;
       case 1:
-        typeName = "TopoDS_CompSolid *";
+        typeName = "TopoDS_CompSolid";
         voidptr = SWIG_as_voidptr(new TopoDS_CompSolid(TopoDS::CompSolid(shape)));
         break;
       case 0:
-        typeName = "TopoDS_Compound *";
+        typeName = "TopoDS_Compound";
         voidptr = SWIG_as_voidptr(new TopoDS_Compound(TopoDS::Compound(shape)));
     }
-    swig_type_info * const outtype = SWIG_TypeQuery(typeName.c_str());
+    swig_type_info * const outtype = SWIG_TypeQuery((typeName + " *").c_str());
     return SWIG_NewPointerObj(voidptr, outtype, SWIG_POINTER_OWN |  0);
   }
 %}`
@@ -74,7 +75,7 @@ v8::Handle<v8::Value> upcastTopoDS_Shape(const TopoDS_Shape & shape){
 features.registerTypemapRenderer('upcastTopoDS', function() {
   return {
     toWrapped(input, output) {
-      return `${output} = upcastTopoDS_Shape((const TopoDS_Shape &)${input});`;
+      return `${output} = upcastTopoDS_Shape(${input});`;
     }
   };
 });
