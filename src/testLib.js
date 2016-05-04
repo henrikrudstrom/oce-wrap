@@ -85,9 +85,10 @@ function createValue(typeName) {
   if (typeName === 'Boolean') return bool();
   if (typeName === 'String') return '';
   var mod = typeName.split('.')[0];
-  var type = typeName.split('.')[1];
-  //if (!mod || !type) throw new Error(typeName)
-  return `${mod}Create.${camelCase(type)}()`;
+  var type = typeName.split('.')[1] || typeName;
+  // if (!mod || !type) throw new Error(typeName)
+  type = type.slice(0, 1).toLowerCase() + type.slice(1);
+  return `${mod}Create.${type}()`;
 }
 module.exports.createValue = createValue;
 
@@ -163,8 +164,8 @@ function memberReturnType(cls, member, suiteKey) {
 
 function renderPendingTest(signature, comment) {
   return `
-// ${comment}
-xit('${signature}', function() { });`;
+  // ${comment}
+  xit('${signature}', function() { });`;
 }
 
 function renderTest(member, testSrc, parts) {

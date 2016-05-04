@@ -83,7 +83,6 @@ var ${m}Create = require('../${m}/create.js');`))
   var src = `\
 ${imports}
 var helpers = require('../testHelpers.js');
-var create = require('../create.js');
 
 describe('${mod.name}', function(){
 ${parts.get(mod.name + 'ModuleSpecs')}

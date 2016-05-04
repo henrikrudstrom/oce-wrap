@@ -27,7 +27,6 @@ class ${cls.origName}${base} {
 features.registerRenderer('swig', 50, renderClass);
 
 
-
 function renderClassSuite(cls, parts) {
   if (cls.declType !== 'class' || cls.abstract || cls.name.startsWith('Handle_'))
     return false;
@@ -39,7 +38,6 @@ var ${mod}Create = require('../${mod}/create.js');`))
 
   var src = `\
 ${imports}
-const create = require('../create.js');
 const helpers = require('../testHelpers.js');
 const expect = require('chai').expect;
 describe('${cls.parent}.${cls.name}', function(){

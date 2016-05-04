@@ -62,10 +62,10 @@ function renderPropertyTest(prop, parts) {
     return false;
 
   var cls = prop.getParent();
-
+  var createFunc = cls.name.slice(0, 1).toLowerCase() + cls.name.slice(1);
   var value = testLib.createValue(prop.type);
   var src = `\
-    var obj = ${cls.parent}Create.${camelCase(cls.name)}();
+    var obj = ${cls.parent}Create.${createFunc}();
     var value = ${value};
     obj.${prop.name} = value;
     var res = obj.${prop.name};

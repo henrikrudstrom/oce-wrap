@@ -55,8 +55,9 @@ function renderMemberFunctionTest(calldef, parts) {
 
   var cls = calldef.getParent();
   var args = argValues(calldef.arguments.filter(arg => !arg.outArg));
+  var createFunc = cls.name.slice(0, 1).toLowerCase() + cls.name.slice(1);
   var testSrc = `\
-    var obj = ${cls.parent}Create.${camelCase(cls.name)}();
+    var obj = ${cls.parent}Create.${createFunc}();
     var res = obj.${calldef.name}(${args});`;
 
   return {
