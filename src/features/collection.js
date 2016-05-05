@@ -86,7 +86,7 @@ function arrayToSettable(listType, elemType, setter) {
 function arrayToAppendable(listType, elemType, add) {
   var deref = isPrimitive(elemType) ? '' : '*';
   return `\
-    ${listType} * list = new ${listType}(1, length);
+    ${listType} * list = new ${listType}();
     ${elemType} ${deref}argpointer;
 
     for(int i = 1; i <= length; i++){
