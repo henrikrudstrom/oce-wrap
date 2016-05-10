@@ -27,10 +27,8 @@ features.registerRenderer('swig', 7, function(decl) {
 #include<TopoDS_CompSolid.hxx>
 #include<TopoDS_Compound.hxx>
 v8::Handle<v8::Value> upcastTopoDS_Shape(const TopoDS_Shape & shape){
-  std::cout << "go!!!!!!!!!!" << std::endl;
   // lookup type
   int type = shape.ShapeType();
-  std::cout << "ok" << std::endl;
   switch(type){
     case 7:
       return SWIG_NewPointerObj(new TopoDS_Vertex(TopoDS::Vertex(shape)), SWIGTYPE_p_TopoDS_Vertex, SWIG_POINTER_OWN |  0);
@@ -53,12 +51,10 @@ v8::Handle<v8::Value> upcastTopoDS_Shape(const TopoDS_Shape & shape){
   return SWIGV8_UNDEFINED();
 }
 v8::Handle<v8::Value> upcastTopo2DS_Shape(const TopoDS_Shape & shape){
-    std::cout << "go!" << std::endl;
     // lookup type
     int type = shape.ShapeType();
     std::string typeName = "";
     void * voidptr = 0;
-    std::cout << "ok" << std::endl;
     switch(type){
       case 7:
         typeName = "TopoDS_Vertex";

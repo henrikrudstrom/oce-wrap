@@ -1,5 +1,5 @@
 const settings = require('./settings.js');
-
+const headers = require('./headers.js');
 
 function unique(t, index, array) {
   return array.indexOf(t) === index;
@@ -40,7 +40,6 @@ function dependencyReader(mods) {
     if (visited.hasOwnProperty(cls.name)) {
       return [];
     }
-    
     visited[cls.name] = true;
 
     if (!cls.declarations) {
@@ -48,7 +47,7 @@ function dependencyReader(mods) {
         return [];
       return memberDepends(cls);
     }
-    
+
     var res = cls.declarations
       .filter((mem) => !options.constructorsOnly || mem.declType === 'constructor')
       .map(mem => memberDepends(mem, options.source))
@@ -72,12 +71,14 @@ function dependencyReader(mods) {
       if (cls.parent)
         // TODO: source occ class names are qualified by default
         qualifiedName = cls.parent + separator + cls.name;
-      return res.filter((name) => name !== qualifiedName);
+      res = res.filter(name => name !== qualifiedName);
     }
-    
+    var handles = res.map(name => 'Handle_' + name)
+      .filter(name => headers.get(name));
+    res = res.concat(handles);
     // cache result
     cache[cls.name] = res;
-    
+
     return res;
   }
 
@@ -90,7 +91,7 @@ function dependencyReader(mods) {
       .reduce((a, b) => a.concat(b), [])
       .map(cls => modName(cls))
       .filter((d, index, array) => array.indexOf(d) === index);
-    
+
     // map to unique toolkit binaries
     return settings.oce.toolkits
       .filter(tk => tk.modules.some(
@@ -105,4 +106,3 @@ function dependencyReader(mods) {
 }
 
 module.exports = dependencyReader;
-

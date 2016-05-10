@@ -12,7 +12,7 @@ function withAccessor(input, output, native, wrapped, getter) {
 
 function withConstructor(input, output, native, wrapped) {
   var arg = `(new ${wrapped}((const ${native} &) ${input}))`;
-  var obj = `SWIG_NewPointerObj(${arg}, SWIGTYPE_p_${wrapped}, SWIG_POINTER_OWN |  0);`;
+  var obj = `SWIG_NewPointerObj(${arg}, $descriptor(${wrapped} *), SWIG_POINTER_OWN |  0);`;
   return `${output} = ${obj}`;
 }
 

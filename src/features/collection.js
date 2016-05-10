@@ -41,7 +41,7 @@ function swigValue(type, arg) {
   if (type.indexOf('Standard_Integer') !== -1)
     return `SWIGV8_INTEGER_NEW(${arg})`;
 
-  return `SWIG_NewPointerObj((${type}*)(${arg}), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`;
+  return `SWIG_NewPointerObj((${type}*)(${arg}), $descriptor(${type} *), SWIG_POINTER_OWN |  0 )`;
 }
 
 function nativeValue(type, arg) {
@@ -53,7 +53,7 @@ function nativeValue(type, arg) {
   // not sure if SWIG_AsVal is always in the swig file
     return `SWIG_AsVal(int)(${arg}, &argpointer)`;
 
-  return `SWIG_ConvertPtr(${arg}, (void **)&argpointer, SWIGTYPE_p_${type}, 0)`;
+  return `SWIG_ConvertPtr(${arg}, (void **)&argpointer, $descriptor(${type} *), 0)`;
 }
 
 

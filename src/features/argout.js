@@ -92,7 +92,7 @@ function swigConvert(type, arg) {
     // create default swig pointer with copy constructor
     var castedArg = `(new ${type}((const ${type})*${arg})`;
     return {
-      expr: `SWIG_NewPointerObj(${castedArg}), SWIGTYPE_p_${type}, SWIG_POINTER_OWN |  0 )`
+      expr: `SWIG_NewPointerObj(${castedArg}), $descriptor(${type} *), SWIG_POINTER_OWN |  0 )`
     };
   }
   return {

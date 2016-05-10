@@ -13,11 +13,6 @@ function noHandle(expr) {
     if (!headers.get(handleKey)) return;
 
     this.include(handleKey);
-
-    var handle = this.get('Handle_' + cls.name);
-
-    if (handle)
-      handle.include('Handle_' + cls.name + '(*)');
   });
 
   this.pushQuery(5, expr, (obj) => {
