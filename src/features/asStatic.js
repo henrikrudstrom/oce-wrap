@@ -69,6 +69,10 @@ function includeBRepPrim(clsName, valueFunc) {
   valueFunc = valueFunc || 'Solid';
   return this.includeAsStatic(clsName, 'BRepPrim', valueFunc, 'TopoDS_Shape');
 }
+// function includeBRepAlgo(clsName, valueFunc) {
+//   valueFunc = valueFunc || 'Solid';
+//   return this.includeAsStatic(clsName, 'BRepPrim', valueFunc, 'TopoDS_Shape');
+// }
 
 features.registerConfig(includeAsStatic, includeGCMake, includeBRepBuilder, includeBRepPrim);
 

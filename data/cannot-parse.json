@@ -22,15 +22,21 @@
     "BOPCol",
     "AppDef",
     "AppParCurves",
-    "GeomInt"
+    "GeomInt",
+    "BRepBlend"
+
   ],
   "headers": [
+    "AAHandle_Adaptor2d_HCurve2d",
+    "AAHandle_Adaptor2d_HCurve",
+    "AABRepBlend_HCurveTool",
+    "AABRepBlend_HCurveTool2d",
     "BRepApprox_SurfaceTool",
     "BRepTest",
     "GeometryTest",
     "GeomliteTest",
     "ChFiKPart_ComputeData_FilPlnCon",
-    "Adaptor3d_HSurfaceTool",
+    "AAAdaptor3d_HSurfaceTool",
     "AIS_ColoredShape",
     "AdvApp2Var_Data_f2c",
     "AdvApp2Var_EvaluatorFunc2Var",

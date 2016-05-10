@@ -1,5 +1,6 @@
 const camelCase = require('camel-case');
 const features = require('../features.js');
+const headers = require('../headers.js');
 const common = require('../common.js');
 
 function isOutArg(arg) {
@@ -109,10 +110,22 @@ function processOutArgName(name) {
 
 
 function renderObjectOutmap(decl, fullSig) {
-  var assignArgs = decl.origArguments.filter(arg => arg.outArg)
+  var values = decl.origArguments.filter(arg => arg.outArg);
+
+
+
+  var assignArgs = values
     .map((arg, index) => {
-      var key = `SWIGV8_STRING_NEW("${processOutArgName(arg.name)}")`;
-      var value = swigConvert(arg.type, '$' + (index + 1));
+      console.log(arg)
+      var name = arg.name;
+      var type = arg.type;
+      if (arg.declType) {
+        name = camelCase(decl.name);
+        type = arg.name;
+      }
+
+      var key = `SWIGV8_STRING_NEW("${processOutArgName(name)}")`;
+      var value = swigConvert(type, '$' + (index + 1));
 
       var res = `obj->Set(${key}, ${value.expr});`;
 
@@ -123,8 +136,16 @@ function renderObjectOutmap(decl, fullSig) {
     })
     .join('\n');
 
+  var assignReturn = ''
+  if (decl.origReturnType !== 'void' && decl.origReturnType !== 'Standard_Boolean' &&
+    decl.origReturnType !== 'Standard_Integer' && decl.origReturnType !== null) {
+    var key = `SWIGV8_STRING_NEW("${processOutArgName(decl.name)}")`;
+    assignReturn = `obj->Set(${key}, $result);`;
+  }
+
   return `%typemap(argout) ${fullSig} {// renderObjectOutmap for ${decl.name}\n
     v8::Local<v8::Object> obj = SWIGV8_OBJECT_NEW();
+  ${assignReturn}
   ${assignArgs}
     $result = obj;
   }`;
@@ -197,14 +218,14 @@ function renderArgouts(decl) {
   var inMap = renderArgoutInit(decl, fullSignature);
 
   var freeargs = argouts.map((arg, index) => {
-    var typemap = features.getTypemap(arg.type);
-    var render = features.getTypemapRenderer(typemap);
-    if (!render || !render.freearg)
-      return null;
+      var typemap = features.getTypemap(arg.type);
+      var render = features.getTypemapRenderer(typemap);
+      if (!render || !render.freearg)
+        return null;
 
-    return render.freearg('$' + (index + 1));
-  })
-  .filter(freearg => freearg !== null);
+      return render.freearg('$' + (index + 1));
+    })
+    .filter(freearg => freearg !== null);
 
   var freeargsMap = '';
   if (freeargs.length > 0) {

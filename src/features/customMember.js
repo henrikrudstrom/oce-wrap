@@ -1,60 +1,49 @@
 const extend = require('extend');
+const camelCase = require('camel-case');
 const features = require('../features.js');
 const headers = require('../headers.js');
+const common = require('../common.js');
 
-// Not working, should probably be implemented in js instead of native
+function staticAsMember(sig) {
+  // var name = camelCase(common.removePrefix(method.name));
+  var res = headers.get(sig)
+    .map(method => {
+      var args = method.arguments.map(arg => extend({}, arg));
+      return {
+        name: method.name,
+        key: method.key,
+        declType: 'memfun',
+        parent: this.name,
+        sourceParent: method.parent,
+        parentKey: this.key,
+        origName: method.name,
+        returnType: method.returnType,
+        arguments: args,
+        depends: method.parent,
+        staticAsMember: true
+      };
+    });
+  res.forEach(decl => this.add(decl));
 
-function customMethod(decl) {
-  this.pushMethod(8, () => {
-    decl = extend({}, decl);
-
-    decl.parent = this.name;
-    decl.declType = 'memfun';
-    decl.throws = true;
-    decl.custom = true;
-
-    this.add(decl);
-    return this;
-  });
+  return this;
 }
 
-function topoSubShapes(name, shapeType) {
-  // makes sure this executes after renames (5)
-  var src = headers.get(
-    'TopExp::MapShapes(TopoDS_Shape, TopAbs_ShapeEnum, TopTools_IndexedMapOfShape)'
-  );
+features.registerConfig(staticAsMember);
 
-  var decl = extend(true, {}, src);
-  decl.origArguments = extend([], decl.arguments);
-  decl.arguments = [extend({}, decl.arguments[0]), extend({}, decl.arguments[2])];
-  decl.name = name;
-  decl.shapeType = shapeType;
-  decl.key = this.key + '::' + decl.key;
-  decl.returnType = 'TopTools_IndexedMapOfShape';
-  delete decl.static;
-  return this.customMethod(decl);
-
-}
-
-features.registerConfig(customMethod, topoSubShapes);
-
-function renderTopoMaps(decl) {
-  return `\
-%extend ${decl.getParent().origName} {
-  static void ${decl.name}(const TopoDS_Shape &shape, TopTools_IndexedMapOfShape& map){
-    TopExp::MapShapes(shape, TopAbs_${decl.shapeType}, map);
-  }
-}`;
-}
-
-
-function renderCustomMemberFunction(decl) {
-  if (!decl.custom) return false;
+function renderJS(decl) {
+  if (decl.declType !== 'memfun' || !staticAsMember)
+    return false;
 
   return {
-    name: 'extends.i',
-    src: renderTopoMaps(decl)
-  };
+    name: decl.parent + '.js',
+    src: `\
+  Object.getPrototypeOf(${decl.qualifiedName}.prototype).${decl.name} = function ${decl.name}() {
+    return ${decl.getParent().qualifiedName}.${decl.name}.apply(
+      this, arguments, Array.prototype.shift.apply(arguments));
+  }
+    `
+  }
+
 }
 
-features.registerRenderer('swig', 0, renderCustomMemberFunction);
+features.registerRenderer('js', 0, renderJS);

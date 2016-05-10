@@ -36,12 +36,12 @@ function renderTypemap(tm) {
   var toWrapped = `
 %typemap(out) ${native} {
   //typemap outmap
-  ${render.toWrapped('$1', '$result')}
+  ${render.toWrapped('$1', '$result', true)}
 }
-%typemap(out) const ${native} & {
+/*%typemap(out) const ${native} & {
   //typemap outmap const &
-  ${render.toWrapped('*$1', '$result')}
-}
+  ${render.toWrapped('$1', '$result')}
+}*/
 `;
   return toWrapped + toNative;
 }

@@ -79,7 +79,7 @@ function resetNumbers() {
   next = 0;
 }
 
-function createValue(typeName) {
+function createValue(typeName, index) {
   if (typeName === 'Integer') return int();
   if (typeName === 'Double') return double();
   if (typeName === 'Boolean') return bool();
@@ -88,7 +88,7 @@ function createValue(typeName) {
   var type = typeName.split('.')[1] || typeName;
   // if (!mod || !type) throw new Error(typeName)
   type = type.slice(0, 1).toLowerCase() + type.slice(1);
-  return `${mod}Create.${type}()`;
+  return `create.${mod}.${type}()`;
 }
 module.exports.createValue = createValue;
 

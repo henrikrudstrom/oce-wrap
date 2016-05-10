@@ -19,8 +19,9 @@ var defaultsettings = {
     lib: '/usr/local/lib',
     //used by header parser, determines which headers are parsed and cached
     parseToolkits: [
-      'TKG3d', 'TKG2d', 'TKernel', 'TKMath', 'TKAdvTools',
-      'TKGeomBase', 'TKBRep', 'TKPrim', 'TKGeomAlgo', 'TKTopAlgo'
+      'TKG3d', 'TKG2d', 'TKernel', 'TKMath', 'TKAdvTools', 'TKBO',
+      'TKGeomBase', 'TKBRep', 'TKPrim', 'TKGeomAlgo', 'TKTopAlgo', 'TKFillet', 'TKBRep',
+      'TKBool', 'TKShHealing'
     ]
   },
   xmlGenerator: 'gccxml',
@@ -82,7 +83,7 @@ function initialize(settings) {
     modules: glob.sync(`${settings.paths.definition}/modules/*.js`)
       .map((file) => path.basename(file).replace('.js', ''))
   };
-  
+
   if (yargs.argv.module)
     settings.build.modules = yargs.argv.module.split(',');
   if (yargs.argv.modules)

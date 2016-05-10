@@ -69,7 +69,7 @@ module.exports = function(gulp) {
     var shadow = mod.shadowed ? '_' : '';
     var libs = (mod.libraries || reader.toolkitDepends(mod))
     if (!libs.find(lib => lib === 'TKernel'))
-      libs.push('TKernel')
+      libs = libs.concat(['TKernel', 'TKMath']);
     return {
       target_name: shadow + mod.name,
       sources,

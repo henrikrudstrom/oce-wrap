@@ -75,14 +75,15 @@ function renderModuleSpec(mod, parts) {
     return false;
 
   var imports = [mod.name].concat(mod.moduleDepends || [])
-    .map(m => (`var ${m} = require('../../lib/${m}.js');
-var ${m}Create = require('../${m}/create.js');`))
+    .map(m => (`var ${m} = require('../../lib/${m}.js');`))
+// var ${m}Create = require('../${m}/create.js');`))
     .join('\n');
 
 
   var src = `\
 ${imports}
 var helpers = require('../testHelpers.js');
+var create = require('./create.js');
 
 describe('${mod.name}', function(){
 ${parts.get(mod.name + 'ModuleSpecs')}

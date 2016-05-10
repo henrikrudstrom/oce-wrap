@@ -100,11 +100,12 @@ function arrayToAppendable(listType, elemType, add) {
 // Native collections to array helpers
 // -------------------------------------------------------------------------
 
-function nativeToArray(input, output, getSize, content) {
+function nativeToArray(input, output, getSize, content, byVal) {
+  var op = byVal ? '.' : '->';
   return `\
     v8::Local<v8::Array> array = v8::Array::New(
-      v8::Isolate::GetCurrent(), ${input}->${getSize}());
-    int length = ${input}->${getSize}();
+      v8::Isolate::GetCurrent(), ${input}${op}${getSize}());
+    int length = ${input}${op}${getSize}();
     ${content}
     ${output} = array;
     `;
@@ -128,7 +129,7 @@ function assignSettable(input, elemType, getExpr) {
 function iterableToArray(input, listType, elemType) {
   var name = listType.split('_')[1];
   var mod = listType.split('_')[0];
-  var assign = assignSettable(input, elemType, '&iterator->Value()');
+  var assign = assignSettable(input, elemType, 'iterator.Value()');
   return `\
    	${mod}_ListIteratorOf${name} iterator($1);
     int i = 0;
@@ -181,7 +182,7 @@ features.registerTypemapRenderer('list', function listTypemap(tm) {
 
     toWrapped(input, output) {
       return nativeToArray(input, output, 'Extent',
-        iterableToArray(input, tm.native, tm.elemType)
+        iterableToArray(input, tm.native, tm.elemType), true
       );
     }
   };

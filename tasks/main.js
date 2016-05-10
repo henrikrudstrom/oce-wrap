@@ -30,21 +30,27 @@ module.exports = function(gulp) {
       'gyp-build', 'copy-gyp', done
     );
   });
+  gulp.task('just-build', function(done) {
+    runSequence(
+      'copy-swig', 'swig-cxx', 'copy-js', 'gyp-clean', 'gyp-configure',
+      'gyp-build', 'copy-gyp', done
+    );
+  });
 
 
   gulp.task('dist-clean', function(done) {
     return gulp.src([
-      '../noce/lib', '../noce/spec',
-      '../noce/inc', '../noce/src'
-    ], { read: false, force: true })
+        '../noce/lib', '../noce/spec',
+        '../noce/inc', '../noce/src'
+      ], { read: false, force: true })
       .pipe(clean({ force: true }));
   });
 
   gulp.task('dist-copy', function() {
     return gulp.src([
-      'build/lib/**/*', 'build/spec/**/*',
-      'build/inc/**/*', 'build/src/**/*'
-    ], { base: 'build' })
+        'build/lib/**/*', 'build/spec/**/*',
+        'build/inc/**/*', 'build/src/**/*'
+      ], { base: 'build' })
       .pipe(gulp.dest('../noce'));
   });
   gulp.task('dist', function(done) {
