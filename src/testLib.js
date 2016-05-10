@@ -40,7 +40,8 @@ var overridenTests = parseTests();
 
 function isOverriden(suite, spec) {
   if (suite in overridenTests) {
-    return overridenTests[suite].indexOf(spec) !== -1;
+    return overridenTests[suite].some(ignore => common.match(ignore, spec));
+    //return overridenTests[suite].indexOf(spec) !== -1;
   }
   return false;
 }
