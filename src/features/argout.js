@@ -25,12 +25,17 @@ function argoutName(name) {
   return name;
 }
 
+function returnValueIsArgout(decl) {
+  return decl.origReturnType !== 'void' && decl.origReturnType !== 'Standard_Boolean' &&
+    decl.origReturnType !== 'Standard_Integer' && decl.origReturnType !== null;
+}
+
 
 // ----------------------------------------------------------------------------
 // Config functions
 // ----------------------------------------------------------------------------
 
-function defineArgout(mem, type) {
+function defineArgout(mem) {
   var argoutIndices = mem.origArguments.map((a, index) => index)
     .filter(index => isOutArg(mem.origArguments[index]));
 
@@ -44,26 +49,31 @@ function defineArgout(mem, type) {
       mem.arguments[index].name = argoutName(mem.arguments[index].name);
     });
 
-  if (argoutIndices.length > 1)
-    mem.returnType = type;
+  var outArgCount = argoutIndices.length;
+
+  if (returnValueIsArgout(mem)) {
+    console.log("RETURN TYPE IS OUTVAL", mem.returnType)
+    mem.outReturnType = mem.returnType;
+    outArgCount += 1;
+  }
+
+  if (outArgCount > 1)
+    mem.returnType = 'Object';
   else
     mem.returnType = mem.arguments[argoutIndices[0]].type;
 
   return true;
 }
 
-function argout(expr, type) {
-  if (type === undefined)
-    throw new Error('argout type must be specified');
-
+function argout(expr) {
   this.pushQuery(9, expr, (mem) => {
-    defineArgout(mem, type);
+    defineArgout(mem);
     return true;
   });
 }
 
 function argoutObject(expr) {
-  return this.argout(expr, 'Object');
+  return this.argout(expr);
 }
 
 function defaultArgouts() {
@@ -75,7 +85,7 @@ function defaultArgouts() {
 
       if (!outarg) return;
 
-      defineArgout(decl, 'Object');
+      defineArgout(decl);
     });
   });
 }
@@ -120,14 +130,12 @@ function processOutArgName(name) {
 }
 
 
+
 function renderObjectOutmap(decl, fullSig) {
   var values = decl.origArguments.filter(arg => arg.outArg);
 
-
-
   var assignArgs = values
     .map((arg, index) => {
-      console.log(arg)
       var name = arg.name;
       var type = arg.type;
       if (arg.declType) {
@@ -147,9 +155,8 @@ function renderObjectOutmap(decl, fullSig) {
     })
     .join('\n');
 
-  var assignReturn = ''
-  if (decl.origReturnType !== 'void' && decl.origReturnType !== 'Standard_Boolean' &&
-    decl.origReturnType !== 'Standard_Integer' && decl.origReturnType !== null) {
+  var assignReturn = '';
+  if (returnValueIsArgout(decl)) {
     var key = `SWIGV8_STRING_NEW("${processOutArgName(decl.name)}")`;
     assignReturn = `obj->Set(${key}, $result);`;
   }
@@ -220,8 +227,9 @@ function renderArgouts(decl) {
     `${decl.origReturnType} ${decl.getParent().origName}::${decl.origName}(${sigArgs})`;
   fullSignature = `(${sigArgs})`;
 
+
   var outMap;
-  if (argouts.length === 1)
+  if (argouts.length === 1 && !returnValueIsArgout(decl))
     outMap = renderSingleValueOutmap(decl, fullSignature);
   else
     outMap = renderObjectOutmap(decl, fullSignature);
@@ -229,14 +237,13 @@ function renderArgouts(decl) {
   var inMap = renderArgoutInit(decl, fullSignature);
 
   var freeargs = argouts.map((arg, index) => {
-      var typemap = features.getTypemap(arg.type);
-      var render = features.getTypemapRenderer(typemap);
-      if (!render || !render.freearg)
-        return null;
+    var typemap = features.getTypemap(arg.type);
+    var render = features.getTypemapRenderer(typemap);
+    if (!render || !render.freearg)
+      return null;
 
-      return render.freearg('$' + (index + 1));
-    })
-    .filter(freearg => freearg !== null);
+    return render.freearg('$' + (index + 1));
+  }).filter(freearg => freearg !== null);
 
   var freeargsMap = '';
   if (freeargs.length > 0) {
@@ -271,6 +278,8 @@ function renderArgoutExpectations(decl) {
   var src = argouts
     .map(arg => `\n    helpers.expectType(res.${camelCase(arg.name)}, '${arg.type}');`)
     .join('');
+  if (returnValueIsArgout(decl))
+    src += `\n helpers.expectType(res.${processOutArgName(decl.name)}, '${decl.outReturnType}');`;
 
   return { name, src };
 }

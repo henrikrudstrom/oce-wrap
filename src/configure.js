@@ -23,6 +23,8 @@ function memberTranslate(typedict) {
   return mem => {
     if (mem.returnType)
       mem.returnType = typedict(mem.returnType);
+    if (mem.outReturnType)
+      mem.outReturnType = typedict(mem.outReturnType);
 
     if (mem.type)
       mem.type = typedict(mem.type);
