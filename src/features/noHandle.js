@@ -52,14 +52,18 @@ function renderHandleTypemaps(cls) {
 
 %typemap(out) Handle_${name} {
   // lookup type
-  std::string name($1->DynamicType()->Name());
-  const std::string lookup_typename = name + " *";
-  swig_type_info * const outtype = SWIG_TypeQuery(lookup_typename.c_str());
-  $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), outtype, $owner);
+  if($1 == NULL){
+    $result = v8::Null(v8::Isolate::GetCurrent());
+  } else {
+    std::string name($1->DynamicType()->Name());
+    const std::string lookup_typename = name + " *";
+    swig_type_info * const outtype = SWIG_TypeQuery(lookup_typename.c_str());
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), outtype, $owner);
 
-  // attach handle
-  Handle_${name} *handle = (Handle_${name} *)new Handle_${name}($1);
-  $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_Standard_Transient));
+    // attach handle
+    Handle_${name} *handle = (Handle_${name} *)new Handle_${name}($1);
+    $result->ToObject()->Set(SWIGV8_SYMBOL_NEW("_handle"), SWIG_NewFunctionPtrObj(handle, SWIGTYPE_p_Handle_Standard_Transient));
+  }
 }`;
 
   return { name: 'typemaps.i', src: typemapsrc };
