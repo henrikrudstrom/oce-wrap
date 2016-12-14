@@ -8,6 +8,17 @@ function isOutArg(arg) {
     arg.decl.indexOf('const') === -1;
 }
 
+const argoutNames = [];
+
+function argoutSuffix(name) {
+  var nameCount = 0;
+  if (argoutNames[name] !== undefined)
+    nameCount = argoutNames[name];
+
+  argoutNames[name] = nameCount + 1;
+  return name + '_out' + nameCount;
+}
+
 function argoutName(name) {
   if (name.indexOf('the') !== -1 && name.length > 3)
     name = name.replace('the', '');
@@ -27,7 +38,7 @@ function defineArgout(mem, type) {
 
   argoutIndices
     .forEach(index => {
-      mem.origArguments[index].name = argoutName(mem.origArguments[index].name) + '_out';
+      mem.origArguments[index].name = argoutSuffix(argoutName(mem.origArguments[index].name));
       mem.origArguments[index].outArg = true;
       mem.arguments[index].outArg = true;
       mem.arguments[index].name = argoutName(mem.arguments[index].name);
@@ -104,7 +115,7 @@ function swigConvert(type, arg) {
 
 // make object property names pretty
 function processOutArgName(name) {
-  name = name.replace('_out', '');
+  name = name.replace(/_out\d+/, '');
   return camelCase(name);
 }
 
