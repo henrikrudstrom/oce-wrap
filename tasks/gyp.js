@@ -108,15 +108,16 @@ module.exports = function(gulp) {
     };
     if (config.targets.length === 0) {
       gutil.log('all binaries up to date, use `gulp build --force` to force rebuild');
-      var cmd = `rm -f ${settings.paths.build}/binding.gyp`;
-      return run(cmd).exec(done);
+      return run(`rm -f ${settings.paths.build}/binding.gyp`).exec(done);
     }
 
     fs.writeFileSync(`${settings.paths.build}/binding.gyp`, JSON.stringify(config, null, 2));
-    var flags = ''
+    var flags = '';
     if (debugBuild)
-      flags += ' --debug'
-    return run('node-gyp configure' + flags, {
+      flags += ' --debug';
+    var cmd = 'node-gyp configure' + flags;
+    console.log(cmd);
+    return run(cmd, {
       cwd: settings.paths.build,
       verbosity: 0
     }).exec(done);
@@ -134,8 +135,9 @@ module.exports = function(gulp) {
     var flags = ' --jobs 4';
     if (debugBuild)
       flags += ' --debug';
-
-    return exec('node-gyp build' + flags, options, (error, stdout, stderr) => {
+    var cmd = 'node-gyp build' + flags;
+    console.log(cmd);
+    return exec(cmd, options, (error, stdout, stderr) => {
       process.stdout.write(stderr);
       process.stdout.write(stdout);
       if (error) {
