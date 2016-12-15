@@ -12,6 +12,7 @@ const mocha = require('gulp-mocha');
 module.exports = function(gulp) {
   const render = require('../src/render.js');
   const settings = require('../src/settings.js');
+  const testLib = require('../src/testLib');
 
   gulp.task('test-clean', (done) =>
     run(`rm -rf ${settings.paths.build}/spec`, { silent: true }).exec(done)
@@ -21,6 +22,12 @@ module.exports = function(gulp) {
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
     render.write(settings.paths.build + '/spec/', render('spec', configuredModules));
     done();
+  });
+
+  gulp.task('render-class-hierarchy', function(done){
+    const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
+    var inheritance = testLib.classHierarchy(configuredModules);
+    console.log(inheritance)
   });
 
   gulp.task('render-js', function(done) {

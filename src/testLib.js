@@ -198,6 +198,22 @@ ${consolelog}${testSrc}
   return src;
 }
 
+function classHierarchy(configModules) {
+  var inherited = [];
+  configModules.forEach(configPath => {
+    var mod = JSON.parse(fs.readFileSync(configPath));
+    mod.declarations.filter(decl => decl.declType === 'class').forEach(cls => {
+      cls.bases.forEach(base => {
+        if (!inherited.hasOwnProperty(base.name))
+          inherited[base.name] = [];
+        inherited[base.name].push(cls.name);
+      });
+    });
+  });
+  return inherited;
+}
+
+
 module.exports = {
   pending,
   excluded,
@@ -205,5 +221,6 @@ module.exports = {
   expectType,
   createValue,
   renderTest,
-  resetNumbers
+  resetNumbers,
+  classHierarchy
 };
