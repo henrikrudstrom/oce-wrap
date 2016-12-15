@@ -31,7 +31,7 @@ function staticAsMember(sig) {
 features.registerConfig(staticAsMember);
 
 function renderJS(decl) {
-  if (decl.declType !== 'memfun' || !staticAsMember)
+  if (decl.declType !== 'memfun' || !decl.staticAsMember)
     return false;
 
   return {

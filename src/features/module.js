@@ -18,10 +18,11 @@ function renderModuleJs(decl, parts) {
     name: decl.name + '.js',
     src: `\
 ${reqs}
-const mod = require('./${decl.name}.node');
+const ${decl.name} = require('./_${decl.name}.node');
 ${parts.get(decl.name + 'JS')}
+${parts.get(decl.name + 'qualifiedNames')}
 
-module.exports = mod;
+module.exports = ${decl.name};
 `
   };
 }

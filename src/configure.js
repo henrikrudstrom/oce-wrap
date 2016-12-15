@@ -42,13 +42,21 @@ function memberTranslate(typedict) {
   };
 }
 
+function translateBaseName(typedict, name){
+  var newName = typedict(name);
+  if (!name.startsWith('Handle_')) return newName;
+  if (newName.includes('Handle_')) return newName;
+  if (!newName.includes('.')) return 'Handle_' + newName;
+  return newName.replace('.', '.Handle_');
+}
+
 function translateTypes(mods) {
   var typedict = createTypeDict(mods);
   var translateMember = memberTranslate(typedict);
   mods.forEach(mod => {
     mod.qualifiedName = mod.name;
     mod.declarations.forEach(cls => {
-      (cls.bases || []).forEach(base => (base.name = typedict(base.name)));
+      (cls.bases || []).forEach(base => (base.name = translateBaseName(typedict, base.name)));
       cls.qualifiedName = mod.name + '.' + cls.name;
     });
 

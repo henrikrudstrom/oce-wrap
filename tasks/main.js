@@ -58,7 +58,7 @@ module.exports = function(gulp) {
   });
 
   gulp.task('test', function(done) {
-    runSequence('test-clean', 'copy-spec', 'render-tests', 'just-test', done);
+    runSequence('test-clean',  'copy-spec', 'render-tests', 'render-class-hierarchy', 'just-test', done);
   });
   gulp.task('test-full', function(done) {
     runSequence('render', 'test', done);

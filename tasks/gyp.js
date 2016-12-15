@@ -71,7 +71,7 @@ module.exports = function(gulp) {
     if (!libs.find(lib => lib === 'TKernel'))
       libs = libs.concat(['TKernel', 'TKMath']);
     return {
-      target_name: shadow + mod.name,
+      target_name: '_' + mod.name,
       sources,
       include_dirs: include,
       libraries: ['-L' + settings.oce.lib].concat(

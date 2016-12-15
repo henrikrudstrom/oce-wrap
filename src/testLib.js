@@ -146,15 +146,14 @@ function expectType(returnType) {
 
 
 function memberReturnType(cls, member, suiteKey) {
-  if (member.declType === 'constructor') return cls.name;
+  if (member.declType === 'constructor') return cls.parent + '.' + cls.name;
   modules = modules || require('./modules.js')();
   var rtype = (member.returnType || member.type);
   var type = modules.get(rtype);
   if (type && type.declType === 'enum') return 'Integer';
-  var returnType = rtype.indexOf('.') !== -1 ?
-    rtype.split('.')[1] : rtype;
+  var returnType = rtype;
   if (member.downCastToThis)
-    returnType = cls.name;
+    returnType = cls.parent + '.' + cls.name;
 
 
   var override = specOverride.returnType(suiteKey, common.signature(member));
@@ -199,14 +198,14 @@ ${consolelog}${testSrc}
 }
 
 function classHierarchy(configModules) {
-  var inherited = [];
+  var inherited = {};
   configModules.forEach(configPath => {
     var mod = JSON.parse(fs.readFileSync(configPath));
     mod.declarations.filter(decl => decl.declType === 'class').forEach(cls => {
       cls.bases.forEach(base => {
         if (!inherited.hasOwnProperty(base.name))
           inherited[base.name] = [];
-        inherited[base.name].push(cls.name);
+        inherited[base.name].push(mod.name + '.' + cls.name);
       });
     });
   });

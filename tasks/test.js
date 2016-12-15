@@ -8,6 +8,8 @@ const arrify = require('arrify');
 const glob = require('glob');
 const run = require('gulp-run');
 const mocha = require('gulp-mocha');
+const fs = require('fs');
+
 
 module.exports = function(gulp) {
   const render = require('../src/render.js');
@@ -27,7 +29,9 @@ module.exports = function(gulp) {
   gulp.task('render-class-hierarchy', function(done){
     const configuredModules = glob.sync(`${settings.paths.config}/*.json`);
     var inheritance = testLib.classHierarchy(configuredModules);
-    console.log(inheritance)
+    var src = 'module.exports = ' + JSON.stringify(inheritance, null, 2).replace(/"/g, '\'') + ';';
+    fs.writeFileSync(settings.paths.build + '/spec/inheritance.js', src);
+    done();
   });
 
   gulp.task('render-js', function(done) {
